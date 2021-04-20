@@ -5,41 +5,60 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { useFonts } from 'expo-font';
 
 const linking = {
   prefixes: ['https://mychat.com', 'mychat://'],
   config: {
     screens: {
-      Home: '',
-      Profile: 'profile',
-      Settings: 'settings',
+      Welcome: 'welcome',
+      Main: {
+        screens: {
+          Overview: 'overview',
+          Profile: 'profile',
+          Settings: 'settings',
+        }
+      }
     }
   },
 };
 
 // Import pages.
-import Home from './Scripts/Home.js';
+import Overview from './Scripts/Overview.js';
 import Profile from './Scripts/Profile.js';
 import Settings from './Scripts/Settings.js';
+import Welcome from './Scripts/Welcome.js';
 
 // Create Sidebar.
 const Drawer = createDrawerNavigator();
 
-export default function App() {
-  const [isLoggedIn, setLoggedIn] = useState(false);
+function Main() {
+  return (<Drawer.Navigator drawerType="permanent">
+    <Drawer.Screen name="Overview" component={Overview} />
+    <Drawer.Screen name="Profile" component={Profile} />
+    <Drawer.Screen name="Settings" component={Settings} />
+  </Drawer.Navigator>)
+}
 
-  useEffect(() => {
-    document.title = 'Home';
-    console.log('test');
-  })
+const Stack = createStackNavigator();
+
+export default function App() {
+  const [loaded] = useFonts({
+    Poppins: require('./assets/fonts/Poppins.ttf'),
+    PoppinsSemiBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
+    PoppinsBold: require('./assets/fonts/Poppins-Bold.ttf'),
+  });
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
-    isLoggedIn && (<NavigationContainer linking={linking}>
-      <Drawer.Navigator drawerType="permanent">
-        <Drawer.Screen name="Home" component={Home} />
-        <Drawer.Screen name="Profile" component={Profile} />
-        <Drawer.Screen name="Settings" component={Settings} />
-      </Drawer.Navigator>
-    </NavigationContainer>) || <View><Text>Welcome!</Text></View>
+    <NavigationContainer linking={linking}>
+      <Stack.Navigator headerMode='none' initialRouteName='Welcome'>
+        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Main" component={Main} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

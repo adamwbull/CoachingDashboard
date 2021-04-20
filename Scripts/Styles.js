@@ -1,13 +1,126 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, Appearance, StyleSheet } from 'react-native';
 
-export const home = StyleSheet.create({
+// Unchanging stylesheets and elements.
+export const windowWidth = Dimensions.get('window').width;
+export const windowHeight = Dimensions.get('window').height;
+export const navLogo = require('../assets/nav-logo.png');
+
+// Dynamic spreadsheets and elements.
+
+export const logoLight = require('../assets/coachsync-logo-light.png');
+
+export const colorsLight = {
+  primaryHighlight: '#2ecc71', // emerald
+  secondaryHighlight: '#27ae60', // forest
+  secondaryBackground: '#ecf0f1', // clouds
+  mainTextColor: '#23272a', // darkGray
+  secondaryTextColor: '#344150', // blueGray
+  mainBackground: '#ffffff', // white
+}
+
+export const btnColors = {
+  primary:'#3498db',
+  caution:'#f1c40f',
+  danger:'#e74c3c',
+  success:'#2ecc71',
+  info:'#48dbfb',
+}
+
+export const overviewLight = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colorsLight.mainBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
   h1: {
-    color:'#fff'
+    color:colorsLight.darkGray
+  }
+});
+
+export const welcomeLight = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderLeftWidth:10,
+    borderLeftColor:colorsLight.secondaryHighlight,
+    flexDirection:'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  login: {
+    flex:1,
+    paddingLeft:50,
+    paddingRight:50,
+    paddingBottom:10,
+    paddingTop:10,
+    height:'100%',
+    width:'100%',
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:colorsLight.mainBackground
+  },
+  features: {
+    flex:2,
+    height:'100%',
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  logoContainer: {
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'flex-start'
+  },
+  logo: {
+    width:120,
+    height:60
+  },
+  form: {
+    flex:1000,
+    justifyContent:'center',
+    alignItems:'center',
+    width:'100%',
+  },
+  title: {
+    color:colorsLight.mainTextColor,
+    fontSize:40,
+    width:'100%',
+    fontFamily:'Poppins'
+  },
+  subtitle: {
+    color:colorsLight.mainTextColor,
+    fontSize:18,
+    width:'100%',
+    marginBottom:25,
+  },
+  link: {
+    color:btnColors.primary,
+    fontSize:18,
+    textDecorationLine: 'underline',
+  },
+  inputLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    width:'100%',
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    height:38,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  submitButton: {
+    fontFamily:'Poppins'
+  },
+  submitButtonContainer: {
+    marginTop:20,
+    width:'100%',
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
   }
 });
