@@ -1,4 +1,5 @@
 import { Dimensions, Appearance, StyleSheet } from 'react-native';
+import { set, get, getTTL, ttl } from '../Scripts/Storage.js'
 
 // Unchanging stylesheets and elements.
 export const windowWidth = Dimensions.get('window').width;
@@ -25,9 +26,16 @@ export const boxColors = {
   info:'#48dbfb',
 }
 
+var coach = get('Coach')
+if (coach == null) {
+  coach = {}
+  coach.PrimaryHighlight = '#2ecc71'
+  coach.SecondaryHighlight = '#27ae60'
+}
+
 export const colorsLight = {
-  primaryHighlight: '#2ecc71', // emerald
-  secondaryHighlight: '#27ae60', // forest
+  primaryHighlight: coach.PrimaryHighlight,
+  secondaryHighlight: coach.SecondaryHighlight,
   secondaryBackground: '#ecf0f1', // clouds
   mainTextColor: '#23272a', // darkGray
   secondaryTextColor: '#344150', // blueGray
@@ -170,31 +178,28 @@ export const welcomeLight = StyleSheet.create({
 
 export const signUpLight = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    flexDirection:'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    backgroundColor:colorsLight.secondaryBackground,
+    alignItems:'center',
     borderLeftWidth:20,
     borderLeftColor:colorsLight.secondaryHighlight,
     borderRightColor:colorsLight.secondaryHighlight,
     borderRightWidth:20,
   },
   main: {
-    flex:1,
     flexDirection:'row',
     paddingLeft:50,
     paddingRight:50,
     paddingBottom:10,
     paddingTop:10,
+    width:'100%',
     alignItems:'center',
     justifyContent:'center',
-    backgroundColor:colorsLight.mainBackground
   },
   logoContainer: {
-    flex:1,
-    flexDirection:'row',
-    justifyContent:'flex-start',
-    alignItems:'flex-start'
+    flexDirection:'column',
+    justifyContent:'center',
+    alignItems:'center',
+    width:'100%',
   },
   pricingTitle: {
     fontSize:40,
@@ -207,7 +212,8 @@ export const signUpLight = StyleSheet.create({
     marginBottom:5,
     textAlign:'center',
     fontFamily:'Poppins',
-    flex: 1, flexWrap: 'wrap'
+    flex: 1,
+    flexWrap: 'wrap'
   },
   pricingCards: {
     flex:1,
@@ -217,15 +223,24 @@ export const signUpLight = StyleSheet.create({
   },
   pricingCardContainer: {
     width:350,
+
     justifyContent:'center'
+  },
+  pricingHighlight: {
+    textAlign:'center',
+    fontFamily:'PoppinsSemiBold',
+    fontSize:30,
+    color:colorsLight.secondaryTextColor
   },
   pricingCardContainerMiddle: {
     width:400,
+    marginTop:0,
     padding:50
   },
   logo: {
-    width:120,
-    height:60
+    width:280,
+    marginTop:15,
+    height:140
   },
   form: {
     flex:1000,
@@ -236,12 +251,14 @@ export const signUpLight = StyleSheet.create({
   title: {
     color:colorsLight.mainTextColor,
     fontSize:40,
+    textAlign:'center',
     width:'100%',
     fontFamily:'Poppins'
   },
   subtitle: {
     color:colorsLight.mainTextColor,
     fontSize:18,
+    textAlign:'center',
     width:'100%',
     marginBottom:25,
   },
@@ -255,6 +272,10 @@ export const signUpLight = StyleSheet.create({
     fontSize:14,
     textDecorationLine: 'underline',
   },
+  formRow: {
+    alignItems:'center',
+    justifyContent:'center'
+  },
   inputLabel: {
     fontFamily:'PoppinsSemiBold',
     fontSize:20,
@@ -262,22 +283,43 @@ export const signUpLight = StyleSheet.create({
   },
   inputStyle: {
     color:colorsLight.mainTextColor,
-    backgroundColor:colorsLight.secondaryBackground,
+    backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
     padding:10,
-    height:38,
+    height:46,
     width:'100%',
     fontFamily:'Poppins',
     fontSize:18,
     marginBottom:20
+  },
+  formColumn: {
+    margin:10,
+    width:350,
   },
   submitButton: {
     fontFamily:'Poppins'
   },
   submitButtonContainer: {
     marginTop:20,
-    width:'100%',
+    width:400,
     backgroundColor:btnColors.primary,
     borderRadius:10,
-  }
+  },
+  backContainer: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:20,
+    marginBottom:20
+  },
+  iconStyle: {
+    flex:1
+  },
+  backText: {
+    fontSize:20,
+    textAlign:'center',
+    fontFamily:'Poppins',
+    width:100,
+    flexWrap: 'wrap'
+  },
 });
