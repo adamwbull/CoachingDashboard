@@ -12,6 +12,7 @@ const linking = {
   config: {
     screens: {
       Welcome: 'welcome',
+      SignUp: 'sign-up',
       Main: {
         screens: {
           Overview: 'overview',
@@ -28,6 +29,7 @@ import Overview from './Scripts/Overview.js';
 import Profile from './Scripts/Profile.js';
 import Settings from './Scripts/Settings.js';
 import Welcome from './Scripts/Welcome.js';
+import SignUp from './Scripts/SignUp.js';
 
 // Create Sidebar.
 const Drawer = createDrawerNavigator();
@@ -57,6 +59,7 @@ export default function App() {
     <NavigationContainer linking={linking}>
       <Stack.Navigator headerMode='none' initialRouteName='Welcome'>
         <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Main" component={Main} />
       </Stack.Navigator>
     </NavigationContainer>

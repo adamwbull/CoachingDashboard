@@ -20,7 +20,7 @@ export const get = (keyName) => {
 
     // If TTL has expired, remove the item from localStorage and return null
     if (Date.now() > item.ttl) {
-        localStorage.removeItem(key);
+        localStorage.removeItem(keyName);
         return null;
     }
 
@@ -44,6 +44,6 @@ export const getTTL = (keyName) => {
         return null;
     }
 
-    // return data if not expired
-    return (item.ttl - date);
+    // return in seconds if not expired
+    return ((item.ttl - date)/1000);
 };
