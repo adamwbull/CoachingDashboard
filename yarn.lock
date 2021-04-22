@@ -4711,6 +4711,11 @@
   "resolved" "https://registry.npmjs.org/mockdate/-/mockdate-3.0.5.tgz"
   "version" "3.0.5"
 
+"moment@^2.29.1":
+  "integrity" "sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ=="
+  "resolved" "https://registry.npmjs.org/moment/-/moment-2.29.1.tgz"
+  "version" "2.29.1"
+
 "ms@2.0.0":
   "integrity" "sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g="
   "resolved" "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
@@ -5314,6 +5319,14 @@
     "merge-class-names" "^1.1.1"
     "prop-types" "^15.6.0"
 
+"react-date-countdown-timer@^1.0.9":
+  "integrity" "sha512-tpe9dw3di4QY3ZiRkwyNalNP7s872t00AmfN4SlKggcoH0f0sLkTXLoQJCEGpwhtVIn7IrW9C6S27a6rBpf7Fg=="
+  "resolved" "https://registry.npmjs.org/react-date-countdown-timer/-/react-date-countdown-timer-1.0.9.tgz"
+  "version" "1.0.9"
+  dependencies:
+    "prop-types" "^15.7.2"
+    "react" "^16.4.2"
+
 "react-date-picker@^8.1.1":
   "integrity" "sha512-kFhn+uSJML+EuROvR6qLYU5G3wsxrdB2K1ugh1t6HjJCjphE6ot85jb8THWebqWEcQi07pLseU7ZFpzKDD3A6A=="
   "resolved" "https://registry.npmjs.org/react-date-picker/-/react-date-picker-8.1.1.tgz"
@@ -5509,7 +5522,7 @@
   "resolved" "https://registry.npmjs.org/react-timer-mixin/-/react-timer-mixin-0.13.4.tgz"
   "version" "0.13.4"
 
-"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0", "react@^16.0", "react@^16.13.1", "react@^16.3.0 || ^17.0.0-0", "react@^16.8.0 || ^17.0.0", "react@>=15.5", "react@>=16.5.1", "react@16.13.1":
+"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0", "react@^16.0", "react@^16.13.1", "react@^16.3.0 || ^17.0.0-0", "react@^16.4.2", "react@^16.8.0 || ^17.0.0", "react@>=15.5", "react@>=16.5.1", "react@16.13.1":
   "integrity" "sha512-YMZQQq32xHLX0bz5Mnibv1/LHb3Sqzngu7xstSM+vrkE5Kzr9xE0yMByK5kMoTK30YVJE61WfbxIFFvfeDKT1w=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.13.1.tgz"
   "version" "16.13.1"
@@ -6428,6 +6441,11 @@
   "integrity" "sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg=="
   "resolved" "https://registry.npmjs.org/uuid/-/uuid-7.0.3.tgz"
   "version" "7.0.3"
+
+"validate.js@^0.13.1":
+  "integrity" "sha512-PnFM3xiZ+kYmLyTiMgTYmU7ZHkjBZz2/+F0DaALc/uUtVzdCt1wAosvYJ5hFQi/hz8O4zb52FQhHZRC+uVkJ+g=="
+  "resolved" "https://registry.npmjs.org/validate.js/-/validate.js-0.13.1.tgz"
+  "version" "0.13.1"
 
 "vary@~1.1.2":
   "integrity" "sha1-IpnwLG3tMNSllhsLn3RSShj2NPw="

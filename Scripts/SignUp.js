@@ -7,12 +7,15 @@ import { Button, Icon, PricingCard } from 'react-native-elements'
 import { useLinkTo, Link } from '@react-navigation/native'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js'
-import { loginCheck, verifyCaptcha } from '../Scripts/API.js'
+import { createAccount, getActiveDiscount, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate } from '../Scripts/API.js'
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import "../Scripts/DatePicker/DatePicker.css"
 import "../Scripts/DatePicker/Calendar.css"
+import { validate } from 'validate.js';
+import { registerConstraints } from '../Scripts/Validator/constraints.js'
+import DateCountdown from 'react-date-countdown-timer';
 
 const delay = ms => new Promise(res => setTimeout(res, ms))
 
@@ -32,17 +35,16 @@ export default function Welcome() {
   const [opacity, setOpacity] = useState(new Animated.Value(0))
   const [refreshing, setRefreshing] = useState(false)
   const [showActivityIndicator, setShowActivityIndicator] = useState(false)
-  const [showRegisterForm, setShowRegisterForm] = useState(false)
-  const [showPricingForm, setShowPricingForm] = useState(true)
+  const [showPricingForm, setShowPricingForm] = useState(false)
+  const [showRegisterForm, setShowRegisterForm] = useState(true)
+  const [showPaymentForm, setShowPaymentForm] = useState(false)
 
   // Form controls and style.
-  var date = new Date()
-  date = date.setFullYear(date.getFullYear() - 13)
-  date = new Date(date)
+  var failed = get('TimesFailed')
+  var dis = (failed == null) ? false : true
   const [errorText, setErrorText] = useState(false)
-  const [showCaptcha, setShowCaptcha] = useState(false)
-  const [buttonDisabled, setButtonDisabled] = useState(false)
-  const [maxDate, setMaxDate] = useState(date)
+  const [buttonDisabled, setButtonDisabled] = useState(dis)
+  const [timesFailed, setTimesFailed] = useState(failed)
 
   // Storage for account creation.
   const [priceType, setPriceType] = useState(1)
@@ -54,7 +56,9 @@ export default function Welcome() {
   const [dob, setDOB] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-
+  const [activeDiscountPerc, setActiveDiscountPerc] = useState(100)
+  const [activeDiscountDesc, setActiveDiscountDesc] = useState(false)
+  const [activeDiscountExpire, setActiveDiscountExpire] = useState(false)
 
   const onLayout = (event) => {
     const { width, height } = event.nativeEvent.layout
@@ -70,13 +74,33 @@ export default function Welcome() {
     setScrollStyle({height:event.nativeEvent.contentSize.height})
   }
 
+  const discount = async () => {
+    const d = await getActiveDiscount()
+    var expire = sqlToJsDate(d.ExpirationDate)
+    // Use Moment: https://momentjs.com/
+    var str = toFullDate(expire)
+    console.log(str)
+    setActiveDiscountExpire(str)
+    setActiveDiscountPerc(d.Percent)
+  }
+
   useEffect(() => {
     document.title = 'Sign Up - CoachSync'
-    const r = get('Coach')
-    if (r !== null) {
-      linkTo('/overview')
+    const coach = get('Coach')
+    if (coach !== null) {
+      if (coach.RegistrationCompleted == 0) {
+        discount()
+        setFirstName(coach.FirstName)
+        setShowRegisterForm(false)
+        setShowActivityIndicator(true)
+        delay(300)
+        setShowActivityIndicator(false)
+        setShowPricingForm(true)
+      } else {
+        linkTo('/overview')
+      }
     }
-  })
+  }, [activeDiscountExpire])
 
   const onLoad = () => {
     Animated.timing(opacity, {
@@ -106,7 +130,6 @@ export default function Welcome() {
     setDOB(text)
   }
 
-
   const onPassword = (text) => {
     setErrorText(false)
     setPassword(text)
@@ -118,8 +141,74 @@ export default function Welcome() {
   }
 
   const onSubmit = async () => {
+    var errorText = ''
+    // Validations.
+    var emailCheckPassed = await emailCheck(email)
+    if (emailCheckPassed == false) {
+      errorText += `That email is already taken.${"\n"}`
+    }
 
-  }
+    if (!containsSpecialCharacters(password) || !hasUpperCase(password) || password.length < 8) {
+      errorText += `Password must be 8+ chars long, contain at least one special character, and at least one uppercase letter.${"\n"}`
+    }
+
+    var data = {
+      emailAddress:email,
+      dob:dob,
+      firstName:firstName,
+      lastName:lastName,
+      password:password,
+      confirmPassword: confirmPassword
+    }
+
+    validate.extend(validate.validators.datetime, {
+      // The value is guaranteed not to be null or undefined but otherwise it
+      // could be anything.
+      parse: function(value) {
+        var d = new Date(value);
+        return d;
+      },
+      // Input is a unix timestamp
+      format: function(value, options) {
+        var format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss";
+        return new Date(value, format);
+      }
+    });
+
+    const validationResult = validate(data, registerConstraints)
+    // Decide what to do.
+    if (validationResult != undefined || errorText != '') {
+      var i = data.length-1
+      for (var key in validationResult) {
+        if (i !== 0) {
+          i++
+          errorText += validationResult[key][0] + `${"\n"}`
+        } else {
+          errorText += validationResult[key][0]
+        }
+      }
+      setErrorText(errorText)
+      setButtonDisabled(true)
+      var newFailed = get('TimesFailed')
+      if (newFailed == null) {
+        set('TimesFailed',1,60)
+        setTimesFailed(1)
+      } else {
+        setTimesFailed(0)
+        set('TimesFailed',newFailed+1,60)
+        setTimesFailed(newFailed+1)
+      }
+    } else {
+      var created = await createAccount(email, dob, firstName, lastName, password);
+      set('Coach',created,ttl)
+      setShowRegisterForm(false)
+      setShowActivityIndicator(true)
+      await delay(300)
+      setShowActivityIndicator(false)
+      setShowPricingForm(true)
+    }
+
+   }
 
   const onPriceSelect = async (type) => {
     setPriceType(type)
@@ -140,11 +229,11 @@ export default function Welcome() {
     setShowActivityIndicator(true)
     await delay(300)
     setShowActivityIndicator(false)
-    setShowRegisterForm(true)
+    setShowPaymentForm(true)
   }
 
-  const onBackRegister = async () => {
-    setShowRegisterForm(false)
+  const onBackPayment = async () => {
+    setShowPaymentForm(false)
     setShowActivityIndicator(true)
     await delay(300)
     setShowActivityIndicator(false)
@@ -152,7 +241,6 @@ export default function Welcome() {
   }
 
   const verifyCallback = async (response) => {
-    console.log(response)
     var check = verifyCaptcha(response)
     if (check) {
       setButtonDisabled(false)
@@ -185,15 +273,24 @@ export default function Welcome() {
     /></View>
     <View style={signUp.main}>
       {showActivityIndicator && (<ActivityIndicatorView />)}
+      {showPaymentForm && (<View style={signUp.paymentForm}>
+        <TouchableOpacity style={signUp.backContainer} onPress={onBackPayment}>
+          <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
+          <Text style={signUp.backText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>)}
       {showPricingForm && (<View style={{flexShrink:1}}>
-        <Text style={signUp.pricingTitle}>Welcome to CoachSync!</Text>
-        <Text style={signUp.pricingIntro}>You're moments away from bringing your coaching practice to the next level!</Text>
-        <Text style={signUp.pricingIntro}>The first step is to choose the perfect package for you.</Text>
+        <Text style={signUp.pricingTitle}>Welcome to CoachSync, {firstName}!</Text>
+        <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you.</Text>
         <View style={[signUp.pricingCards,pricingCardsStyle]}>
         <PricingCard
           color={btnColors.primary}
           title="Free"
-          price="$0"
+          price={<View>
+            <Text>$0/mo</Text>
+            {activeDiscountExpire && (<View style={signUp.prevPriceHeight}>
+            </View>)}
+          </View>}
           info={['Up to 3 Clients', 'Prompts/Concepts/Surveys', 'Calendly Integration', 'Messaging and Social Feed']}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
@@ -203,8 +300,17 @@ export default function Welcome() {
           <Text style={signUp.pricingHighlight}>Most Popular:</Text>
           <PricingCard
             color={btnColors.success}
-            title="Standard"
-            price="$49.99/mo"
+            title={<View>
+              <Text>Standard</Text>
+            </View>}
+            price={<View>
+              <Text>${(69.99*((100-activeDiscountPerc)/100.0)).toFixed(2)}/mo</Text>
+              {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+                <Text style={signUp.previousPrice}>69.99</Text>
+                <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+              </View>)}
+              {activeDiscountExpire && (<View style={{fontSize:20}}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}
+            </View>}
             info={['Up to 10 Clients', 'All Free Features', 'Client Payment Collection', 'Basic Support']}
             button={{ title: 'Select' }}
             containerStyle={signUp.pricingCardContainerMiddle}
@@ -213,8 +319,17 @@ export default function Welcome() {
         </View>
         <PricingCard
           color={btnColors.danger}
-          title="Professional"
-          price="$99.99/mo"
+          title={<View>
+            <Text>Professional</Text>
+          </View>}
+          price={<View>
+            <Text>${(119.99*((100-activeDiscountPerc)/100.0)).toFixed(2)}/mo</Text>
+            {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+              <Text style={signUp.previousPrice}>119.99</Text>
+              <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+            </View>)}
+            {activeDiscountExpire && (<View style={{fontSize:20}}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}
+          </View>}
           info={['Unlimited Clients!', 'All Standard Features', 'Premium Support', 'Contract Signing']}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
@@ -222,33 +337,58 @@ export default function Welcome() {
         />
         </View>
       </View>)}
-      {showRegisterForm && (<View>
+      {showRegisterForm && (<View style={{flexShrink:1}}>
         <View style={signUp.form}>
           <Text style={signUp.title}>Register Account</Text>
-          <Text style={signUp.subtitle}>You chose the <Text style={priceStyle}>{priceName}</Text>!</Text>
+          <Text style={signUp.pricingIntro}>You're moments away from bringing your coaching practice to the next level!</Text>
           {errorText && (<View style={messageBox.errorBox}>
               <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
-              <Text style={messageBox.text}>{errorText} We can help you <Link to='/forgot-password' style={signUp.linkBlend}>recover your password</Link>.
-              {attemptsLeft !== null && attemptsLeft > 0 && attemptsLeft < 10 && (<View>{"\n"}{"\n"}<Text style={[messageBox.text]}>For security reasons, after <Text style={bold}>{attemptsLeft}</Text> more failed login attempts, you'll have to wait <Text style={bold}>30 minutes</Text> before trying again.</Text></View>)}
-              </Text>
+              <Text style={messageBox.text}>{errorText}</Text>
             </View>) || (<View></View>)}
           <View style={[signUp.formRow,pricingCardsStyle]}>
             <View style={signUp.formColumn}>
-              <Text style={signUp.inputLabel}>Email</Text>
+              <Text style={[signUp.inputLabel,{marginTop:20}]}>Email</Text>
               <TextInput
                 style={signUp.inputStyle}
                 value={email}
                 keyboardType='email'
                 onChangeText={onEmail}
               />
+            </View>
+            <View style={signUp.formColumn}>
+              <Text style={signUp.inputLabel}>Birthday</Text>
+              <DatePicker
+                onChange={onDOB}
+                value={dob}
+                monthPlaceholder='mm'
+                dayPlaceholder='dd'
+                yearPlaceholder='yyyy'
+                disableCalendar={true}
+                style={signUp.inputStyle}
+              />
+            </View>
+          </View>
+          <View style={[signUp.formRow,pricingCardsStyle]}>
+            <View style={signUp.formColumn}>
               <Text style={signUp.inputLabel}>First Name</Text>
               <TextInput
                 style={signUp.inputStyle}
                 value={firstName}
-                secureTextEntry={true}
                 onChangeText={onFirstName}
               />
-              <Text style={signUp.inputLabel}>Password</Text>
+            </View>
+            <View style={signUp.formColumn}>
+              <Text style={[signUp.inputLabel]}>Last Name</Text>
+              <TextInput
+                style={signUp.inputStyle}
+                value={lastName}
+                onChangeText={onLastName}
+              />
+            </View>
+          </View>
+          <View style={[signUp.formRow,pricingCardsStyle]}>
+            <View style={signUp.formColumn}>
+            <Text style={signUp.inputLabel}>Password</Text>
               <TextInput
                 style={signUp.inputStyle}
                 value={password}
@@ -257,30 +397,16 @@ export default function Welcome() {
               />
             </View>
             <View style={signUp.formColumn}>
-              <Text style={signUp.inputLabel}>Birthday</Text>
-              <DatePicker
-                onChange={onDOB}
-                value={dob}
-                style={signUp.inputStyle}
-                maxDate={maxDate}
-              />
-              <Text style={[signUp.inputLabel,{marginTop:20}]}>Last Name</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={lastName}
-                secureTextEntry={true}
-                onChangeText={onLastName}
-              />
               <Text style={signUp.inputLabel}>Confirm Password</Text>
               <TextInput
                 style={signUp.inputStyle}
-                value={password}
+                value={confirmPassword}
                 secureTextEntry={true}
                 onChangeText={onConfirmPassword}
               />
             </View>
           </View>
-          {showCaptcha && (<Recaptcha
+          {(timesFailed > 0) && (<Recaptcha
             sitekey='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
             callback={verifyCallback}
             expiredCallback={expiredCallback}
@@ -291,10 +417,6 @@ export default function Welcome() {
           buttonStyle={signUp.submitButton}
           containerStyle={signUp.submitButtonContainer}
           onPress={onSubmit}/>
-          <TouchableOpacity style={signUp.backContainer} onPress={onBackRegister}>
-            <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
-            <Text style={signUp.backText}>Go Back</Text>
-          </TouchableOpacity>
         </View>
       </View>)}
     </View>

@@ -41,7 +41,7 @@
   padding: 0 1px;
   border: 0;
   background: none;
-  font: inherit;
+  font: 'Poppins';
   box-sizing: content-box;
   -moz-appearance: textfield;
 }

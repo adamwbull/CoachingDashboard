@@ -223,14 +223,17 @@ export const signUpLight = StyleSheet.create({
   },
   pricingCardContainer: {
     width:350,
-
+    height:400,
     justifyContent:'center'
+  },
+  prevPriceHeight: {
+    height:35
   },
   pricingHighlight: {
     textAlign:'center',
     fontFamily:'PoppinsSemiBold',
     fontSize:30,
-    color:colorsLight.secondaryTextColor
+    color:colorsLight.secondaryTextColor,
   },
   pricingCardContainerMiddle: {
     width:400,
@@ -238,15 +241,17 @@ export const signUpLight = StyleSheet.create({
     padding:50
   },
   logo: {
-    width:280,
+    width:240,
     marginTop:15,
-    height:140
+    height:120
   },
   form: {
     flex:1000,
     justifyContent:'center',
     alignItems:'center',
     width:'100%',
+    marginBottom:20,
+    flexShrink:1
   },
   title: {
     color:colorsLight.mainTextColor,
@@ -276,6 +281,10 @@ export const signUpLight = StyleSheet.create({
     alignItems:'center',
     justifyContent:'center'
   },
+  formColumn: {
+    margin:10,
+    width:350,
+  },
   inputLabel: {
     fontFamily:'PoppinsSemiBold',
     fontSize:20,
@@ -291,10 +300,6 @@ export const signUpLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:18,
     marginBottom:20
-  },
-  formColumn: {
-    margin:10,
-    width:350,
   },
   submitButton: {
     fontFamily:'Poppins'
@@ -322,4 +327,33 @@ export const signUpLight = StyleSheet.create({
     width:100,
     flexWrap: 'wrap'
   },
+  paymentForm: {
+    flex:1
+  },
+  previousPriceContainer: {
+    backgroundColor:boxColors.danger,
+    marginLeft:40,
+    width:200,
+    borderRadius:10,
+    padding:5,
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  previousPrice: {
+    fontSize:26,
+    color:'#ffffff',
+    textDecorationLine:'line-through'
+  },
+  previousPriceDiscount: {
+    fontSize:18,
+    marginLeft:5,
+    color:'#ffffff'
+  },
+  activeDiscountDesc: {
+    textAlign:'center',
+    marginTop:5,
+    fontSize:16,
+    color:colorsLight.secondaryTextColor
+  }
 });
