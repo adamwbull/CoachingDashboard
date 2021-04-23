@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Crypto from 'expo-crypto';
+const { DateTime } = require("luxon");
 
 export const url = 'https://api.coachsync.me';
 export const uploadUrl = 'https://db.coachsync.me';
@@ -42,20 +43,9 @@ export function parseDateText(date) {
 
 export function toFullDate(date) {
 
-    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    hours = hours < 10 ? '0'+minutes : minutes;
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    var seconds = date.getSeconds();
-    seconds = seconds < 10 ? '0'+seconds : seconds;
-    var tz = date.toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2]
-    const dateText = months[date.getMonth()] +
-                          " " + date.getDate() +
-                          ", " + date.getFullYear() +
-                          " " + hours + ":" + minutes + ':' + seconds +
-                          " " + tz
-    return dateText;
+    date = date.toISOString()
+    var d = DateTime.fromISO(date).toFormat('LLLL dd, y TT ZZ')
+    return d;
 }
 
 export function getTimeSince(milliseconds) {
@@ -156,6 +146,46 @@ export async function check() {
 
 */
 
+export async function getNumCoaches() {
+
+  var ret = false;
+
+  console.log('Getting coach count...');
+  const res = await fetch(url + '/user/total-coaches/' + key, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload) {
+    console.log('Coach count found!');
+    ret = payload.length;
+  }
+
+  return ret;
+
+}
+
+
+export async function getPlans(t) {
+
+  var ret = false;
+
+  console.log('Getting plans...');
+  const res = await fetch(url + '/plans/' + t, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Plans retrieved!');
+    ret = payload;
+  }
+
+  return ret;
+
+}
 
 export async function getActiveDiscount() {
 

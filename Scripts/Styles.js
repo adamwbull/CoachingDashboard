@@ -223,11 +223,11 @@ export const signUpLight = StyleSheet.create({
   },
   pricingCardContainer: {
     width:350,
-    height:400,
+    height:420,
     justifyContent:'center'
   },
   prevPriceHeight: {
-    height:35
+    height:55
   },
   pricingHighlight: {
     textAlign:'center',
@@ -238,12 +238,12 @@ export const signUpLight = StyleSheet.create({
   pricingCardContainerMiddle: {
     width:400,
     marginTop:0,
-    padding:50
+    padding:20
   },
   logo: {
-    width:240,
-    marginTop:15,
-    height:120
+    width:200,
+    marginTop:10,
+    height:100
   },
   form: {
     flex:1000,
@@ -310,35 +310,61 @@ export const signUpLight = StyleSheet.create({
     backgroundColor:btnColors.primary,
     borderRadius:10,
   },
+  paymentFormContainer: {
+    width:'80%',
+    justifyContent:'center',
+    alignItems:'center',
+  },
   backContainer: {
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center',
-    marginTop:20,
-    marginBottom:20
+    marginBottom:10,
   },
   iconStyle: {
-    flex:1
+    marginRight:5,
   },
   backText: {
     fontSize:20,
-    textAlign:'center',
+    textAlign:'left',
+    flex:1,
     fontFamily:'Poppins',
     width:100,
     flexWrap: 'wrap'
   },
   paymentForm: {
-    flex:1
+    width:'100%',
+    backgroundColor:colorsLight.mainBackground,
+    flexDirection:'row'
+  },
+  paymentInfo: {
+    flex:7,
+    padding:20
+  },
+  paymentMain: {
+    flex:6,
+    padding:50,
+    flexDirection:'column',
+    justifyContent:'space-between'
   },
   previousPriceContainer: {
     backgroundColor:boxColors.danger,
-    marginLeft:40,
     width:200,
+    marginLeft:15,
     borderRadius:10,
     padding:5,
+    flexDirection:'column',
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  previousPriceInner: {
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center'
+  },
+  discountDesc: {
+    color:'#ffffff',
+    fontSize:20,
   },
   previousPrice: {
     fontSize:26,
@@ -346,7 +372,7 @@ export const signUpLight = StyleSheet.create({
     textDecorationLine:'line-through'
   },
   previousPriceDiscount: {
-    fontSize:18,
+    fontSize:20,
     marginLeft:5,
     color:'#ffffff'
   },
@@ -355,5 +381,125 @@ export const signUpLight = StyleSheet.create({
     marginTop:5,
     fontSize:16,
     color:colorsLight.secondaryTextColor
+  },
+  timeLeft: {
+    fontSize:22,
+    marginBottom:5,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  countdown: {
+    fontSize:22,
+    fontFamily:'Poppins',
+    color:btnColors.danger
+  },
+  priceBottomText: {
+    fontSize:20,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor,
+    marginBottom:10
+  },
+  toggleAnnual: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  groupButton: {
+    width:200,
+    height:40
+  },
+  paymentSubmitButton: {
+    margin:0,
+    backgroundColor:btnColors.primary,
+  },
+  paymentSubmitButtonContainer: {
+    margin:10,
+    paddingLeft:0,
+    paddingRight:0,
+  },
+  paymentItem: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    marginBottom:10
+  },
+  paymentItemTitle: {
+    color:'#fff',
+    fontFamily:'PoppinsSemiBold',
+    fontSize:24
+  },
+  paymentItemMemo: {
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:14
+  },
+  paymentItemAmount: {
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  paymentDiscountAmount: {
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:14,
+    textDecorationLine:'line-through'
+  },
+  paymentPrimaryAmount: {
+    color:'#fff',
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  paymentIcon: {
+    alignItems:'flex-start',
+    justifyContent:'center'
+  },
+  paymentEnterInfo: {
+    marginTop:30,
+    marginBottom:30
+  },
+  inputCardNumber: {
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10,
+    borderWidth:1,
+    borderColor:colorsLight.secondaryBackground,
+    padding:15,
+    marginLeft:10,
+    marginRight:10
+  },
+  inputCardDate: {
+    borderBottomLeftRadius:10,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:1,
+    borderColor:colorsLight.secondaryBackground,
+    paddingTop:15,
+    paddingBottom:15,
+    paddingLeft:15,
+    marginLeft:10,
+    width:'100%'
+  },
+  inputCVC: {
+    borderBottomRightRadius:10,
+    borderRightWidth:1,
+    borderBottomWidth:1,
+    borderColor:colorsLight.secondaryBackground,
+    paddingTop:15,
+    paddingBottom:15,
+    paddingLeft:15,
+    paddingRight:11,
+    marginRight:10,
+    width:'100%'
+  },
+  paymentCardBack: {
+    flexDirection:'row'
+  },
+  paymentStripe: {
+    width:150,
+    height:34,
+    alignSelf:'flex-end'
+  },
+  stripeSection: {
+    flex:1,
+    alignItems:'flex-end',
+    justifyContent:'flex-end'
   }
 });

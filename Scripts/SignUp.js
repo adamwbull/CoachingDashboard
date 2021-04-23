@@ -3,11 +3,11 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { TouchableOpacity, ScrollView, Linking, Animated, Image, StyleSheet, Text, View } from 'react-native'
 import { signUpLight, logoLight, navLogo, colorsLight, messageBox, bold, btnColors } from '../Scripts/Styles.js'
 import { signUpDark, logoDark, colorsDark } from '../Scripts/StylesDark.js'
-import { Button, Icon, PricingCard } from 'react-native-elements'
+import { Button, Icon, PricingCard, ButtonGroup } from 'react-native-elements'
 import { useLinkTo, Link } from '@react-navigation/native'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js'
-import { createAccount, getActiveDiscount, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate } from '../Scripts/API.js'
+import { createAccount, getActiveDiscount, getNumCoaches, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate, getPlans } from '../Scripts/API.js'
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
@@ -34,9 +34,9 @@ export default function Welcome() {
   // Stage controls.
   const [opacity, setOpacity] = useState(new Animated.Value(0))
   const [refreshing, setRefreshing] = useState(false)
-  const [showActivityIndicator, setShowActivityIndicator] = useState(false)
+  const [showActivityIndicator, setShowActivityIndicator] = useState(true)
   const [showPricingForm, setShowPricingForm] = useState(false)
-  const [showRegisterForm, setShowRegisterForm] = useState(true)
+  const [showRegisterForm, setShowRegisterForm] = useState(false)
   const [showPaymentForm, setShowPaymentForm] = useState(false)
 
   // Form controls and style.
@@ -45,20 +45,36 @@ export default function Welcome() {
   const [errorText, setErrorText] = useState(false)
   const [buttonDisabled, setButtonDisabled] = useState(dis)
   const [timesFailed, setTimesFailed] = useState(failed)
+  const [annual, setAnnual] = useState(1)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [paymentIndex, setPaymentIndex] = useState(0)
+  const [priceUnit, setPriceUnit] = useState('mo')
+  const [priceStyle, setPriceStyle] = useState({color:btnColors.primary})
+  const [priceAmount, setPriceAmount] = useState(0)
+  const [priceMemo, setPriceMemo] = useState('')
+  const [priceBase, setPriceBase] = useState(0)
+  const [firstPlan, setFirstPlan] = useState({})
+  const [secondPlan, setSecondPlan] = useState({})
+  const [thirdPlan, setThirdPlan] = useState({})
+  const [coachCount, setCoachCount] = useState(0)
 
   // Storage for account creation.
   const [priceType, setPriceType] = useState(1)
   const [priceName, setPriceName] = useState('Free')
-  const [priceStyle, setPriceStyle] = useState({})
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [dob, setDOB] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [activeDiscountPerc, setActiveDiscountPerc] = useState(100)
+  const [activeDiscountPerc, setActiveDiscountPerc] = useState(0)
   const [activeDiscountDesc, setActiveDiscountDesc] = useState(false)
   const [activeDiscountExpire, setActiveDiscountExpire] = useState(false)
+  const [activeDiscountDurText, setActiveDiscountDurText] = useState('')
+  const [activeDiscountMonths, setActiveDiscountMonths] = useState(0)
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardDate, setCardDate] = useState('')
+  const [cvc, setCVC] = useState('')
 
   const onLayout = (event) => {
     const { width, height } = event.nativeEvent.layout
@@ -76,31 +92,59 @@ export default function Welcome() {
 
   const discount = async () => {
     const d = await getActiveDiscount()
-    var expire = sqlToJsDate(d.ExpirationDate)
-    // Use Moment: https://momentjs.com/
-    var str = toFullDate(expire)
-    console.log(str)
-    setActiveDiscountExpire(str)
-    setActiveDiscountPerc(d.Percent)
+    if (d !== false) {
+      var expire = sqlToJsDate(d.ExpirationDate)
+      // Use Moment: https://momentjs.com/
+      var str = toFullDate(expire)
+      setActiveDiscountExpire(str)
+      setActiveDiscountMonths(d.MonthDuration)
+      setActiveDiscountPerc(d.Percent)
+      setActiveDiscountDesc(d.Description)
+      setActiveDiscountDurText(d.DurationText)
+    }
+  }
+
+  const plans = async (t) => {
+    var res = await getPlans(t)
+    var plan1 = res[0]
+    plan1.InfoParsed = plan1.Info.split(',')
+    setFirstPlan(plan1)
+    var plan2 = res[1]
+    plan2.InfoParsed = plan2.Info.split(',')
+    setSecondPlan(plan2)
+    var plan3 = res[2]
+    plan3.InfoParsed = plan3.Info.split(',')
+    setThirdPlan(plan3)
+  }
+
+  const coaches = async () => {
+    var count = await getNumCoaches()
+    setCoachCount(count)
   }
 
   useEffect(() => {
     document.title = 'Sign Up - CoachSync'
     const coach = get('Coach')
+    coach.FirstName = 'Adam'
     if (coach !== null) {
       if (coach.RegistrationCompleted == 0) {
         discount()
-        setFirstName(coach.FirstName)
-        setShowRegisterForm(false)
-        setShowActivityIndicator(true)
-        delay(300)
-        setShowActivityIndicator(false)
-        setShowPricingForm(true)
+        coaches()
+        plans(coach.Token)
+        setTimeout(() => {
+          setFirstName(coach.FirstName)
+          setShowActivityIndicator(false)
+          setShowPricingForm(true)
+        }, 500)
       } else {
         linkTo('/overview')
       }
+    } else {
+      delay(1000)
+      setShowActivityIndicator(false)
+      setShowRegisterForm(true)
     }
-  }, [activeDiscountExpire])
+  }, [])
 
   const onLoad = () => {
     Animated.timing(opacity, {
@@ -210,34 +254,16 @@ export default function Welcome() {
 
    }
 
-  const onPriceSelect = async (type) => {
-    setPriceType(type)
-    var name, style
-    if (type == 1) {
-      name = 'Free Plan'
-      style = {color:btnColors.primary}
-    } else if (type == 2) {
-      name = 'Standard Plan'
-      style = {color:colorsLight.primaryHighlight}
-    } else if (type == 3) {
-      name = 'Professional Plan'
-      style = {color:btnColors.danger}
+  const selectButton = (i) => {
+    if (i == 0) {
+      setSelectedIndex(0)
+      setAnnual(1)
+      setPriceUnit('mo')
+    } else if (i == 1) {
+      setSelectedIndex(1)
+      setAnnual(12)
+      setPriceUnit('yr')
     }
-    setPriceName(name)
-    setPriceStyle(style)
-    setShowPricingForm(false)
-    setShowActivityIndicator(true)
-    await delay(300)
-    setShowActivityIndicator(false)
-    setShowPaymentForm(true)
-  }
-
-  const onBackPayment = async () => {
-    setShowPaymentForm(false)
-    setShowActivityIndicator(true)
-    await delay(300)
-    setShowActivityIndicator(false)
-    setShowPricingForm(true)
   }
 
   const verifyCallback = async (response) => {
@@ -250,6 +276,61 @@ export default function Welcome() {
   }
 
   const expiredCallback = () => { console.log('captcha expired') }
+
+  const onPriceSelect = async (type) => {
+    setPriceType(type)
+    var name, style, amount, memo, dateType, priceBase, discountLine, lengthText
+    if (type == 1) {
+      name = 'Free Plan'
+      style = {color:colorsLight.secondaryHighlight}
+      amount = (firstPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+      dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
+      priceBase = firstPlan.BasePrice*annual
+    } else {
+      if (type == 2) {
+        name = 'Standard Plan'
+        style = {color:colorsLight.secondaryHighlight}
+        amount = (secondPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+        dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
+        priceBase = secondPlan.BasePrice*annual
+      } else if (type == 3) {
+        name = 'Professional Plan'
+        style = {color:colorsLight.secondaryHighlight}
+        amount = (thirdPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+        dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
+        priceBase = thirdPlan.BasePrice*annual
+      }
+      lengthText = (selectedIndex == 0) ? '/mo for ' + activeDiscountMonths + ' ' + ((activeDiscountMonths > 1) ? 'months ' : 'month ') : ' for a year '
+      discountLine = (activeDiscountExpire != false) ? `${"\n"}$` + amount + lengthText + 'then $' + priceBase + ' after' : ''
+      memo = activeDiscountDesc + ' ' + dateType + ' ' + name + discountLine
+      setPriceName(name)
+      setPriceStyle(style)
+      setPriceAmount(amount)
+      setPriceMemo(memo)
+      setPriceBase(priceBase)
+      setShowPricingForm(false)
+      setShowActivityIndicator(true)
+      await delay(300)
+      setShowActivityIndicator(false)
+      setShowPaymentForm(true)
+    }
+  }
+
+  const onBackPayment = async () => {
+    setShowPaymentForm(false)
+    setShowActivityIndicator(true)
+    await delay(300)
+    setShowActivityIndicator(false)
+    setShowPricingForm(true)
+  }
+
+  const selectPaymentOption = (i) => {
+    setPaymentIndex(i)
+  }
+
+  const submitPayment = () => {
+    console.log('paying')
+  }
 
   return (<ScrollView contentContainerStyle={[signUp.container,scrollStyle]} scrollEnabled={true} onLayout={onLayout} onScroll={onScroll}>
     <View style={signUp.logoContainer}><Animated.Image
@@ -273,25 +354,115 @@ export default function Welcome() {
     /></View>
     <View style={signUp.main}>
       {showActivityIndicator && (<ActivityIndicatorView />)}
-      {showPaymentForm && (<View style={signUp.paymentForm}>
+      {showPaymentForm && (<View style={signUp.paymentFormContainer}>
         <TouchableOpacity style={signUp.backContainer} onPress={onBackPayment}>
           <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
           <Text style={signUp.backText}>Go Back</Text>
         </TouchableOpacity>
+        <View style={[signUp.paymentForm,pricingCardsStyle]}>
+          <View style={[signUp.paymentInfo,{backgroundColor:priceStyle.color}]}>
+            <View style={signUp.paymentIcon}>
+              <Icon size={40} color='#fff' name='cart-outline' type='ionicon' />
+            </View>
+            <View style={signUp.paymentItem}>
+              <View style={signUp.paymentItemDetails}>
+                <Text style={signUp.paymentItemTitle}>{priceName}</Text>
+                <Text style={signUp.paymentItemMemo}>{priceMemo}</Text>
+              </View>
+              <View style={signUp.paymentItemAmount}>
+                <Text style={signUp.paymentDiscountAmount}>${activeDiscountExpire && (priceBase)}</Text>
+                <Text style={signUp.paymentPrimaryAmount}>${priceAmount}</Text>
+              </View>
+            </View>
+            <View style={signUp.stripeSection}>
+              <Animated.Image
+                  onLoad={onLoad}
+                  source={require('../assets/stripe.png')}
+                  resizeMode="contain"
+                  style={[
+                    {
+                      opacity: opacity,
+                      transform: [
+                        {
+                          scale: opacity.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.85, 1],
+                          })
+                        },
+                      ],
+                    },
+                    signUp.paymentStripe
+                  ]}
+              />
+            </View>
+          </View>
+          <View style={signUp.paymentMain}>
+            <View style={signUp.paymentOptions}>
+              <ButtonGroup
+                onPress={selectPaymentOption}
+                buttons={['Credit Card','PayPal']}
+                selectedIndex={paymentIndex}
+                textStyle={signUp.groupPaymentButton}
+                selectedTextStyle={{backgroundColor:priceStyle.color}}
+                selectedButtonStyle={{backgroundColor:priceStyle.color}}
+                style={{margin:0,padding:0}}
+              />
+            </View>
+            {paymentIndex == 0 && (<View><View style={signUp.paymentEnterInfo}>
+              <TextInput
+                style={signUp.inputCardNumber}
+                value={cardNumber}
+                placeholder='Card Number'
+                keyboardType='email'
+                onChangeText={(t) => { setCardNumber(t) }}
+              />
+              <View style={signUp.paymentCardBack}>
+                <TextInput
+                  style={signUp.inputCardDate}
+                  value={cardDate}
+                  placeholder='MM/YYYY'
+                  keyboardType='email'
+                  onChangeText={(t) => { setCardDate(t) }}
+                />
+                <TextInput
+                  style={signUp.inputCVC}
+                  value={cvc}
+                  placeholder='CVC'
+                  keyboardType='email'
+                  onChangeText={(t) => { setCVC(t) }}
+                />
+              </View>
+            </View><Button
+              title={'Pay $' + priceAmount}
+              buttonStyle={signUp.paymentSubmitButton}
+              containerStyle={signUp.paymentSubmitButtonContainer}
+              onPress={submitPayment}
+            /></View>)}
+          </View>
+        </View>
       </View>)}
       {showPricingForm && (<View style={{flexShrink:1}}>
         <Text style={signUp.pricingTitle}>Welcome to CoachSync, {firstName}!</Text>
-        <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you.</Text>
+        <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you. You can also upgrade later!</Text>
+        {false && (<Text style={signUp.timeLeft}>Time left on sale: {activeDiscountExpire && (<View style={signUp.countdown}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}</Text>)}
+        {activeDiscountExpire && (<Text style={signUp.timeLeft}>Beta Sale lasts for first 50 sign ups! <Text style={signUp.countdown}>{50-coachCount} spaces left</Text></Text>)}
+        {true && (<View style={signUp.toggleAnnual}>
+          <ButtonGroup
+            onPress={selectButton}
+            buttons={['Monthly','Annual']}
+            selectedIndex={selectedIndex}
+            containerStyle={signUp.groupButton}
+            />
+        </View>)}
         <View style={[signUp.pricingCards,pricingCardsStyle]}>
         <PricingCard
           color={btnColors.primary}
-          title="Free"
+          title={firstPlan.Title}
           price={<View>
-            <Text>$0/mo</Text>
-            {activeDiscountExpire && (<View style={signUp.prevPriceHeight}>
-            </View>)}
+            <Text style={{fontSize:45}}>${firstPlan.BasePrice}/{priceUnit}</Text>
+            {activeDiscountExpire && (<Text style={signUp.priceBottomText}>forever</Text>)}
           </View>}
-          info={['Up to 3 Clients', 'Prompts/Concepts/Surveys', 'Calendly Integration', 'Messaging and Social Feed']}
+          info={firstPlan.InfoParsed}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
           onButtonPress={() => onPriceSelect(1)}
@@ -301,17 +472,20 @@ export default function Welcome() {
           <PricingCard
             color={btnColors.success}
             title={<View>
-              <Text>Standard</Text>
+              {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+                <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
+                <View style={signUp.previousPriceInner}>
+                  <Text style={signUp.previousPrice}>{secondPlan.BasePrice*annual}</Text>
+                  <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+                </View>
+              </View>)}
+              <Text style={{fontSize:50}}>{secondPlan.Title}</Text>
             </View>}
             price={<View>
-              <Text>${(69.99*((100-activeDiscountPerc)/100.0)).toFixed(2)}/mo</Text>
-              {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
-                <Text style={signUp.previousPrice}>69.99</Text>
-                <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
-              </View>)}
-              {activeDiscountExpire && (<View style={{fontSize:20}}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}
+              <Text style={{fontSize:45}}>${(secondPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+              <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
             </View>}
-            info={['Up to 10 Clients', 'All Free Features', 'Client Payment Collection', 'Basic Support']}
+            info={secondPlan.InfoParsed}
             button={{ title: 'Select' }}
             containerStyle={signUp.pricingCardContainerMiddle}
             onButtonPress={() => onPriceSelect(2)}
@@ -320,17 +494,20 @@ export default function Welcome() {
         <PricingCard
           color={btnColors.danger}
           title={<View>
-            <Text>Professional</Text>
+            {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+              <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
+              <View style={signUp.previousPriceInner}>
+                <Text style={signUp.previousPrice}>{thirdPlan.BasePrice*annual}</Text>
+                <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+              </View>
+            </View>)}
+            <Text>{thirdPlan.Title}</Text>
           </View>}
           price={<View>
-            <Text>${(119.99*((100-activeDiscountPerc)/100.0)).toFixed(2)}/mo</Text>
-            {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
-              <Text style={signUp.previousPrice}>119.99</Text>
-              <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
-            </View>)}
-            {activeDiscountExpire && (<View style={{fontSize:20}}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}
+            <Text style={{fontSize:45}}>${(thirdPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+            <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
           </View>}
-          info={['Unlimited Clients!', 'All Standard Features', 'Premium Support', 'Contract Signing']}
+          info={thirdPlan.InfoParsed}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
           onButtonPress={() => onPriceSelect(3)}
