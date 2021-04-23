@@ -456,39 +456,6 @@ export const signUpLight = StyleSheet.create({
     marginTop:30,
     marginBottom:30
   },
-  inputCardNumber: {
-    borderTopLeftRadius:10,
-    borderTopRightRadius:10,
-    borderWidth:1,
-    borderColor:colorsLight.secondaryBackground,
-    padding:15,
-    marginLeft:10,
-    marginRight:10
-  },
-  inputCardDate: {
-    borderBottomLeftRadius:10,
-    borderLeftWidth:1,
-    borderRightWidth:1,
-    borderBottomWidth:1,
-    borderColor:colorsLight.secondaryBackground,
-    paddingTop:15,
-    paddingBottom:15,
-    paddingLeft:15,
-    marginLeft:10,
-    width:'100%'
-  },
-  inputCVC: {
-    borderBottomRightRadius:10,
-    borderRightWidth:1,
-    borderBottomWidth:1,
-    borderColor:colorsLight.secondaryBackground,
-    paddingTop:15,
-    paddingBottom:15,
-    paddingLeft:15,
-    paddingRight:11,
-    marginRight:10,
-    width:'100%'
-  },
   paymentCardBack: {
     flexDirection:'row'
   },
@@ -501,5 +468,30 @@ export const signUpLight = StyleSheet.create({
     flex:1,
     alignItems:'flex-end',
     justifyContent:'flex-end'
-  }
+  },
+  inputCardName: {
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10,
+    borderWidth:1,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    borderColor:colorsLight.secondaryBackground,
+    padding:15,
+    marginLeft:10,
+    marginRight:10,
+    marginTop:10,
+    fontWeight:'1000',
+  },
+  cardWrapper: {
+    borderBottomLeftRadius:10,
+    borderBottomRightRadius:10,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:1,
+    borderColor:colorsLight.secondaryBackground,
+    padding:15,
+    marginLeft:10,
+    marginRight:10,
+    marginBottom:10
+  },
 });

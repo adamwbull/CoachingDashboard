@@ -7,6 +7,7 @@ import { welcomeLight, logoLight, navLogo, colorsLight } from '../Scripts/Styles
 import { welcomeDark, logoDark, colorsDark } from '../Scripts/StylesDark.js';
 import { Button } from 'react-native-elements';
 import { TextInput } from 'react-native-web';
+import { Helmet } from "react-helmet";
 
 export default function Welcome() {
   const linkTo = useLinkTo();

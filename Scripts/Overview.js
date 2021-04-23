@@ -6,6 +6,7 @@ import { overviewLight, colorsLight } from '../Scripts/Styles.js';
 import { overviewDark, colorsDark } from '../Scripts/Styles.js';
 import { useLinkTo } from '@react-navigation/native';
 import LoadingScreen from '../Scripts/LoadingScreen.js';
+import { Helmet } from "react-helmet";
 
 export default function Overview() {
   const linkTo = useLinkTo();

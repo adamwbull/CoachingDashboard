@@ -9,6 +9,7 @@ import { TextInput } from 'react-native-web';
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js';
 import { loginCheck, verifyCaptcha } from '../Scripts/API.js';
 import Recaptcha from 'react-grecaptcha';
+import { Helmet } from "react-helmet";
 
 export default function Welcome() {
   const linkTo = useLinkTo();
@@ -37,9 +38,13 @@ export default function Welcome() {
     const r = get('Coach')
     console.log(get('LoginAttempts'))
     if (r !== null) {
-      linkTo('/overview')
+      if (r.RegistrationCompleted == 0) {
+        linkTo('/sign-up')
+      } else {
+        linkTo('/overview')
+      }
     }
-  });
+  }, []);
 
   const onLoad = () => {
     Animated.timing(opacity, {
@@ -112,6 +117,10 @@ export default function Welcome() {
   const expiredCallback = () => { console.log('captcha expired') };
 
   return (<View style={welcome.container} onLayout={onLayout}>
+    <Helmet>
+        <meta charSet="utf-8" />
+        <title>Welcome - CoachSync</title>
+    </Helmet>
     <View style={welcome.login}>
       <View style={welcome.logoContainer}>
         <Animated.Image
