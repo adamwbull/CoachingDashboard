@@ -15,9 +15,7 @@ const linking = {
       SignUp: 'sign-up',
       Main: {
         screens: {
-          Overview: 'overview',
-          Profile: 'profile',
-          Settings: 'settings',
+          Home: 'home',
         }
       }
     }
@@ -25,7 +23,7 @@ const linking = {
 };
 
 // Import pages.
-import Overview from './Scripts/Overview.js';
+import Home from './Scripts/Home.js';
 import Profile from './Scripts/Profile.js';
 import Settings from './Scripts/Settings.js';
 import Welcome from './Scripts/Welcome.js';
@@ -35,10 +33,8 @@ import SignUp from './Scripts/SignUp.js';
 const Drawer = createDrawerNavigator();
 
 function Main() {
-  return (<Drawer.Navigator drawerType="permanent">
-    <Drawer.Screen name="Overview" component={Overview} />
-    <Drawer.Screen name="Profile" component={Profile} />
-    <Drawer.Screen name="Settings" component={Settings} />
+  return (<Drawer.Navigator>
+    <Drawer.Screen name="Home" component={Home} />
   </Drawer.Navigator>)
 }
 

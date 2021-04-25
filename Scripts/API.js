@@ -146,6 +146,32 @@ export async function check() {
 
 */
 
+export async function refreshCoach(id, token) {
+
+  var ret = false;
+  var arr = {Id:id, Token:token};
+
+  console.log('Refreshing coach from DB...');
+  const res = await fetch(url + '/user/coach/refresh', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Refreshed!');
+    ret = payload[0];
+  }
+
+  return ret;
+
+}
+
 export async function getNumCoaches() {
 
   var ret = false;

@@ -21,7 +21,7 @@ export const btnColors = {
 export const boxColors = {
   primary:'#38A2E8',
   caution:'#FFCF0F',
-  danger: '#F55240',
+  danger: '#fb7161',
   success:'#32D977',
   info:'#48dbfb',
 }
@@ -339,7 +339,8 @@ export const signUpLight = StyleSheet.create({
   },
   paymentInfo: {
     flex:7,
-    padding:20
+    padding:20,
+    backgroundColor:colorsLight.secondaryHighlight
   },
   paymentMain: {
     flex:6,
@@ -494,4 +495,57 @@ export const signUpLight = StyleSheet.create({
     marginRight:10,
     marginBottom:10
   },
+  paymentBottomText: {
+    textAlign:'center',
+    color:colorsLight.mainTextColor,
+    fontSize:12
+  },
+  congratsContainer: {
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    width:400
+  },
+  congratsHeader: {
+    backgroundColor:colorsLight.secondaryHighlight,
+    height:80,
+  },
+  congratsBody: {
+    padding:20
+  },
+  congratsIcon: {
+    width:100,
+    height:100,
+    position:'absolute',
+    top:-50,
+    left:150,
+    justifyContent:'center',
+    alignItems:'center',
+    flex:1,
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:2,
+    borderRadius:100,
+    borderColor:colorsLight.secondaryBackground
+  },
+  congratsTitle: {
+    marginTop:40,
+    fontFamily:'Poppins',
+    fontSize:26,
+    textAlign:'center',
+    color:colorsLight.mainTextColor
+  },
+  congratsText: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.mainTextColor
+  },
+  congratsButton: {
+    borderRadius:100,
+    backgroundColor:colorsLight.secondaryHighlight,
+  },
+  congratsButtonContainer: {
+    width:'50%',
+    marginTop:20,
+    marginLeft:'25%'
+  }
 });

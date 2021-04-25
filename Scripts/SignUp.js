@@ -7,7 +7,7 @@ import { Button, Icon, PricingCard, ButtonGroup } from 'react-native-elements'
 import { useLinkTo, Link } from '@react-navigation/native'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js'
-import { createAccount, getActiveDiscount, getNumCoaches, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate, getPlans } from '../Scripts/API.js'
+import { refreshCoach, url, createAccount, getActiveDiscount, getNumCoaches, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate, getPlans } from '../Scripts/API.js'
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
@@ -26,6 +26,194 @@ import {
 } from '@stripe/react-stripe-js';
 
 const delay = ms => new Promise(res => setTimeout(res, ms))
+
+const SubscribeForm = ({onFinished, planId, annual, priceAmount}) => {
+
+  // Get the lookup key for the price from the previous page redirect.
+  const linkTo = useLinkTo()
+  const [name, setName] = useState('');
+  const [messages, setMessages] = useState('');
+  const [subscription, setSubscription] = useState();
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Styling.
+  const [signUp, setStyle] = useState(signUpLight)
+  const [colors, setColors] = useState(colorsLight)
+
+  // helper for displaying status messages.
+  const setMessage = (message) => {
+    if (messages == '') {
+      setMessages(`${message}`);
+    } else {
+      setMessages(`${messages}\n${message}`);
+    }
+  }
+
+  const cardInputStyle = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: colorsLight.mainTextColor,
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: btnColors.danger,
+      },
+    },
+  };
+
+  // Initialize an instance of stripe.
+  const stripe = useStripe();
+  const elements = useElements();
+
+  if (!stripe || !elements) {
+    // Stripe.js has not loaded yet. Make sure to disable
+    // form submission until Stripe.js has loaded.
+    return '';
+  }
+
+  // When the subscribe-form is submitted we do a few things:
+  //
+  //   1. Tokenize the payment method
+  //   2. Create the subscription
+  //   3. Handle any next actions like 3D Secure that are required for SCA.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Get a reference to a mounted CardElement. Elements knows how
+    // to find your CardElement because there can only ever be one of
+    // each type of element.
+    const cardElement = elements.getElement(CardElement);
+
+    // Use card Element to tokenize payment details
+    let { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+      billing_details: {
+        name: name,
+      }
+    });
+
+    if (error) {
+      // show error and collect new card details.
+      setMessage(error.message);
+      return;
+    }
+
+    setRefreshing(true)
+    var coach = get('Coach')
+    var arr = {
+      planId,
+      annual,
+      paymentMethodId: paymentMethod.id,
+      CoachId:coach.Id,
+      Token:coach.Token
+    };
+    console.log(arr)
+    // Create the subscription.
+    let { subError, subscription } = await fetch(url + '/user/coach/create-stripe-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(arr),
+    }).then(r => r.json());
+    setRefreshing(false)
+
+    if(subError) {
+      // show error and collect new card details.
+      setMessage(subError.message);
+      return;
+    }
+
+    setMessage(`Subscription created with status: ${subscription.status}`);
+    setSubscription(subscription);
+
+    // This sample only supports a Subscription with payment
+    // upfront. If you offer a trial on your subscription, then
+    // instead of confirming the subscription's latest_invoice's
+    // payment_intent. You'll use stripe.confirmCardSetup to confirm
+    // the subscription's pending_setup_intent.
+    switch(subscription.status) {
+      case 'active':
+        // Redirect to account page
+        onFinished()
+        break;
+
+      case 'incomplete':
+
+        // Handle next actions
+        //
+        // If the status of the subscription is `incomplete` that means
+        // there are some further actions required by the customer. In
+        // the case of upfront payment (not trial) the payment is confirmed
+        // by passing the client_secret of the subscription's latest_invoice's
+        // payment_intent.
+        //
+        // For trials, this works a little differently and requires a call to
+        // `stripe.confirmCardSetup` and passing the subscription's
+        // pending_setup_intent's client_secret like so:
+        //
+        //   const {error, setupIntent} = await stripe.confirmCardSetup(
+        //     subscription.pending_setup_intent.client_secret
+        //   )
+        //
+        // then handling the resulting error and setupIntent as we do below.
+        //
+        // This sample does not support subscriptions with trials. Instead, use these docs:
+        // https://stripe.com/docs/billing/subscriptions/trials
+        const {error} = await stripe.confirmCardPayment(
+          subscription.latest_invoice.payment_intent.client_secret,
+        )
+
+        if(error) {
+          setMessage(error.message);
+        } else {
+          setMessage("Success! Redirecting to your account.");
+          setSubscription({ status: 'active' });
+        }
+        break;
+
+
+      default:
+        setMessage(`Unknown Subscription status: ${subscription.status}`);
+    }
+
+  }
+
+  if(subscription && subscription.status === 'active') {
+    onFinished()
+  }
+
+  return (<View>
+    {refreshing && (<ActivityIndicatorView />)}
+    {refreshing == false && (<View>
+      {messages.length > 0 && (<View style={[messageBox.errorBox,{marginTop:10,marginLeft:10,marginRight:10}]}>
+          <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+          <Text style={messageBox.text}>{messages}</Text>
+        </View>) || (<View></View>)}
+      <TextInput
+        style={signUp.inputCardName}
+        value={name}
+        placeholder='Cardholder Name'
+        placeholderTextColor='#aab7c4'
+        keyboardType='default'
+        onChangeText={(t) => { setName(t) }}
+      />
+      <View style={signUp.cardWrapper}>
+        <CardElement options={cardInputStyle} />
+      </View>
+      <Button
+      title={'Pay $' + priceAmount}
+      buttonStyle={signUp.paymentSubmitButton}
+      containerStyle={signUp.paymentSubmitButtonContainer}
+      onPress={handleSubmit} />
+      <Text style={signUp.paymentBottomText}>You can unsubscribe or adjust your plan later.</Text>
+    </View>)}
+  </View>)
+}
 
 export default function SignUp() {
   // Refs.
@@ -46,7 +234,7 @@ export default function SignUp() {
   const [showPricingForm, setShowPricingForm] = useState(false)
   const [showRegisterForm, setShowRegisterForm] = useState(false)
   const [showPaymentForm, setShowPaymentForm] = useState(false)
-
+  const [showCongrats, setShowCongrats] = useState(false)
   // Form controls and style.
   var failed = get('TimesFailed')
   var dis = (failed == null) ? false : true
@@ -57,31 +245,19 @@ export default function SignUp() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [paymentIndex, setPaymentIndex] = useState(0)
   const [priceUnit, setPriceUnit] = useState('mo')
-  const [priceStyle, setPriceStyle] = useState({color:btnColors.primary})
+  const [priceStyle, setPriceStyle] = useState(btnColors.success)
   const [priceAmount, setPriceAmount] = useState(0)
   const [priceMemo, setPriceMemo] = useState('')
   const [priceBase, setPriceBase] = useState(0)
-  const [firstPlan, setFirstPlan] = useState({})
-  const [secondPlan, setSecondPlan] = useState({})
-  const [thirdPlan, setThirdPlan] = useState({})
+  const [chosenPlan, setChosenPlan] = useState({})
+  const [plans, setPlans] = useState([{BasePrice:0, Title:''},{BasePrice:0, Title:''},{BasePrice:0, Title:''}])
   const [coachCount, setCoachCount] = useState(0)
-  const cardInputStyle = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: colorsLight.mainTextColor,
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: btnColors.danger,
-      },
-    },
-  };
+
+  const [cardError, setMessage] = useState(false)
+
   // Storage for account creation.
   const [priceType, setPriceType] = useState(1)
-  const [priceName, setPriceName] = useState('Free')
+  const [priceName, setPriceName] = useState('Free Plan')
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -93,8 +269,6 @@ export default function SignUp() {
   const [activeDiscountExpire, setActiveDiscountExpire] = useState(false)
   const [activeDiscountDurText, setActiveDiscountDurText] = useState('')
   const [activeDiscountMonths, setActiveDiscountMonths] = useState(0)
-  const [cardName, setCardName] = useState('')
-  const [subscription, setSubscription] = useState({})
 
   const onLayout = (event) => {
     const { width, height } = event.nativeEvent.layout
@@ -124,17 +298,19 @@ export default function SignUp() {
     }
   }
 
-  const plans = async (t) => {
+  const loadPlans = async (t) => {
     var res = await getPlans(t)
     var plan1 = res[0]
-    plan1.InfoParsed = plan1.Info.split(',')
-    setFirstPlan(plan1)
     var plan2 = res[1]
-    plan2.InfoParsed = plan2.Info.split(',')
-    setSecondPlan(plan2)
     var plan3 = res[2]
+    plan1.InfoParsed = plan1.Info.split(',')
+    plan2.InfoParsed = plan2.Info.split(',')
     plan3.InfoParsed = plan3.Info.split(',')
-    setThirdPlan(plan3)
+    var newPlans = []
+    newPlans[0] = plan1
+    newPlans[1] = plan2
+    newPlans[2] = plan3
+    setPlans(newPlans)
   }
 
   const coaches = async () => {
@@ -143,21 +319,25 @@ export default function SignUp() {
   }
 
   useEffect(() => {
-    document.title = 'Sign Up - CoachSync'
     const coach = get('Coach')
-    coach.FirstName = 'Adam'
     if (coach !== null) {
       if (coach.RegistrationCompleted == 0) {
-        discount()
-        coaches()
-        plans(coach.Token)
-        setTimeout(() => {
-          setFirstName(coach.FirstName)
-          setShowActivityIndicator(false)
-          setShowPricingForm(true)
-        }, 500)
+        try {
+          discount()
+          coaches()
+          loadPlans(coach.Token)
+        } finally {
+          setTimeout(() => {
+            setFirstName(coach.FirstName)
+            setShowActivityIndicator(false)
+            setShowPricingForm(true)
+          }, 500)
+        }
       } else {
-        linkTo('/overview')
+        setFirstName(coach.FirstName)
+        paymentCheck(coach.Plan)
+        setShowActivityIndicator(false)
+        setShowCongrats(true)
       }
     } else {
       delay(1000)
@@ -265,11 +445,17 @@ export default function SignUp() {
     } else {
       var created = await createAccount(email, dob, firstName, lastName, password);
       set('Coach',created,ttl)
-      setShowRegisterForm(false)
-      setShowActivityIndicator(true)
-      await delay(300)
-      setShowActivityIndicator(false)
-      setShowPricingForm(true)
+      try {
+        discount()
+        coaches()
+        loadPlans(created.Token)
+      } finally {
+        setShowRegisterForm(false)
+        setShowActivityIndicator(true)
+        await delay(300)
+        setShowActivityIndicator(false)
+        setShowPricingForm(true)
+      }
     }
 
    }
@@ -300,29 +486,28 @@ export default function SignUp() {
   const onPriceSelect = async (type) => {
     setPriceType(type)
     var name, style, amount, memo, dateType, priceBase, discountLine, lengthText
-    if (type == 1) {
+    if (type == 0) {
       name = 'Free Plan'
-      style = {color:colorsLight.secondaryHighlight}
-      amount = (firstPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
-      dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
-      priceBase = firstPlan.BasePrice*annual
+      amount = (plans[0].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+      priceBase = plans[0].BasePrice*annual
+      style = btnColors.primary
     } else {
-      if (type == 2) {
+      if (type == 1) {
         name = 'Standard Plan'
-        style = {color:colorsLight.secondaryHighlight}
-        amount = (secondPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
-        dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
-        priceBase = secondPlan.BasePrice*annual
-      } else if (type == 3) {
+        amount = (plans[1].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+        priceBase = plans[1].BasePrice*annual
+        style = btnColors.success
+      } else if (type == 2) {
         name = 'Professional Plan'
-        style = {color:colorsLight.secondaryHighlight}
-        amount = (thirdPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
-        dateType = (selectedIndex == 0) ? 'Monthly' : 'Annually'
-        priceBase = thirdPlan.BasePrice*annual
+        amount = (plans[2].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
+        priceBase = plans[2].BasePrice*annual
+        style = btnColors.danger
       }
+      dateType = (selectedIndex == 0) ? 'Monthly' : 'Annual'
       lengthText = (selectedIndex == 0) ? '/mo for ' + activeDiscountMonths + ' ' + ((activeDiscountMonths > 1) ? 'months ' : 'month ') : ' for a year '
       discountLine = (activeDiscountExpire != false) ? `${"\n"}$` + amount + lengthText + 'then $' + priceBase + ' after' : ''
-      memo = activeDiscountDesc + ' ' + dateType + ' ' + name + discountLine
+      memo = dateType + ' Subscription' + discountLine
+      setChosenPlan(plans[type])
       setPriceName(name)
       setPriceStyle(style)
       setPriceAmount(amount)
@@ -334,6 +519,20 @@ export default function SignUp() {
       setShowActivityIndicator(false)
       setShowPaymentForm(true)
     }
+  }
+
+  const paymentCheck = (type) => {
+    var style, name
+    if (type == 1) {
+      name = 'Standard Plan'
+      style = btnColors.success
+    } else if (type == 2) {
+      name = 'Professional Plan'
+      style = btnColors.danger
+    }
+    setPriceName(name)
+    setPriceStyle(style)
+    setShowCongrats(true)
   }
 
   const onBackPayment = async () => {
@@ -350,107 +549,19 @@ export default function SignUp() {
 
   const stripePromise = loadStripe('pk_test_51Ibda0Doo38J0s0VtHeC0WxsqtMWNxu6xy9FcAwt9Tch77641I6LeIAmWHcbzVSeiFh6m2smQt3C9OgSYIlo4RAK00ZPlZhqub')
 
-  // When the subscribe-form is submitted we do a few things:
-  //
-  //   1. Tokenize the payment method
-  //   2. Create the subscription
-  //   3. Handle any next actions like 3D Secure that are required for SCA.
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleFinish = async () => {
+    const coach = get('Coach')
+    var updated = await refreshCoach(coach.Id, coach.Token);
+    set('Coach',updated,ttl)
+    setShowPaymentForm(false)
+    setShowActivityIndicator(true)
+    await delay(300)
+    setShowActivityIndicator(false)
+    setShowCongrats(true)
 
-    // Initialize an instance of stripe.
-    const stripe = await useStripe();
-    const elements = await useElements();
-
-    // Get a reference to a mounted CardElement. Elements knows how
-    // to find your CardElement because there can only ever be one of
-    // each type of element.
-    const cardElement = elements.getElement(CardElement);
-
-    // Use card Element to tokenize payment details
-    let { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardElement,
-      billing_details: {
-        name: name,
-      }
-    });
-
-    if(error) {
-      // show error and collect new card details.
-      setMessage(error.message);
-      return;
-    }
-
-    // Create the subscription.
-    let {subError, subscription} = await fetch('/create-subscription', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        priceLookupKey,
-        paymentMethodId: paymentMethod.id
-      }),
-    }).then(r => r.json());
-
-    if(subError) {
-      // show error and collect new card details.
-      setMessage(subError.message);
-      return;
-    }
-
-    setSubscription(subscription);
-
-    // This sample only supports a Subscription with payment
-    // upfront. If you offer a trial on your subscription, then
-    // instead of confirming the subscription's latest_invoice's
-    // payment_intent. You'll use stripe.confirmCardSetup to confirm
-    // the subscription's pending_setup_intent.
-    switch(subscription.status) {
-      case 'active':
-        // Redirect to account page
-        console.log("Success! Redirecting to your account.");
-        break;
-
-
-      case 'incomplete':
-        // Handle next actions
-        //
-        // If the status of the subscription is `incomplete` that means
-        // there are some further actions required by the customer. In
-        // the case of upfront payment (not trial) the payment is confirmed
-        // by passing the client_secret of the subscription's latest_invoice's
-        // payment_intent.
-        //
-        // For trials, this works a little differently and requires a call to
-        // `stripe.confirmCardSetup` and passing the subscription's
-        // pending_setup_intent's client_secret like so:
-        //
-        //   const {error, setupIntent} = await stripe.confirmCardSetup(
-        //     subscription.pending_setup_intent.client_secret
-        //   )
-        //
-        // then handling the resulting error and setupIntent as we do below.
-        //
-        // This sample does not support subscriptions with trials. Instead, use these docs:
-        // https://stripe.com/docs/billing/subscriptions/trials
-        const {error} = await stripe.confirmCardPayment(
-          subscription.latest_invoice.payment_intent.client_secret,
-        )
-
-        if(error) {
-          setMessage(error.message);
-        } else {
-          setMessage("Success! Redirecting to your account.");
-          setSubscription({ status: 'active' });
-        }
-        break;
-
-
-      default:
-        setMessage(`Unknown Subscription status: ${subscription.status}`);
-    }
+  }
+  const dashboard = async () => {
+    linkTo('/home')
   }
 
   return (<ScrollView contentContainerStyle={[signUp.container,scrollStyle]} scrollEnabled={true} onLayout={onLayout} onScroll={onScroll}>
@@ -479,13 +590,28 @@ export default function SignUp() {
     /></View>
     <View style={signUp.main}>
       {showActivityIndicator && (<ActivityIndicatorView />)}
+      {showCongrats && (<View style={signUp.congratsContainer}>
+        <View style={signUp.congratsHeader}></View>
+        <View style={signUp.congratsBody}>
+          <View style={signUp.congratsIcon}>
+          <Icon name='people' size={60} type='ionicon' color={priceStyle}/>
+          </View>
+          <Text style={signUp.congratsTitle}>Congrats {firstName}!</Text>
+          <Text style={signUp.congratsText}>You've subscribed to the <Text style={[signUp.congratsTextBold,{color:priceStyle}]}>{priceName}</Text>.{"\n"}A new coaching journey awaits!</Text>
+          <Button
+          title='Get Started'
+          buttonStyle={signUp.congratsButton}
+          containerStyle={signUp.congratsButtonContainer}
+          onPress={dashboard}/>
+        </View>
+      </View>)}
       {showPaymentForm && (<View style={signUp.paymentFormContainer}>
         <TouchableOpacity style={signUp.backContainer} onPress={onBackPayment}>
           <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
           <Text style={signUp.backText}>Go Back</Text>
         </TouchableOpacity>
         <View style={[signUp.paymentForm,pricingCardsStyle]}>
-          <View style={[signUp.paymentInfo,{backgroundColor:priceStyle.color}]}>
+          <View style={[signUp.paymentInfo]}>
             <View style={signUp.paymentIcon}>
               <Icon size={40} color='#fff' name='cart-outline' type='ionicon' />
             </View>
@@ -528,28 +654,17 @@ export default function SignUp() {
                 buttons={['Credit Card','PayPal']}
                 selectedIndex={paymentIndex}
                 textStyle={signUp.groupPaymentButton}
-                selectedTextStyle={{backgroundColor:priceStyle.color}}
-                selectedButtonStyle={{backgroundColor:priceStyle.color}}
+                selectedTextStyle={{backgroundColor:colorsLight.secondaryHighlight}}
+                selectedButtonStyle={{backgroundColor:colorsLight.secondaryHighlight}}
                 style={{margin:0,padding:0}}
               />
             </View>
+            {cardError && (<View style={messageBox.errorBox}>
+                <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+                <Text style={messageBox.text}>{cardError}</Text>
+              </View>) || (<View></View>)}
             {paymentIndex == 0 && (<Elements stripe={stripePromise}>
-              <TextInput
-                style={signUp.inputCardName}
-                value={cardName}
-                placeholder='Cardholder Name'
-                placeholderTextColor='#aab7c4'
-                keyboardType='default'
-                onChangeText={(t) => { setCardName(t) }}
-              />
-              <View style={signUp.cardWrapper}>
-                <CardElement options={cardInputStyle} />
-              </View>
-              <Button
-              title={'Pay $' + priceAmount}
-              buttonStyle={signUp.paymentSubmitButton}
-              containerStyle={signUp.paymentSubmitButtonContainer}
-              onPress={handleSubmit} />
+              <SubscribeForm onFinished={handleFinish} planId={chosenPlan.Type} annual={annual} priceAmount={priceAmount} />
             </Elements>)}
           </View>
         </View>
@@ -570,15 +685,15 @@ export default function SignUp() {
         <View style={[signUp.pricingCards,pricingCardsStyle]}>
         <PricingCard
           color={btnColors.primary}
-          title={firstPlan.Title}
+          title={plans[0].Title}
           price={<View>
-            <Text style={{fontSize:45}}>${firstPlan.BasePrice}/{priceUnit}</Text>
+            <Text style={{fontSize:45}}>${plans[0].BasePrice}/{priceUnit}</Text>
             {activeDiscountExpire && (<Text style={signUp.priceBottomText}>forever</Text>)}
           </View>}
-          info={firstPlan.InfoParsed}
+          info={plans[0].InfoParsed}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
-          onButtonPress={() => onPriceSelect(1)}
+          onButtonPress={() => onPriceSelect(0)}
         />
         <View>
           <Text style={signUp.pricingHighlight}>Most Popular:</Text>
@@ -588,20 +703,20 @@ export default function SignUp() {
               {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
                 <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
                 <View style={signUp.previousPriceInner}>
-                  <Text style={signUp.previousPrice}>{secondPlan.BasePrice*annual}</Text>
+                  <Text style={signUp.previousPrice}>{plans[1].BasePrice*annual}</Text>
                   <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
                 </View>
               </View>)}
-              <Text style={{fontSize:50}}>{secondPlan.Title}</Text>
+              <Text style={{fontSize:50}}>{plans[1].Title}</Text>
             </View>}
             price={<View>
-              <Text style={{fontSize:45}}>${(secondPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+              <Text style={{fontSize:45}}>${(plans[1].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
               <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
             </View>}
-            info={secondPlan.InfoParsed}
+            info={plans[1].InfoParsed}
             button={{ title: 'Select' }}
             containerStyle={signUp.pricingCardContainerMiddle}
-            onButtonPress={() => onPriceSelect(2)}
+            onButtonPress={() => onPriceSelect(1)}
           />
         </View>
         <PricingCard
@@ -610,20 +725,20 @@ export default function SignUp() {
             {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
               <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
               <View style={signUp.previousPriceInner}>
-                <Text style={signUp.previousPrice}>{thirdPlan.BasePrice*annual}</Text>
+                <Text style={signUp.previousPrice}>{plans[2].BasePrice*annual}</Text>
                 <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
               </View>
             </View>)}
-            <Text>{thirdPlan.Title}</Text>
+            <Text>{plans[2].Title}</Text>
           </View>}
           price={<View>
-            <Text style={{fontSize:45}}>${(thirdPlan.BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+            <Text style={{fontSize:45}}>${(plans[2].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
             <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
           </View>}
-          info={thirdPlan.InfoParsed}
+          info={plans[2].InfoParsed}
           button={{ title: 'Select' }}
           containerStyle={signUp.pricingCardContainer}
-          onButtonPress={() => onPriceSelect(3)}
+          onButtonPress={() => onPriceSelect(2)}
         />
         </View>
       </View>)}

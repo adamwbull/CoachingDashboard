@@ -8,7 +8,7 @@ import { useLinkTo } from '@react-navigation/native';
 import LoadingScreen from '../Scripts/LoadingScreen.js';
 import { Helmet } from "react-helmet";
 
-export default function Overview() {
+export default function Home() {
   const linkTo = useLinkTo();
   const [refreshing, setRefreshing] = useState(true);
   const [overview, setStyle] = useState(overviewLight);
