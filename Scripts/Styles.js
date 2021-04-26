@@ -36,10 +36,12 @@ if (coach == null) {
 export const colorsLight = {
   primaryHighlight: coach.PrimaryHighlight,
   secondaryHighlight: coach.SecondaryHighlight,
-  secondaryBackground: '#ecf0f1', // clouds
+  secondaryBackground: '#ebeef6', // clouds
   mainTextColor: '#23272a', // darkGray
   secondaryTextColor: '#344150', // blueGray
   mainBackground: '#ffffff', // white
+  header: '#FAFAFA',
+  headerBorder: '#ebeef6',
 }
 
 export const messageBox = StyleSheet.create({
@@ -68,21 +70,11 @@ export const messageBox = StyleSheet.create({
     color:colorsLight.mainTextColor
   }
 });
-// Dynamic spreadsheets and elements.
+
 
 export const logoLight = require('../assets/coachsync-logo-light.png');
 
-export const overviewLight = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colorsLight.mainBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  h1: {
-    color:colorsLight.darkGray
-  }
-});
+// Dynamic spreadsheets and elements.
 
 export const welcomeLight = StyleSheet.create({
   container: {
@@ -547,5 +539,158 @@ export const signUpLight = StyleSheet.create({
     width:'50%',
     marginTop:20,
     marginLeft:'25%'
+  }
+});
+
+export const drawerLight = StyleSheet.create({
+  drawer: {
+    backgroundColor:colorsLight.secondaryHighlight,
+    padding:0,
+    margin:0,
+    width:80,
+    borderWidth:0,
+  },
+  drawerItem: {
+    padding:0,
+    margin:0,
+    backgroundColor:'',
+    borderWidth:0,
+  },
+  header: {
+    width:'100%',
+    flexDirection:'row',
+    backgroundColor:colorsLight.mainBackground
+  },
+  headerLogoContainer: {
+    width:80,
+    borderRightColor:colorsLight.mainBackground,
+    borderRightWidth:1,
+    backgroundColor:colorsLight.secondaryHighlight,
+  },
+  headerLogo: {
+    width:80,
+    height:80,
+    tintColor:colorsLight.mainBackground,
+  },
+  headerTextContainer: {
+    width:200,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  headerText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:25,
+    textAlign:'center',
+    lineHeight:25,
+  },
+  headerMain: {
+    flex:1,
+    backgroundColor:colorsLight.header,
+    flexDirection:'row',
+    justifyContent:'flex-end',
+    alignItems:'center'
+  },
+  headerUser: {
+    flexDirection:'row',
+    justifyContent:'flex-end',
+    alignItems:'center',
+    height:80
+  },
+  headerIcon: {
+    justifyContent:'center',
+    alignItems:'center',
+    marginRight:10,
+    padding:5,
+    width:40,
+    height:40,
+    borderRadius:10,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  headerUserBox: {
+    height:40,
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'flex-end',
+    paddingRight:10
+  },
+  headerUserBoxText: {
+    justifyContent:'center',
+    alignItems:'left',
+    height:40
+  },
+  headerUserName: {
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'PoppinsSemiBold'
+  },
+  headerPlan: {
+    fontSize:12,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  headerAvatar: {
+    width:40,
+    height:40,
+    borderRadius:10,
+    backgroundColor:colorsLight.secondaryBackground,
+    marginRight:10,
+  },
+  messagesContainer: {
+    width:80,
+    height:80,
+    backgroundColor:colorsLight.header,
+    borderLeftColor:colorsLight.headerBorder,
+    borderLeftWidth:1,
+    justifyContent:'center',
+    alignItems:'center'
+  }
+})
+
+export const innerDrawerLight = StyleSheet.create({
+  drawer: {
+    backgroundColor:colorsLight.mainBackground,
+    height:'100%',
+    width:200,
+    elevation:0,
+  },
+  drawerTop: {
+    backgroundColor:colorsLight.mainBackground,
+    width:200,
+    paddingLeft:20,
+    paddingRight:20,
+    paddingTop:23,
+    paddingBottom:0,
+  },
+  drawerTopTitle: {
+    fontSize:22,
+    fontFamily:'PoppinsSemiBold',
+    borderBottomWidth:2,
+    color:colorsLight.mainTextColor,
+    borderBottomColor:colorsLight.mainTextColor
+  }
+})
+
+export const homeLight = StyleSheet.create({
+  container: {
+    flex: 1,
+    borderWidth:0,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth:0,
+  },
+  body: {
+    flex:4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth:0,
+  },
+  h1: {
+    color:colorsLight.darkGray
   }
 });

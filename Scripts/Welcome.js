@@ -41,7 +41,7 @@ export default function Welcome() {
       if (r.RegistrationCompleted == 0) {
         linkTo('/sign-up')
       } else {
-        linkTo('/overview')
+        linkTo('/home')
       }
     }
   }, []);
@@ -96,7 +96,7 @@ export default function Welcome() {
 
       } else {
         set('Coach', success, ttl)
-        linkTo('/overview')
+        linkTo('/home')
       }
     } else {
       var errorText = `Too many failed attempts. ${'\n'}Please try again in ` + parseInt(getTTL('LoginLocked')/60) + ` mins.`;

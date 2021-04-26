@@ -1,11 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useFonts } from 'expo-font';
+import { StatusBar } from 'expo-status-bar'
+import React, { useState, useEffect } from 'react'
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { NavigationContainer, useLinkTo } from '@react-navigation/native'
+import { createDrawerNavigator } from '@react-navigation/drawer'
+import { useFonts } from 'expo-font'
+import { colorsLight } from './Scripts/Styles.js'
+import { colorsDark } from './Scripts/Styles.js'
+import { set, get, getTTL, ttl } from './Scripts/Storage.js'
 
 const linking = {
   prefixes: ['https://mychat.com', 'mychat://'],
@@ -15,49 +17,65 @@ const linking = {
       SignUp: 'sign-up',
       Main: {
         screens: {
-          Home: 'home',
+          Home: {
+            screens: {
+              Overview: 'home'
+            }
+          }
         }
       }
     }
   },
-};
-
-// Import pages.
-import Home from './Scripts/Home.js';
-import Profile from './Scripts/Profile.js';
-import Settings from './Scripts/Settings.js';
-import Welcome from './Scripts/Welcome.js';
-import SignUp from './Scripts/SignUp.js';
-
-// Create Sidebar.
-const Drawer = createDrawerNavigator();
-
-function Main() {
-  return (<Drawer.Navigator>
-    <Drawer.Screen name="Home" component={Home} />
-  </Drawer.Navigator>)
 }
 
-const Stack = createStackNavigator();
+// Import Main Drawer.
+import Main from './Scripts/Drawers/Main.js'
+
+// Import auth flow.
+import Welcome from './Scripts/Welcome.js'
+import SignUp from './Scripts/SignUp.js'
+
+
+const Stack = createStackNavigator()
 
 export default function App() {
+  const linkTo = useLinkTo()
+
   const [loaded] = useFonts({
     Poppins: require('./assets/fonts/Poppins.ttf'),
     PoppinsSemiBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsBold: require('./assets/fonts/Poppins-Bold.ttf'),
-  });
+  })
+  const [colors, setColors] = useState(colorsLight)
 
-  if (!loaded) {
-    return null;
-  }
+
+  const MyTheme = {
+    colors: {
+      background:colors.secondaryBackground,
+      primary:colors.mainTextColor,
+      card:colors.mainBackground,
+      border:colors.mainBackground
+    }
+  };
+
+  useEffect(() => {
+    const sCoach = get('Coach')
+    if (sCoach != null) {
+      if (sCoach.Theme == 1) {
+        setColors(colorsDark)
+      }
+    } else {
+      linkTo('/welcome')
+    }
+  }, [])
 
   return (
-    <NavigationContainer linking={linking}>
-      <Stack.Navigator headerMode='none' initialRouteName='Welcome'>
+    <NavigationContainer linking={linking} theme={MyTheme}>
+      <Stack.Navigator headerMode='none'>
         <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Main" component={Main} />
       </Stack.Navigator>
     </NavigationContainer>
-  );
+  )
 }

@@ -128,7 +128,6 @@ const SubscribeForm = ({onFinished, planId, annual, priceAmount}) => {
       return;
     }
 
-    setMessage(`Subscription created with status: ${subscription.status}`);
     setSubscription(subscription);
 
     // This sample only supports a Subscription with payment
