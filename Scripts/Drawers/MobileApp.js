@@ -15,6 +15,9 @@ const Drawer = createDrawerNavigator()
 
 // Items.
 import Overview from '../Overview.js'
+import BrandDesign from '../BrandDesign.js'
+import SocialFeed from '../SocialFeed.js'
+import Notifications from '../Notifications.js'
 
 export default function MobileApp() {
   const linkTo = useLinkTo();
@@ -59,25 +62,63 @@ export default function MobileApp() {
 
         },
         itemStyle: {
+          marginBottom:0,
+          marginTop:0,
           paddingLeft:3,
         }
       }}
     >
-      <Drawer.Screen name="Overview" component={Overview}
+      <Drawer.Screen name="BrandDesign" component={BrandDesign}
         options={{
-          title:'Overview - CoachSync',
+          title:'Brand - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
-              name='apps'
+              name='eye'
               type='ionicon'
               size={20}
               style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
             />
           ),
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:16,fontFamily:'Poppins',color:color}}>Overview</Text>)
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Brand</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="SocialFeed" component={SocialFeed}
+        options={{
+          title:'Social Feed - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='albums'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Social Feed</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="Notifications" component={Notifications}
+        options={{
+          title:'Notifications - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='notifications-circle'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Notifications</Text>)
           }
         }}
       />

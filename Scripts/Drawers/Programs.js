@@ -15,6 +15,10 @@ const Drawer = createDrawerNavigator()
 
 // Items.
 import Overview from '../Overview.js'
+import AllPrograms from '../AllPrograms.js'
+import Prompts from '../Prompts.js'
+import Concepts from '../Concepts.js'
+import AddProgram from '../AddProgram.js'
 
 export default function Programs() {
   const linkTo = useLinkTo();
@@ -44,7 +48,8 @@ export default function Programs() {
       drawerType='permanent'
       drawerStyle={drawerStyles.drawer}
       sceneContainerStyle={{
-        borderWidth:0,
+        height:'100%' + 60,
+        marginTop:-60
       }}
       screenContainerStyle={{}}
       drawerContentOptions={{
@@ -59,28 +64,84 @@ export default function Programs() {
 
         },
         itemStyle: {
+          marginBottom:0,
+          marginTop:0,
           paddingLeft:3,
         }
       }}
     >
-      <Drawer.Screen name="Overview" component={Overview}
-        options={{
-          title:'Overview - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='apps'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:16,fontFamily:'Poppins',color:color}}>Overview</Text>)
-          }
-        }}
-      />
+    <Drawer.Screen name="AllPrograms" component={AllPrograms}
+      options={{
+        title:'All Programs - CoachSync',
+        drawerIcon: ({focused, size}) => (
+          <Icon
+            name='clipboard'
+            type='ionicon'
+            size={20}
+            style={{backgroundColor:''}}
+            color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+          />
+        ),
+        drawerLabel:({focused}) => {
+          const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+          return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>All Programs</Text>)
+        }
+      }}
+    />
+    <Drawer.Screen name="Prompts" component={Prompts}
+      options={{
+        title:'Prompts - CoachSync',
+        drawerIcon: ({focused, size}) => (
+          <Icon
+            name='compass'
+            type='ionicon'
+            size={20}
+            style={{backgroundColor:''}}
+            color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+          />
+        ),
+        drawerLabel:({focused}) => {
+          const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+          return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Prompts</Text>)
+        }
+      }}
+    />
+    <Drawer.Screen name="Concepts" component={Concepts}
+      options={{
+        title:'Concepts - CoachSync',
+        drawerIcon: ({focused, size}) => (
+          <Icon
+            name='library'
+            type='ionicon'
+            size={20}
+            style={{backgroundColor:''}}
+            color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+          />
+        ),
+        drawerLabel:({focused}) => {
+          const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+          return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Concepts</Text>)
+        }
+      }}
+    />
+    <Drawer.Screen name="AddProgram" component={AddProgram}
+      options={{
+        title:'New Program - CoachSync',
+        drawerIcon: ({focused, size}) => (
+          <Icon
+            name='add'
+            type='ionicon'
+            size={20}
+            style={{backgroundColor:''}}
+            color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+          />
+        ),
+        drawerLabel:({focused}) => {
+          const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+          return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>New Program</Text>)
+        }
+      }}
+    />
     </Drawer.Navigator>
   </View>)
 

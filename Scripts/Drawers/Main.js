@@ -1,13 +1,14 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useState, useEffect } from 'react'
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import { TouchableOpacity, Animated, StyleSheet, Text, View } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer, useLinkTo } from '@react-navigation/native'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { Icon } from 'react-native-elements'
-import { drawerLight, colorsLight, navLogo, btnColors } from '../Styles.js'
+import { drawerLight, colorsLight, navLogo, btnColors, windowHeight } from '../Styles.js'
 import { drawerDark, colorsDark } from '../StylesDark.js'
 import { set, get, getTTL, ttl } from '../Storage.js'
+import ReactFullscreen from 'react-easyfullscreen'
 
 // Sub Drawers.
 import Home from './Home.js'
@@ -26,8 +27,9 @@ export default function Main() {
   const [headerPlan, setHeaderPlan] = useState({})
   const [planTitle, setPlanTitle] = useState('')
   const [userName, setUserName] = useState('')
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const linkTo = useLinkTo();
+  const linkTo = useLinkTo()
 
   useEffect(() => {
     const sCoach = get('Coach')
@@ -37,7 +39,7 @@ export default function Main() {
         setStyles(drawerDark)
         setColors(colorsDark)
       }
-      var name = sCoach.FirstName + ' ' + sCoach.LastName.charAt(0) + '.';
+      var name = sCoach.FirstName + ' ' + sCoach.LastName.charAt(0) + '.'
       setUserName(name)
       if (sCoach.Plan == 0) {
         setPlanTitle('Free Plan')
@@ -60,7 +62,12 @@ export default function Main() {
     }).start()
   }
 
-  return (<View style={{height:'100%',borderWidth:0}}>
+  const myStyle = {
+    backgroundColor:'#000'
+  }
+  return (<ReactFullscreen>
+    {({ ref, onRequest, onExit }) => (
+    <View style={{flex:1}} ref={ref}>
     <View style={styles.header}>
       <View style={styles.headerLogoContainer}>
         <Animated.Image
@@ -88,14 +95,21 @@ export default function Main() {
       </View>
       <View style={styles.headerMain}>
         <View style={styles.headerUser}>
-          <View style={styles.headerIcon}>
+          {isFullscreen && (<TouchableOpacity style={styles.headerIcon} onPress={() => { setIsFullscreen(false); onExit() }}>
+            <Icon
+              name='contract'
+              type='ionicon'
+              size={21}
+              color={colors.mainTextColor}
+            />
+          </TouchableOpacity>) || (<TouchableOpacity style={styles.headerIcon} onPress={() => { setIsFullscreen(true); onRequest() }}>
             <Icon
               name='scan'
               type='ionicon'
               size={21}
               color={colors.mainTextColor}
             />
-          </View>
+          </TouchableOpacity>)}
           <View style={styles.headerIcon}>
             <Icon
               name='notifications'
@@ -176,19 +190,6 @@ export default function Main() {
           )
         }}
       />
-      <Drawer.Screen name="MobileApp" component={MobileApp}
-        options={{
-          title:'App - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='color-palette'
-              type='ionicon'
-              size={30}
-              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
-            />
-          )
-        }}
-      />
       <Drawer.Screen name="Programs" component={Programs}
         options={{
           title:'Programs - CoachSync',
@@ -202,12 +203,12 @@ export default function Main() {
           )
         }}
       />
-      <Drawer.Screen name="Clients" component={Clients}
+      <Drawer.Screen name="MobileApp" component={MobileApp}
         options={{
-          title:'Clients - CoachSync',
+          title:'App - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
-              name='people'
+              name='color-palette'
               type='ionicon'
               size={30}
               color={focused ? coach.SecondaryHighlight : colors.mainBackground}
@@ -216,5 +217,5 @@ export default function Main() {
         }}
       />
     </Drawer.Navigator>
-  </View>)
+  </View>)}</ReactFullscreen>)
 }

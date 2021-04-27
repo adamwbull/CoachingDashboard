@@ -15,6 +15,8 @@ const Drawer = createDrawerNavigator()
 
 // Items.
 import Overview from '../Overview.js'
+import AllClients from '../AllClients.js'
+import InviteClients from '../InviteClients.js'
 
 export default function Clients() {
   const linkTo = useLinkTo();
@@ -59,28 +61,13 @@ export default function Clients() {
 
         },
         itemStyle: {
+          marginBottom:0,
+          marginTop:0,
           paddingLeft:3,
         }
       }}
     >
-      <Drawer.Screen name="Overview" component={Overview}
-        options={{
-          title:'Overview - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='apps'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:16,fontFamily:'Poppins',color:color}}>Overview</Text>)
-          }
-        }}
-      />
+
     </Drawer.Navigator>
   </View>)
 

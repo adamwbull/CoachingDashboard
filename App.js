@@ -6,7 +6,7 @@ import { NavigationContainer, useLinkTo } from '@react-navigation/native'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { useFonts } from 'expo-font'
 import { colorsLight } from './Scripts/Styles.js'
-import { colorsDark } from './Scripts/Styles.js'
+import { colorsDark } from './Scripts/StylesDark.js'
 import { set, get, getTTL, ttl } from './Scripts/Storage.js'
 
 const linking = {
@@ -19,7 +19,25 @@ const linking = {
         screens: {
           Home: {
             screens: {
-              Overview: 'home'
+              Overview: 'home',
+              Stats: 'stats',
+              AllClients: 'clients',
+              InviteClients: 'invite-clients'
+            }
+          },
+          MobileApp: {
+            screens: {
+              BrandDesign: 'brand',
+              SocialFeed: 'social-feed',
+              Notifications: 'notifications'
+            }
+          },
+          Programs: {
+            screens: {
+              AllPrograms: 'programs',
+              Prompts: 'prompts',
+              Concepts: 'concepts',
+              AddProgram: 'new-program'
             }
           }
         }
