@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar'
 import React, { useState, useEffect } from 'react'
 import { TouchableOpacity, Animated, StyleSheet, Text, View } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { NavigationContainer, useLinkTo } from '@react-navigation/native'
+import { NavigationContainer, useLinkTo, Link } from '@react-navigation/native'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { Icon } from 'react-native-elements'
 import { drawerLight, colorsLight, navLogo, btnColors, windowHeight } from '../Styles.js'
@@ -28,6 +28,7 @@ export default function Main() {
   const [planTitle, setPlanTitle] = useState('')
   const [userName, setUserName] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [dropdownVisible, setDropdownVisible] = useState(false)
 
   const linkTo = useLinkTo()
 
@@ -62,9 +63,24 @@ export default function Main() {
     }).start()
   }
 
-  const myStyle = {
-    backgroundColor:'#000'
+  const toggleUserDropdown = () => {
+    if (dropdownVisible) {
+      setDropdownVisible(false)
+    } else {
+      setDropdownVisible(true)
+      window.addEventListener('click', closeDropdown)
+    }
   }
+
+  const closeDropdown = () => {
+    setDropdownVisible(false)
+    window.removeEventListener('click', closeDropdown)
+  }
+
+  const logout = () => {
+    console.log('Log out...')
+  }
+
   return (<ReactFullscreen>
     {({ ref, onRequest, onExit }) => (
     <View style={{flex:1}} ref={ref}>
@@ -118,7 +134,7 @@ export default function Main() {
               color={colors.mainTextColor}
             />
           </View>
-          <View style={styles.headerUserBox}>
+          <TouchableOpacity style={styles.headerUserBox} onPress={toggleUserDropdown}>
             <Animated.Image
                 onLoad={onLoad}
                 source={{ uri: coach.Avatar }}
@@ -142,7 +158,8 @@ export default function Main() {
               <Text style={styles.headerUserName}>{userName}</Text>
               <Text style={[styles.headerPlan,headerPlan]}>{planTitle}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
+
         </View>
       </View>
       <View style={styles.messagesContainer}>
@@ -217,5 +234,17 @@ export default function Main() {
         }}
       />
     </Drawer.Navigator>
+    {dropdownVisible && (<View style={styles.dropdownBox}>
+      <Link to="/manage-plan" style={styles.dropdownBoxText}>Manage Plan</Link>
+      <TouchableOpacity style={styles.dropdownBoxLogoutContainer} onPress={logout}>
+        <Icon
+          name='log-out-outline'
+          type='ionicon'
+          size={20}
+          color={btnColors.danger}
+        />
+        <Text style={styles.dropdownBoxLogout}>Logout</Text>
+      </TouchableOpacity>
+    </View>)}
   </View>)}</ReactFullscreen>)
 }

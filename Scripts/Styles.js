@@ -613,7 +613,8 @@ export const drawerLight = StyleSheet.create({
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'flex-end',
-    paddingRight:10
+    paddingRight:10,
+    width:200,
   },
   headerUserBoxText: {
     justifyContent:'center',
@@ -645,6 +646,36 @@ export const drawerLight = StyleSheet.create({
     borderLeftWidth:1,
     justifyContent:'center',
     alignItems:'center'
+  },
+  dropdownBox: {
+    padding:15,
+    position:'absolute',
+    right:80,
+    top:70,
+    width:200,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder
+  },
+  dropdownBoxText: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    paddingBottom:4,
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    color:colorsLight.mainTextColor
+  },
+  dropdownBoxLogoutContainer: {
+    paddingTop:4,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  dropdownBoxLogout: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:btnColors.danger,
+    marginLeft:3
   }
 })
 
@@ -1092,3 +1123,79 @@ export const programsLight = StyleSheet.create({
     color:btnColors.danger
   }
 });
+
+export const addProgramLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  addProgramContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    flexDirection:'row',
+    height:windowHeight-220
+  },
+  addProgramListContainer: {
+    flex:1,
+    backgroundColor:colorsLight.header,
+    borderRightWidth:1,
+    borderRightColor:colorsLight.headerBorder,
+    borderTopLeftRadius:10,
+    borderBottomLeftRadius:10
+  },
+  addProgramListButton: {
+    borderRadius:50
+  },
+  addProgramListButtonContainer: {
+    padding:20,
+  },
+  addProgramMainContainer: {
+    flex:3,
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  addProgramMainEmptyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  }
+})
