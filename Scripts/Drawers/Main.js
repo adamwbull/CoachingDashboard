@@ -14,7 +14,6 @@ import ReactFullscreen from 'react-easyfullscreen'
 import Home from './Home.js'
 import MobileApp from './MobileApp.js'
 import Programs from './Programs.js'
-import Clients from './Clients.js'
 
 // Create Sidebar.
 const Drawer = createDrawerNavigator()

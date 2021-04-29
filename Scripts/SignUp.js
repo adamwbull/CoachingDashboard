@@ -234,6 +234,7 @@ export default function SignUp() {
   const [showRegisterForm, setShowRegisterForm] = useState(false)
   const [showPaymentForm, setShowPaymentForm] = useState(false)
   const [showCongrats, setShowCongrats] = useState(false)
+
   // Form controls and style.
   var failed = get('TimesFailed')
   var dis = (failed == null) ? false : true

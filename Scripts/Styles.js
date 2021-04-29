@@ -733,7 +733,6 @@ export const promptsLight = StyleSheet.create({
   main: {
     flex:1,
     flexDirection:'row',
-
   },
   scrollView: {
     paddingTop:20,
@@ -856,7 +855,83 @@ export const promptsLight = StyleSheet.create({
   },
   proPlanText: {
     color:btnColors.danger
-  }
+  },
+  newPromptContainer: {
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+  },
+  newPromptHeader: {
+    paddingBottom:5,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  newPromptDescTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    paddingLeft:5,
+    paddingRight:10,
+  },
+  newPromptBody: {
+    flexDirection:'row',
+    padding:10,
+  },
+  newPromptForm: {
+    flex:3,
+  },
+  newPromptVideoSection: {
+    flex:2,
+    padding:10,
+    marginLeft:10,
+  },
+  newPromptTitleLabel: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  newPromptVideoEmpty: {
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    justifyContent:'center',
+    alignItems:'center',
+    flex:1
+  },
+  newPromptVideoEmptyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  newPromptFooter: {
+    flex:1,
+  },
+  newPromptAddButtonTitle: {
+    fontSize:16,
+    fontFamily:'Poppins'
+  },
+  newPromptAddButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  newPromptAddButtonContainer: {
+    width:'60%',
+    paddingLeft:10,
+    paddingRight:10
+  },
 });
 
 export const conceptsLight = StyleSheet.create({
@@ -1197,5 +1272,50 @@ export const addProgramLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
-  }
+  },
+})
+
+export const brandDesignLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
 })

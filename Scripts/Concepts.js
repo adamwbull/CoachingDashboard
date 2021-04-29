@@ -50,7 +50,7 @@ export default function Concepts() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Concepts</Text>
-              <Text style={styles.bodyDesc}>Static knowledge for Clients to view.</Text>
+              <Text style={styles.bodyDesc}>Knowledge and documents for Clients to view.</Text>
             </View>
             <View style={styles.bodyHeaderNav}>
               <Link to='/programs' style={styles.bodyHeaderNavLink}>Programs</Link>
