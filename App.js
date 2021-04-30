@@ -82,8 +82,6 @@ export default function App() {
       if (sCoach.Theme == 1) {
         setColors(colorsDark)
       }
-    } else {
-      linkTo('/welcome')
     }
   }, [])
 

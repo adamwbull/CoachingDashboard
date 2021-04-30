@@ -319,6 +319,7 @@ export default function SignUp() {
   }
 
   useEffect(() => {
+    set('Coach',null,ttl)
     const coach = get('Coach')
     if (coach !== null) {
       if (coach.RegistrationCompleted == 0) {

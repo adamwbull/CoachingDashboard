@@ -28,10 +28,18 @@ export default function Prompts() {
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
   const [videoSelected, setVideoSelected] = useState(false)
+  const [showVideoOptions, setVideoOptions] = useState(false)
+  const [showSelectYouTube, setSelectYoutube] = useState(false)
+  const [showSelectUpload, setSelectUpload] = useState(false)
 
-  // Text Prompts data.
+  // Text Prompts data to upload.
   const [textPromptTitle, setTextPromptTitle] = useState('')
+  const [promptType, setPromptType] = useState(0)
   const [textPromptText, setTextPromptText] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+  // Text Prompts builder data.
+  const [videoType, setVideoType] = useState(-1)
+
 
   // Main page Data.
   const [prompts, setPrompts] = useState([])
@@ -78,6 +86,18 @@ export default function Prompts() {
     setTextPromptText(text)
   }
 
+  // Select video type to control showing youtube link or video upload form.
+  const selectVideoType = (type) => {
+    // 0 - YouTube
+    // 1 - Upload
+    setVideoType(type)
+  }
+
+  const getYoutubeUrl = (url) => {
+    var r, x = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+    return r = url.match(x)
+  }
+
   // Survey controls.
   const addSurvey = () => {
     console.log ('Add new survey...')
@@ -97,6 +117,7 @@ export default function Prompts() {
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
+
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Prompts</Text>
@@ -215,6 +236,7 @@ export default function Prompts() {
 
           {showAddingTextPrompt && (<>
             <View style={styles.newPromptContainer}>
+
               <View style={styles.newPromptHeader}>
                 <Text style={styles.newPromptDescTitle}>New Text Prompt</Text>
               </View>
@@ -237,19 +259,46 @@ export default function Prompts() {
                   numberOfLines={4}
                 />
                 </View>
+
                 <View style={styles.newPromptVideoSection}>
-                  {videoSelected == false &&
-                  (<TouchableOpacity style={styles.newPromptVideoEmpty}>
-                    <Text style={styles.newPromptVideoEmptyText}>
-                    Upload or link YouTube video.
-                    {"\n"}
-                    (optional)
-                    </Text>
-                  </TouchableOpacity>)
+                  {videoSelected &&
+                  (<></>)
                   ||
-                  (<></>)}
+                  (<>
+                    {showSelectYouTube && (<>
+
+                    </>)
+                    ||
+                    (<>
+                      {showSelectUpload && (<>
+
+                      </>)
+                      ||
+                      (<>{showVideoOptions &&
+                        (<View style={styles.showVideoOptions}>
+                          <TouchableOpacity style={styles.showVideoOptionsChooseUpload}>
+                            <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload Video</Text>
+                            <Text style={styles.showVideoOptionsChooseUploadTypes}>mp4, m4a, mov</Text>
+                            <Text style={styles.showVideoOptionsChooseUploadSize}>max. 200 MB</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.showVideoOptionsChooseYouTube}>
+                            <Text style={styles.showVideoOptionsChooseUploadTitle}>Link YouTube Video</Text>
+                          </TouchableOpacity>
+                        </View>)
+                        ||
+                        (<TouchableOpacity style={styles.newPromptVideoEmpty} onPress={() => setVideoOptions(true)}>
+                          <Text style={styles.newPromptVideoEmptyText}>
+                            Upload or link YouTube video.
+                            {"\n"}
+                            (optional)
+                          </Text>
+                        </TouchableOpacity>)}
+                      </>)}
+                    </>)}
+                  </>)}
                 </View>
               </View>
+
               <View style={styles.newPromptFooter}>
                 <Button
                   title='Create Prompt'
@@ -259,8 +308,10 @@ export default function Prompts() {
                 />
                 <View style={styles.newPromptAddButtonSpacer}></View>
               </View>
+
             </View>
           </>)}
+
         </View>
       </View>
     </View>

@@ -930,8 +930,54 @@ export const promptsLight = StyleSheet.create({
   newPromptAddButtonContainer: {
     width:'60%',
     paddingLeft:10,
-    paddingRight:10
+    paddingRight:20
   },
+  showVideoOptions: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    padding:20
+  },
+  showVideoOptionsChooseUpload: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    width:'40%',
+    height:200,
+    marginRight:10
+  },
+  showVideoOptionsChooseUploadTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseUploadTypes: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseUploadSize: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseYouTube: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    width:'40%',
+    height:200,
+    marginLeft:10
+  }
 });
 
 export const conceptsLight = StyleSheet.create({
