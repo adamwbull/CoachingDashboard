@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
-import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
+import { homeDark, colorsDark, innerDrawerDark, btnColors } from '../Scripts/Styles.js'
 import { useLinkTo, Link } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
@@ -31,6 +31,8 @@ export default function Prompts() {
   const [showVideoOptions, setVideoOptions] = useState(false)
   const [showSelectYouTube, setSelectYoutube] = useState(false)
   const [showSelectUpload, setSelectUpload] = useState(false)
+  const [videoError, setVideoError] = useState('')
+  const [videoActivityIndicator, setVideoActivityIndicator] = useState(false)
 
   // Text Prompts data to upload.
   const [textPromptTitle, setTextPromptTitle] = useState('')
@@ -39,7 +41,8 @@ export default function Prompts() {
   const [videoUrl, setVideoUrl] = useState('')
   // Text Prompts builder data.
   const [videoType, setVideoType] = useState(-1)
-
+  const [file, setFile] = useState('')
+  const [uploadFileDisabled, setUploadFileDisabled] = useState(true)
 
   // Main page Data.
   const [prompts, setPrompts] = useState([])
@@ -96,6 +99,41 @@ export default function Prompts() {
   const getYoutubeUrl = (url) => {
     var r, x = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
     return r = url.match(x)
+  }
+
+  const hiddenFileInput = React.useRef(null);
+
+  const handleClick = event => {
+    hiddenFileInput.current.click();
+    setVideoActivityIndicator(true)
+    setVideoError('')
+  };
+
+  const handleFile = () => {
+    // Check type.
+    var file = event.target.files[0];
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      console.log(fileArr)
+      var fileOptions = ['mov','mp4','m4a']
+      setVideoActivityIndicator(false)
+      if (fileOptions.includes(fileArr[1])) {
+        if (file.size <= 200000000) {
+          setFile(file)
+        } else {
+          setVideoError('File size should be less than 200 MB.')
+        }
+      } else {
+        setVideoError('File type should be mp4, m4a, or mov.')
+      }
+    } else {
+      setVideoActivityIndicator(false)
+    }
+
+  }
+
+  const uploadFile = () => {
+
   }
 
   // Survey controls.
@@ -270,13 +308,41 @@ export default function Prompts() {
                     </>)
                     ||
                     (<>
-                      {showSelectUpload && (<>
-
-                      </>)
+                      {showSelectUpload && (<View style={styles.selectUploadContainer}>
+                        <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
+                        {file == '' && (<Button
+                          title='Choose Video'
+                          titleStyle={styles.uploadFileTitle}
+                          buttonStyle={styles.uploadFileTitleButton}
+                          containerStyle={styles.uploadFileTitleButtonContainer}
+                          onPress={handleClick}
+                        />)}
+                        {videoActivityIndicator && (<ActivityIndicatorView />) || (<></>)}
+                        {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
+                        {file !== '' && (<>
+                          <Text>{file.name}</Text>
+                          <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                            <Button
+                              title='Save Video'
+                              titleStyle={styles.uploadFileTitle}
+                              buttonStyle={styles.uploadFileTitleButton}
+                              containerStyle={styles.uploadFileTitleButtonContainer}
+                              onPress={uploadFile}
+                            />
+                            <Button
+                              title='Choose Another'
+                              titleStyle={styles.uploadFileTitle}
+                              buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
+                              containerStyle={styles.uploadFileTitleButtonContainer}
+                              onPress={() => setFile('')}
+                            />
+                          </View>
+                        </>)}
+                      </View>)
                       ||
                       (<>{showVideoOptions &&
                         (<View style={styles.showVideoOptions}>
-                          <TouchableOpacity style={styles.showVideoOptionsChooseUpload}>
+                          <TouchableOpacity style={styles.showVideoOptionsChooseUpload} onPress={() => setSelectUpload(true)}>
                             <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload Video</Text>
                             <Text style={styles.showVideoOptionsChooseUploadTypes}>mp4, m4a, mov</Text>
                             <Text style={styles.showVideoOptionsChooseUploadSize}>max. 200 MB</Text>

@@ -977,6 +977,32 @@ export const promptsLight = StyleSheet.create({
     width:'40%',
     height:200,
     marginLeft:10
+  },
+  selectUploadContainer: {
+    paddingTop:80,
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  uploadInputStyle: {
+    marginBottom:10
+  },
+  uploadFileTitle: {
+    fontSize:16,
+    fontFamily:'Poppins'
+  },
+  uploadFileTitleButton: {
+    marginTop:10,
+    backgroundColor:btnColors.success,
+    borderRadius:50,
+    padding:10,
+  },
+  uploadFileTitleButtonContainer: {
+    padding:5,
+  },
+  videoError: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:btnColors.danger
   }
 });
 
