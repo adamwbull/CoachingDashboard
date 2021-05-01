@@ -882,7 +882,8 @@ export const promptsLight = StyleSheet.create({
   },
   newPromptVideoSection: {
     flex:2,
-    padding:10,
+    paddingLeft:10,
+    paddingRight:10,
     marginLeft:10,
   },
   newPromptTitleLabel: {
@@ -979,8 +980,8 @@ export const promptsLight = StyleSheet.create({
     marginLeft:10
   },
   selectUploadContainer: {
-    paddingTop:80,
-    justifyContent:'center',
+    flex:1,
+    justifyContent:'flex-start',
     alignItems:'center',
   },
   uploadInputStyle: {
@@ -988,7 +989,7 @@ export const promptsLight = StyleSheet.create({
   },
   uploadFileTitle: {
     fontSize:16,
-    fontFamily:'Poppins'
+    fontFamily:'Poppins',
   },
   uploadFileTitleButton: {
     marginTop:10,
@@ -1002,7 +1003,26 @@ export const promptsLight = StyleSheet.create({
   videoError: {
     fontSize:14,
     fontFamily:'Poppins',
-    color:btnColors.danger
+    color:btnColors.danger,
+    textAlign:'center'
+  },
+  reactPlayerContainer: {
+    aspectRatio:16/9,
+    flex:1
+  },
+  videoGoBack: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:10,
+    marginTop:10
+  },
+  videoGoBackText: {
+    fontFamily:'Poppins',
+    fontSize:20,
+    color:colorsLight.mainTextColor
+  },
+  youTubeSection: {
   }
 });
 
