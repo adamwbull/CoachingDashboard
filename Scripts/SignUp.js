@@ -11,8 +11,6 @@ import { refreshCoach, url, createAccount, getActiveDiscount, getNumCoaches, ver
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
-import "../Scripts/DatePicker/DatePicker.css"
-import "../Scripts/DatePicker/Calendar.css"
 import { validate } from 'validate.js';
 import { registerConstraints } from '../Scripts/Validator/constraints.js'
 import DateCountdown from 'react-date-countdown-timer';
