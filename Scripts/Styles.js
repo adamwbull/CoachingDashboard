@@ -862,6 +862,9 @@ export const promptsLight = StyleSheet.create({
     backgroundColor:colorsLight.mainBackground,
   },
   newPromptHeader: {
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
     paddingBottom:5,
     borderBottomWidth:1,
     borderBottomColor:colorsLight.headerBorder
@@ -1338,8 +1341,28 @@ export const addProgramLight = StyleSheet.create({
   addProgramContainer: {
     backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
-    flexDirection:'row',
-    height:windowHeight-220
+  },
+  addProgramHeader: {
+    padding:20,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+  },
+  addProgramLabel: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+  },
+  addProgramBody: {
+    flexDirection:'row'
   },
   addProgramListContainer: {
     flex:1,
@@ -1354,17 +1377,60 @@ export const addProgramLight = StyleSheet.create({
   },
   addProgramListButtonContainer: {
     padding:20,
+    flex:1,
+  },
+  addProgramListDropdown: {
+    position:'absolute',
+    width:'92%',
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    padding:10,
+    left:'4%',
+    top:60,
+  },
+  addProgramListDropdownTouch: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    cursor:'pointer'
+  },
+  addProgramListDropdownTouchBottom: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    cursor:'pointer'
+  },
+  addProgramListDropdownText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  planRequiredText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:12,
+    color:colorsLight.mainTextColor,
   },
   addProgramMainContainer: {
     flex:3,
+    minHeight:300,
     alignItems:'center',
     justifyContent:'center'
   },
-  addProgramMainEmptyText: {
+  addProgramMainHelpText: {
     fontSize:16,
     fontFamily:'Poppins',
+    textAlign:'center',
     color:colorsLight.mainTextColor
   },
+  addProgramFooter: {
+    flexDirection:'row',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+  }
 })
 
 export const brandDesignLight = StyleSheet.create({

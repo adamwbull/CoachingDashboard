@@ -47,6 +47,13 @@ export default function Prompts() {
   const [tempVideoUrl, setTempVideoUrl] = useState('')
   const [uploadFileDisabled, setUploadFileDisabled] = useState(true)
 
+  // Survey Prompts stage controls.
+  const [showAddingSurveyPrompt, setAddingSurveyPrompt] = useState(false)
+
+  // Survey Prompts data to upload.
+  const [surveyTitle, setSurveyTitle] = useState('')
+  const [surveyItems, setSurveyItems] = useState([])
+
   // Main page Data.
   const [prompts, setPrompts] = useState([])
   const [surveys, setSurveys] = useState([])
@@ -73,6 +80,17 @@ export default function Prompts() {
       }
     }
   },[])
+
+  // Return to main.
+  const returnToMain = () => {
+    setAddingSurveyPrompt(false)
+    setAddingTextPrompt(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
+  }
 
   // Text prompt controls.
   const addPrompt = () => {
@@ -177,6 +195,12 @@ export default function Prompts() {
   // Survey controls.
   const addSurvey = () => {
     console.log ('Add new survey...')
+    setMain(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setAddingSurveyPrompt(true)
+    },500)
   }
 
   // Payment controls.
@@ -197,7 +221,7 @@ export default function Prompts() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Prompts</Text>
-              <Text style={styles.bodyDesc}>Content for Clients to respond do.</Text>
+              <Text style={styles.bodyDesc}>Content for Clients to interact with.</Text>
             </View>
             <View style={styles.bodyHeaderNav}>
               <Link to='/programs' style={styles.bodyHeaderNavLink}>Programs</Link>
@@ -215,6 +239,7 @@ export default function Prompts() {
                 color={colors.mainTextColor}
               />)}
               {showAddingTextPrompt && (<Text style={styles.bodyHeaderNavLink}>New Text Prompt</Text>)}
+              {showAddingSurveyPrompt && (<Text style={styles.bodyHeaderNavLink}>New Survey</Text>)}
             </View>
           </View>
 
@@ -314,6 +339,13 @@ export default function Prompts() {
             <View style={styles.newPromptContainer}>
 
               <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMain}
+                />
                 <Text style={styles.newPromptDescTitle}>New Text Prompt</Text>
               </View>
               <View style={styles.newPromptBody}>
@@ -454,6 +486,33 @@ export default function Prompts() {
                 <View style={styles.newPromptAddButtonSpacer}></View>
               </View>
 
+            </View>
+          </>)}
+
+          {showAddingSurveyPrompt && (<>
+            <View style={styles.newPromptContainer}>
+              <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMain}
+                />
+                <Text style={styles.newPromptDescTitle}>New Survey</Text>
+              </View>
+              <View style={styles.newPromptBody}>
+              </View>
+              <View style={styles.newPromptFooter}>
+                <Button
+                  title='Create Survey'
+                  disabled={createButtonDisabled}
+                  titleStyle={styles.newPromptAddButtonTitle}
+                  buttonStyle={styles.newPromptAddButton}
+                  containerStyle={styles.newPromptAddButtonContainer}
+                />
+                <View style={styles.newPromptAddButtonSpacer}></View>
+              </View>
             </View>
           </>)}
 
