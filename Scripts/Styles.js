@@ -1301,7 +1301,6 @@ export const addProgramLight = StyleSheet.create({
   main: {
     flex:1,
     flexDirection:'row',
-
   },
   scrollView: {
     paddingTop:20,
@@ -1341,6 +1340,7 @@ export const addProgramLight = StyleSheet.create({
   addProgramContainer: {
     backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
+    marginBottom:20,
   },
   addProgramHeader: {
     padding:20,
@@ -1365,7 +1365,7 @@ export const addProgramLight = StyleSheet.create({
     flexDirection:'row'
   },
   addProgramListContainer: {
-    flex:1,
+    flex:2,
     backgroundColor:colorsLight.header,
     borderRightWidth:1,
     borderRightColor:colorsLight.headerBorder,
@@ -1377,17 +1377,16 @@ export const addProgramLight = StyleSheet.create({
   },
   addProgramListButtonContainer: {
     padding:20,
-    flex:1,
   },
   addProgramListDropdown: {
     position:'absolute',
-    width:'92%',
+    width:'80%',
     backgroundColor:colorsLight.mainBackground,
     borderWidth:1,
     borderColor:colorsLight.headerBorder,
     borderRadius:10,
     padding:10,
-    left:'4%',
+    left:'10%',
     top:60,
   },
   addProgramListDropdownTouch: {
@@ -1409,6 +1408,40 @@ export const addProgramLight = StyleSheet.create({
     fontSize:16,
     color:colorsLight.mainTextColor
   },
+  addProgramList: {
+    justifyContent:'flex-start',
+    flex:5,
+  },
+  programTask: {
+    backgroundColor:colorsLight.mainBackground,
+    flexDirection:'row',
+    marginBottom:10,
+    borderTopColor:colorsLight.headerBorder,
+    borderBottomColor:colorsLight.headerBorder,
+    borderTopWidth:2,
+    borderBottomWidth:2
+  },
+  programTaskMain: {
+    flex:1,
+    padding:20,
+    flexDirection:'row',
+    alignItems:'center',
+    cursor:'pointer'
+  },
+  programTaskIcon: {
+    marginRight:15,
+  },
+  programTaskTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  programTaskNav: {
+    width:40,
+    justifyContent:'space-between',
+    paddingTop:4,
+    paddingBottom:4
+  },
   planRequiredText: {
     fontFamily:'PoppinsSemiBold',
     fontSize:12,
@@ -1418,7 +1451,7 @@ export const addProgramLight = StyleSheet.create({
     flex:3,
     minHeight:300,
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
   },
   addProgramMainHelpText: {
     fontSize:16,
@@ -1426,11 +1459,82 @@ export const addProgramLight = StyleSheet.create({
     textAlign:'center',
     color:colorsLight.mainTextColor
   },
+  addProgramMain: {
+    flex:1,
+    width:'100%',
+    padding:20,
+  },
+  addProgramMainHeader: {
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    paddingBottom:10,
+    paddingLeft:5,
+    paddingRight:5,
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
+  addProgramMainHeaderLeft: {
+    flexDirection:'row',
+    flex:3,
+    alignItems:'center'
+  },
+  addProgramMainHeaderRight: {
+    justifyContent:'center',
+    flex:1,
+    cursor:'pointer'
+  },
+  addProgramMainHeaderDelete: {
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'right',
+  },
+  addProgramMainHeaderTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    textAlign:'left',
+    marginRight:10,
+  },
+  addProgramMainHeaderTitle: {
+    fontFamily:'Poppins',
+    fontSize:22,
+    textAlign:'left'
+  },
+  addProgramMainBody: {
+    paddingTop:15,
+    justifyContent:'flex-start',
+    alignItems:'flex-start',
+  },
+  addProgramMainSearch: {
+    zIndex:999
+  },
+  chosenTask: {
+    flex:1,
+    marginLeft:20,
+  },
+  chosenTaskTitle: {
+    fontSize:22,
+    marginTop:10,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  chosenTaskText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    marginTop:5,
+    color:colorsLight.mainTextColor
+  },
+  searchTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+  },
   addProgramFooter: {
     flexDirection:'row',
     borderTopWidth:1,
     borderTopColor:colorsLight.headerBorder,
-  }
+  },
 })
 
 export const brandDesignLight = StyleSheet.create({

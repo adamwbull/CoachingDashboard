@@ -10,7 +10,12 @@ import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
-import { Search } from 'semantic-ui-react'
+import _ from 'lodash'
+import { Search, Popup } from 'semantic-ui-react'
+import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
+import { getTextPrompts, getSurveys, getPayments, getContracts, getConcepts } from '../Scripts/API.js'
+import 'semantic-ui-css/semantic.min.css'
+import './CSS/custom-search.css'
 
 export default function AddProgram() {
   const linkTo = useLinkTo()
@@ -21,6 +26,7 @@ export default function AddProgram() {
 
   // Stage controls.
   const [showMain, setMain] = useState(false)
+  const [showMainActivityIndicator, setMainActivityIndicator] = useState(false)
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [addPaymentDisabled, setAddPaymentDisabled] = useState(true)
   const [addContractDisabled, setAddContractDisabled] = useState(true)
@@ -30,20 +36,32 @@ export default function AddProgram() {
   const [hoverBackground4, setHoverBackground4] = useState({})
   const [hoverBackground5, setHoverBackground5] = useState({})
   // Task controls.
-  const [taskTitle, setTaskTitle] = useState('')
   const [taskCategory, setTaskCategory] = useState(0)
   const [task, setTask] = useState({})
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [typeText, setTypeText] = useState('')
+  const [typeVisit, setTypeVisit] = useState('')
 
   // Data.
+  const [canPublish, setCanPublish] = useState(false)
   const [taskList, setTaskList] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  // Search data.
+  const [loading, setLoading] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const [searchList, setSearchList] = useState([])
+  const [searchHardlist, setSearchHardlist] = useState([])
+  const [chosenTask, setChosenTask] = useState({})
+  const [searchResults, setSearchResults] = useState([])
+
+  const timeoutRef = React.useRef()
 
   useEffect(() => {
+    clearTimeout(timeoutRef.current)
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
-      console.log(sCoach)
       if (sCoach.Plan == 2) {
         setAddContractDisabled(false)
         setAddPaymentDisabled(false)
@@ -80,32 +98,190 @@ export default function AddProgram() {
     window.removeEventListener('click', closeDropdown)
   }
 
-  // Add Text Prompt controls.
-  const addTextPrompt = () => {
-    closeDropdown()
-    setTaskTitle('')
-    setTaskCategory(0)
+  // Search controls.
+  const getSearchList = async (type) => {
+    switch (type) {
+      case 0:
+        var list = JSON.parse(JSON.stringify(await getTextPrompts(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          set.description = item.Text
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
+      break
+      case 1:
+        var list = await getSurveys(coach.Id, coach.Token)
+        setSearchList(list)
+      break
+      case 2:
+        var list = await getPayments(coach.Id, coach.Token)
+        setSearchList(list)
+      break
+      case 3:
+        var list = await getContracts(coach.Id, coach.Token)
+        setSearchList(list)
+      break
+      case 4:
+        var list = await getConcepts(coach.Id, coach.Token)
+        setSearchList(list)
+      break
+      default:
+        var list = await getTextPrompts(coach.Id, coach.Token)
+        setSearchList(list)
+      break
+    }
   }
 
-  // Add Text Prompt controls.
-  const addSurvey = () => {
-    closeDropdown()
+  const handleSearchChange = React.useCallback((e, data) => {
+    clearTimeout(timeoutRef.current)
+    setLoading(true)
+    setSearchValue(data.value)
+
+    timeoutRef.current = setTimeout(() => {
+      if (data.value.length === 0) {
+        setSearchResults([])
+        setSearchValue('')
+        setLoading(false)
+        return
+      }
+
+      const re = new RegExp(_.escapeRegExp(data.value), 'i')
+      const isMatch = (result) => re.test(result.title)
+
+      setLoading(false)
+      var res = _.filter(searchList, isMatch)
+      console.log(res)
+      setSearchResults(res)
+    }, 300)
+  })
+
+  const chooseSearchResult = (e, data) => {
+    var list = JSON.parse(JSON.stringify(taskList))
+    list[currentIndex].TaskId = data.result.id
+    list[currentIndex].Title = data.result.title
+    setTaskList(list)
+    setChosenTask(searchHardlist[data.result.index])
   }
 
-  // Add Text Prompt controls.
-  const addPayment = () => {
+  // Add Task controls.
+  const addTask = (type) => {
     closeDropdown()
+    var title = ''
+    var t = ''
+    var v = ''
+    switch (type) {
+      case 0:
+        title = 'Unchosen Text Prompt'
+        t = 'Text Prompts'
+        v = 'Prompts'
+      break
+      case 1:
+        title = 'Unchosen Survey'
+        t = 'Surveys'
+        v = 'Prompts'
+      break
+      case 2:
+        title = 'Unchosen Payment'
+        t = 'Payments'
+        v = 'Prompts'
+      break
+      case 3:
+        title = 'Unchosen Contract'
+        t = 'Contracts'
+        v = 'Prompts'
+      break
+      case 4:
+        title = 'Unchosen Concept'
+        t = 'Concepts'
+        v = 'Concepts'
+      break
+      default:
+        title = 'Unchosen Text Prompt'
+        t = 'Text Prompts'
+        v = 'Prompts'
+      break
+    }
+    setTypeText(t)
+    setTypeVisit(v)
+    setChosenTask({})
+    setSearchValue('')
+    setCurrentIndex(taskList.length)
+    var newTask = {Type:type,TaskId:0,Title:title}
+    var list = taskList
+    list.push(newTask)
+    setTaskList(list)
+    setMainActivityIndicator(true)
+    getSearchList(type)
+    setTimeout(() => {
+      setMain(true)
+      setMainActivityIndicator(false)
+    }, 800)
+
   }
 
-  // Add Text Prompt controls.
-  const addContract = () => {
-    closeDropdown()
+  const moveTaskUp = (index, l) => {
+    var list = l
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index-1]
+    newList[index-1] = list[index]
+    if (currentIndex == index) {
+      setCurrentIndex(index-1)
+    } else if (currentIndex == index-1) {
+      setCurrentIndex(index)
+    }
+    setTaskList(newList)
   }
 
-  // Add Text Prompt controls.
-  const addConcept = () => {
-    closeDropdown()
+  const moveTaskDown = (index, l) => {
+    var list = l
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index+1]
+    newList[index+1] = list[index]
+    if (currentIndex == index) {
+      setCurrentIndex(index+1)
+    } else if (currentIndex == index+1) {
+      setCurrentIndex(index)
+    }
+    setTaskList(newList)
   }
+
+  const selectTask = (index, type, t, v) => {
+    getSearchList(type)
+    setTypeText(t)
+    setTypeVisit(v)
+    setCurrentIndex(index)
+    setSearchValue('')
+    var id = taskList[index].TaskId
+    if (id == 0) {
+      setChosenTask({})
+    } else {
+      var task = searchHardlist.filter(task => task.Id === id)
+      setChosenTask(task[0])
+    }
+  }
+
+  const deleteTask = () => {
+    var list = JSON.parse(JSON.stringify(taskList))
+    if (list.length == 1) {
+      setMain(false)
+      setCurrentIndex(0)
+    }
+    setSearchValue('')
+    list.splice(currentIndex, 1)
+    setTaskList(list)
+    if (currentIndex == 0) {
+      setCurrentIndex(0)
+    } else {
+      setCurrentIndex(currentIndex-1)
+    }
+  }
+
 
 
 
@@ -148,73 +324,197 @@ export default function AddProgram() {
                   containerStyle={styles.addProgramListButtonContainer}
                 />
                 <View contentContainerStyle={styles.addProgramList}>
-
+                {taskList.map((item, index) => {
+                  const isCurrent = (index == currentIndex) ? {borderBottomColor:btnColors.info,borderTopColor:btnColors.info} : {}
+                  var icon = ''
+                  var t = ''
+                  var v = ''
+                  switch (item.Type) {
+                    case 0:
+                      icon = 'create'
+                      t = 'Text Prompts'
+                      v = 'Prompts'
+                    break
+                    case 1:
+                      icon = 'clipboard'
+                      t = 'Surveys'
+                      v = 'Prompts'
+                    break
+                    case 2:
+                      icon = 'card'
+                      t = 'Payments'
+                      v = 'Prompts'
+                    break
+                    case 3:
+                      icon = 'document-text'
+                      t = 'Contracts'
+                      v = 'Prompts'
+                    break
+                    case 4:
+                      icon = 'book'
+                      t = 'Concepts'
+                      v = 'Concepts'
+                    break
+                    default:
+                      icon = 'create'
+                      t = 'Text Prompts'
+                      v = 'Prompts'
+                    break
+                  }
+                  return (<View style={[styles.programTask,isCurrent]} key={index}>
+                    <Pressable style={styles.programTaskMain} onPress={() => selectTask(index, item.Type, t, v)}>
+                      <Icon
+                        name={icon}
+                        type='ionicon'
+                        size={26}
+                        style={styles.programTaskIcon}
+                        color={colors.mainTextColor}
+                      />
+                      <Text style={styles.programTaskTitle}>{item.Title}</Text>
+                    </Pressable>
+                    <View style={styles.programTaskNav}>
+                      <Icon
+                        name='chevron-up'
+                        type='ionicon'
+                        size={25}
+                        color={(index == 0) ? colors.mainBackground : colors.mainTextColor}
+                        onPress={() => moveTaskUp(index, taskList)}
+                        disabledStyle={{backgroundColor:colors.mainBackground}}
+                        disabled={(index == 0) ? true : false}
+                      />
+                      <Icon
+                        name='chevron-down'
+                        type='ionicon'
+                        size={25}
+                        color={(index == taskList.length-1) ? colors.mainBackground : colors.mainTextColor}
+                        onPress={() => moveTaskDown(index, taskList)}
+                        disabledStyle={{backgroundColor:colors.mainBackground}}
+                        disabled={(index == taskList.length-1) ? true : false}
+                      />
+                    </View>
+                  </View>)
+                })}
                 </View>
                 {dropdownVisible && (<View style={styles.addProgramListDropdown}>
 
-                  <Pressable style={[styles.addProgramListDropdownTouch,hoverBackground1]} onPress={addTextPrompt} onPressIn={() => setHoverBackground1({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground1({})}>
+                  <Pressable style={[styles.addProgramListDropdownTouch,hoverBackground1]} onPress={() => addTask(0)} onPressIn={() => setHoverBackground1({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground1({})}>
                     <Text style={styles.addProgramListDropdownText}>Add Text Prompt</Text>
                   </Pressable>
 
-                  <Pressable style={[styles.addProgramListDropdownTouch,hoverBackground2]} onPress={addSurvey} onPressIn={() => setHoverBackground2({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground2({})}>
+                  <Pressable style={[styles.addProgramListDropdownTouch,hoverBackground2]} onPress={() => addTask(1)} onPressIn={() => setHoverBackground2({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground2({})}>
                     <Text style={styles.addProgramListDropdownText}>Add Survey</Text>
                   </Pressable>
 
-                  {addPaymentDisabled && (<Pressable disabled={addPaymentDisabled} style={[styles.addProgramListDropdownTouch,hoverBackground3]} onPress={addPayment} onPressIn={() => setHoverBackground3({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground3({})}>
+                  {addPaymentDisabled && (<Pressable disabled={addPaymentDisabled} style={[styles.addProgramListDropdownTouch]}>
                     <Text style={[styles.addProgramListDropdownText,{textDecorationLine:'line-through',textDecorationColor:colors.mainTextColor}]}>Add Payment</Text>
                     <Text style={styles.planRequiredText}>
                       <Text style={{color:btnColors.success}}>Standard Plan</Text> Required
                     </Text>
                   </Pressable>)
-                  || (<Pressable disabled={addPaymentDisabled} style={[styles.addProgramListDropdownTouch,hoverBackground3]} onPress={addPayment} onPressIn={() => setHoverBackground3({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground3({})}>
+                  || (<Pressable style={[styles.addProgramListDropdownTouch,hoverBackground3]} onPress={() => addTask(2)} onPressIn={() => setHoverBackground3({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground3({})}>
                     <Text style={styles.addProgramListDropdownText}>Add Payment</Text>
                   </Pressable>)}
 
-                  {addContractDisabled && (<Pressable disabled={addContractDisabled} style={[styles.addProgramListDropdownTouch,hoverBackground4]} onPress={addContract} onPressIn={() => setHoverBackground4({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground4({})}>
+                  {addContractDisabled && (<Pressable disabled={addContractDisabled} style={[styles.addProgramListDropdownTouch]}>
                     <Text style={[styles.addProgramListDropdownText,{textDecorationLine:'line-through',textDecorationColor:colors.mainTextColor}]}>Add Contract</Text>
                     <Text style={styles.planRequiredText}>
                       <Text style={{color:btnColors.danger}}>Professional Plan</Text> Required
                     </Text>
                   </Pressable>)
-                  || (<Pressable disabled={addContractDisabled} style={[styles.addProgramListDropdownTouch,hoverBackground4]} onPress={addContract} onPressIn={() => setHoverBackground4({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground4({})}>
+                  || (<Pressable style={[styles.addProgramListDropdownTouch,hoverBackground4]} onPress={() => addTask(3)} onPressIn={() => setHoverBackground4({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground4({})}>
                     <Text style={[styles.addProgramListDropdownText]}>Add Contract</Text>
                   </Pressable>)}
 
-                  <Pressable style={[styles.addProgramListDropdownTouchBottom,hoverBackground5]} onPress={addConcept} onPressIn={() => setHoverBackground5({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground5({})}>
+                  <Pressable style={[styles.addProgramListDropdownTouchBottom,hoverBackground5]} onPress={() => addTask(4)} onPressIn={() => setHoverBackground5({backgroundColor:colors.secondaryBackground})} onPressOut={() => setHoverBackground5({})}>
                     <Text style={styles.addProgramListDropdownText}>Add Concept</Text>
                   </Pressable>
 
                 </View>)}
               </View>
               <View style={styles.addProgramMainContainer}>
-                {showMain &&
-                (<View style={styles.addProgramMain}>
-                  <View style={styles.addProgramMainHeader}>
-                    <Text style={styles.addProgramMainHeaderTitle}>{taskTitle}</Text>
-                  </View>
-                </View>)
-                ||
-                (<Text style={styles.addProgramMainHelpText}>
-                  {taskList.length > 0 && ('Select a Task to configure.') || (`Add a Task to configure.${"\n"}Tasks are existing Prompts, Surveys, Payments, Contracts, or Concepts.`)}
-                </Text>)}
+                {showMainActivityIndicator && (<ActivityIndicatorView />)
+                || (<>
+                  {showMain &&
+                  (<View style={styles.addProgramMain}>
+                    <View style={styles.addProgramMainHeader}>
+                      <View style={styles.addProgramMainHeaderLeft}>
+                        <Text style={styles.addProgramMainHeaderTaskText}>Task #{currentIndex+1}</Text>
+                        <Text style={styles.addProgramMainHeaderTitle}>{taskList[currentIndex].Title}</Text>
+                      </View>
+                      <Pressable style={styles.addProgramMainHeaderRight} onPress={() => deleteTask()}>
+                        <Text style={styles.addProgramMainHeaderDelete}>Delete</Text>
+                      </Pressable>
+                    </View>
+                    <View style={styles.addProgramMainBody}>
+                      {searchList.length > 0 && (<View style={{flexDirection:'row'}}>
+                        <View style={styles.addProgramMainSearch}>
+                          <Text style={styles.searchTaskText}>Search {typeText}</Text>
+                          <Search
+                            loading={loading}
+                            onResultSelect={chooseSearchResult}
+                            onSearchChange={handleSearchChange}
+                            results={searchResults}
+                            value={searchValue}
+                            className='custom'
+                            size={'mini'}
+                          />
+                        </View>
+                        {chosenTask.Id !== undefined && (<View style={styles.chosenTask}>
+                          <Text style={styles.chosenTaskTitle}>{chosenTask.Title}</Text>
+                          <Text style={styles.chosenTaskText}>{chosenTask.Text}</Text>
+                        </View>)}
+                      </View>)
+                      || (<>
+                        <Text style={styles.addProgramMainHelpText}>No {typeText} created yet! Visit the {typeVisit} tab on the left.</Text>
+                      </>)}
+                    </View>
+                  </View>)
+                  ||
+                  (<Text style={styles.addProgramMainHelpText}>
+                    {taskList.length > 0 && ('Select a Task to configure.') || (`Add a Task to configure.${"\n"}Tasks are existing Prompts, Surveys, Payments, Contracts, or Concepts.`)}
+                  </Text>)}
+                </>)}
               </View>
             </View>
             <View style={styles.addProgramFooter}>
               <View style={{flex:1}}>
-                <Button
-                  title='Publish Program'
-                  buttonStyle={[styles.addProgramListButton]}
-                  containerStyle={styles.addProgramListButtonContainer}
-                />
-                <Text style={[styles.addProgramMainHelpText,{marginBottom:20}]}>Editable until assigned to Clients.</Text>
+                {canPublish && (<>
+                  <Button
+                    title='Publish Program'
+                    buttonStyle={[styles.addProgramListButton]}
+                    containerStyle={styles.addProgramListButtonContainer}
+                  />
+                </>)
+                || (<>
+                  <Popup content='Cannot be published until Title/Description are filled out and all created Tasks are chosen.'
+                  trigger={<Button
+                    title='Publish Program'
+                    disabled={true}
+                    buttonStyle={[styles.addProgramListButton]}
+                    containerStyle={styles.addProgramListButtonContainer} />}
+                    style={{backgroundColor:colors.secondaryBackground,padding:5,borderRadius:10,fontFamily:'Poppins',marginBottom:-10,marginLeft:10}}
+                  />
+                </>)}
               </View>
               <View style={{flex:1}}>
-                <Button
-                  title='Create Draft'
-                  buttonStyle={[styles.addProgramListButton,{backgroundColor:btnColors.caution}]}
-                  containerStyle={styles.addProgramListButtonContainer}
-                />
-                <Text style={[styles.addProgramMainHelpText,{marginBottom:20}]}>Cannot assign to Clients until draft is published.</Text>
+                {title.length > 0 && (<>
+                  <Button
+                    title='Create Draft'
+                    buttonStyle={[styles.addProgramListButton,{backgroundColor:btnColors.caution}]}
+                    containerStyle={styles.addProgramListButtonContainer}
+                  />
+                </>)
+                || (<>
+                  <Popup content='At least the Title needs to be filled out before a draft can be created.'
+                  trigger={<Button
+                      title='Create Draft'
+                      disabled={true}
+                      buttonStyle={[styles.addProgramListButton,{backgroundColor:btnColors.caution}]}
+                      containerStyle={styles.addProgramListButtonContainer}
+                    />}
+                    style={{backgroundColor:colors.secondaryBackground,padding:5,borderRadius:10,fontFamily:'Poppins',marginBottom:-10,marginRight:10}}
+                  />
+                </>)}
               </View>
             </View>
           </View>

@@ -1,0 +1,11 @@
+.ui.search.custom > .results {
+  background-color: rgba(256, 256, 256, 1) !important;
+  opacity: 1 !imprtant;
+  z-index: 999
+}
+
+.ui.search.custom > .results .result {
+  background-color: rgba(256, 256, 256, 1) !important;
+  opacity: 1 !imprtant;
+  z-index: 999
+}

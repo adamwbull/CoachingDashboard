@@ -146,6 +146,121 @@ export async function check() {
 
 */
 
+export async function getConcepts(id, token) {
+
+  var ret = false;
+
+  console.log('Getting concepts...');
+  const res = await fetch(url + '/concepts/' + id + '/' + token, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Concepts found!');
+    ret = payload;
+  } else {
+    console.log('No concepts found!')
+    ret = []
+  }
+
+  return ret;
+
+}
+
+export async function getContracts(id, token) {
+
+  var ret = false;
+
+  console.log('Getting contracts...');
+  const res = await fetch(url + '/contracts/' + id + '/' + token, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Contracts found!');
+    ret = payload;
+  } else {
+    console.log('No contracts found!')
+    ret = []
+  }
+
+  return ret;
+
+}
+
+export async function getPayments(id, token) {
+
+  var ret = false;
+
+  console.log('Getting payments...');
+  const res = await fetch(url + '/payments/' + id + '/' + token, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Payments found!');
+    ret = payload;
+  } else {
+    console.log('No payments found!')
+    ret = []
+  }
+
+  return ret;
+
+}
+
+export async function getSurveys(id, token) {
+
+  var ret = false;
+
+  console.log('Getting surveys...');
+  const res = await fetch(url + '/surveys/' + id + '/' + token, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Surveys found!');
+    ret = payload;
+  } else {
+    console.log('No surveys found!')
+    ret = []
+  }
+
+  return ret;
+
+}
+
+export async function getTextPrompts(id, token) {
+
+  var ret = false;
+
+  console.log('Getting text prompts...');
+  const res = await fetch(url + '/prompts/' + id + '/' + token, {
+    method:'GET'
+  });
+
+  const payload = await res.json();
+
+  if (payload.length > 0) {
+    console.log('Prompts found!');
+    ret = payload;
+  } else {
+    console.log('No prompts found!')
+    ret = []
+  }
+
+  return ret;
+
+}
+
 export async function refreshCoach(id, token) {
 
   var ret = false;
