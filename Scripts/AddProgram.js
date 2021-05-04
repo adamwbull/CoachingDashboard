@@ -116,24 +116,77 @@ export default function AddProgram() {
         setSearchHardlist(list)
       break
       case 1:
-        var list = await getSurveys(coach.Id, coach.Token)
-        setSearchList(list)
+        var list = JSON.parse(JSON.stringify(await getSurveys(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          set.description = item.Text
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
       break
       case 2:
-        var list = await getPayments(coach.Id, coach.Token)
-        setSearchList(list)
+        var list = JSON.parse(JSON.stringify(await getPayments(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          set.description = item.Memo
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
       break
       case 3:
-        var list = await getContracts(coach.Id, coach.Token)
-        setSearchList(list)
+        var list = JSON.parse(JSON.stringify(await getContracts(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          var fileArr = item.File.split('/')
+          set.description = fileArr[fileArr.length-1]
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
       break
       case 4:
-        var list = await getConcepts(coach.Id, coach.Token)
-        setSearchList(list)
+        var list = JSON.parse(JSON.stringify(await getConcepts(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          var parser = new DOMParser();
+          var htmlDoc = parser.parseFromString(txt, 'text/html');
+          set.description = htmlDoc.body.firstChild.textContent
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
       break
       default:
-        var list = await getTextPrompts(coach.Id, coach.Token)
-        setSearchList(list)
+        var list = JSON.parse(JSON.stringify(await getTextPrompts(coach.Id, coach.Token)))
+        var ret = []
+        list.forEach((item, index) => {
+          var set = {}
+          set.title = item.Title
+          set.description = item.Text
+          set.id = item.Id
+          set.index = index
+          ret.push(set)
+        })
+        setSearchList(ret)
+        setSearchHardlist(list)
       break
     }
   }

@@ -11,6 +11,7 @@ import { refreshCoach, url, createAccount, getActiveDiscount, getNumCoaches, ver
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
+import "../Scripts/DatePicker/DatePicker.css"
 import { validate } from 'validate.js';
 import { registerConstraints } from '../Scripts/Validator/constraints.js'
 import DateCountdown from 'react-date-countdown-timer';
@@ -317,7 +318,6 @@ export default function SignUp() {
   }
 
   useEffect(() => {
-    set('Coach',null,ttl)
     const coach = get('Coach')
     if (coach !== null) {
       if (coach.RegistrationCompleted == 0) {

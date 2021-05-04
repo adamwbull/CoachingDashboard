@@ -146,6 +146,29 @@ export async function check() {
 
 */
 
+export async function uploadVideo(file) {
+
+  var ret = false;
+  let formData = new FormData();
+  formData.append('video', file);
+
+  console.log('Attempting video upload...');
+  const res = await fetch(uploadUrl + '/api/video', {
+    method:'POST',
+    body: formData,
+  });
+
+  const payload = await res.json();
+
+  if (payload.affectedRows == 1) {
+    console.log('Upload complete!');
+    ret = uploadUrl;
+  }
+
+  return ret;
+
+}
+
 export async function getConcepts(id, token) {
 
   var ret = false;

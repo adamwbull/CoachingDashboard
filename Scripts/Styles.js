@@ -215,7 +215,7 @@ export const signUpLight = StyleSheet.create({
   },
   pricingCardContainer: {
     width:350,
-    height:420,
+    height:440,
     justifyContent:'center'
   },
   prevPriceHeight: {

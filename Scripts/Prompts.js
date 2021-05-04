@@ -12,6 +12,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
+import { uploadVideo } from './API.js'
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -41,11 +42,10 @@ export default function Prompts() {
   const [promptType, setPromptType] = useState(0)
   const [textPromptText, setTextPromptText] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
-  // Text Prompts builder data.
   const [videoType, setVideoType] = useState(-1) // 0 - YT, 1 - Upload
-  const [file, setFile] = useState('')
+  // Text Prompts builder data
   const [tempVideoUrl, setTempVideoUrl] = useState('')
-  const [uploadFileDisabled, setUploadFileDisabled] = useState(true)
+  const [tempVideoFile, setTempVideoFile] = useState('')
 
   // Survey Prompts stage controls.
   const [showAddingSurveyPrompt, setAddingSurveyPrompt] = useState(false)
@@ -113,7 +113,7 @@ export default function Prompts() {
   // Select video type to control showing youtube link or video upload form.
   const selectVideoType = (type) => {
     setVideoUrl('')
-    setFile('')
+    setTempVideoUrl('')
     if (type == 0) {
       setSelectYouTube(true)
     } else {
@@ -161,21 +161,20 @@ export default function Prompts() {
     setVideoError('')
   }
 
-  const handleFile = () => {
+  const handleFile = async () => {
 
-    // Check type.
     var file = event.target.files[0]
     if (file !== undefined) {
       var fileArr = file.name.split('.')
-      console.log(file)
       var fileOptions = ['mov','mp4','m4a']
-      setVideoActivityIndicator(false)
-      if (fileOptions.includes(fileArr[1])) {
+      var fileType = fileArr[1]
+      if (fileOptions.includes(fileType)) {
         if (file.size <= 200000000) {
+          setVideoActivityIndicator(false)
           setCreateButtonDisabled(false)
-          setFile(file)
-          var temp = URL.createObjectURL(file)
-          setTempVideoUrl(temp)
+          var url = URL.createObjectURL(file)
+          setTempVideoUrl(url)
+          setTempVideoFile(file)
         } else {
           setVideoError('File size should be less than 200 MB.')
         }
@@ -188,8 +187,25 @@ export default function Prompts() {
 
   }
 
-  const uploadFile = () => {
-
+  const uploadFile = async () => {
+    var file = tempVideoFile
+    if (file != '') {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['mov','mp4','m4a']
+      var fileType = fileArr[1]
+      var fileMime = 'video/mp4'
+      if (fileType == 'mov') {
+        fileMime = 'video/quicktime'
+      }
+      var ts = Math.floor(Math.random() * (999999999999+1) + 1);
+      ts = ts.toString();
+      var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
+      var newFile = new File([file], fileName, {type: fileMime})
+      console.log('file:',newFile)
+      var url = await uploadVideo(newFile) + fileName
+      console.log('url:',url)
+      setVideoUrl(url)
+    }
   }
 
   // Survey controls.
@@ -369,109 +385,103 @@ export default function Prompts() {
                 </View>
 
                 <View style={styles.newPromptVideoSection}>
-                  {videoSelected &&
-                  (<></>)
-                  ||
-                  (<>
-                    {showSelectYouTube && (<>
-                      {tempVideoUrl !== '' && (<>
-                        <View style={[styles.reactPlayerContainer]}>
-                          <ReactPlayer controls={true} url={tempVideoUrl} width={'100%'} height={'100%'} />
-                        </View>
-                        <Text style={{marginTop:10}}>{file.name}</Text>
-                        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-                          <Button
-                            title='Choose Another Video'
-                            titleStyle={styles.uploadFileTitle}
-                            buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
-                            containerStyle={styles.uploadFileTitleButtonContainer}
-                            onPress={() => {setTempVideoUrl(''); setVideoUrl(''); setCreateButtonDisabled(true)}}
-                          />
-                        </View>
-                      </>)
-                      || (<>
-                        <Text style={styles.newPromptTitleLabel}>YouTube Link</Text>
-                        <TextInput
-                          style={styles.inputStyle}
-                          value={videoUrl}
-                          placeholder='ex. youtu.be/NlhiR1M_XH8'
-                          onChangeText={onYTVideoUrl}
-                        />
-                        <TouchableOpacity style={styles.videoGoBack} onPress={promptVideoGoBack}>
-                          <Icon
-                            name='chevron-back'
-                            type='ionicon'
-                            size={22}
-                            color={colors.mainTextColor}
-                          />
-                          <Text style={styles.videoGoBackText}>Go Back</Text>
-                        </TouchableOpacity>
-                        {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
-                      </>)}
-                    </>)
-                    ||
-                    (<>
-                      {showSelectUpload && (<View style={styles.selectUploadContainer}>
-                        <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
-                        {file == '' && (<>
-                          <Button
-                          title='Choose Video'
-                          titleStyle={styles.uploadFileTitle}
-                          buttonStyle={styles.uploadFileTitleButton}
-                          containerStyle={styles.uploadFileTitleButtonContainer}
-                          onPress={handleClick}
-                          />
-                          <TouchableOpacity style={styles.videoGoBack} onPress={promptVideoGoBack}>
-                            <Icon
-                              name='chevron-back'
-                              type='ionicon'
-                              size={22}
-                              color={colors.mainTextColor}
-                            />
-                            <Text style={styles.videoGoBackText}>Go Back</Text>
-                          </TouchableOpacity>
-                        </>)}
-                        {videoActivityIndicator && (<ActivityIndicatorView />) || (<></>)}
-                        {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
-                        {file !== '' && (<>
-                          <View style={styles.reactPlayerContainer}>
-                            <ReactPlayer controls={true} url={tempVideoUrl} width={'100%'} height={'100%'} />
-                          </View>
-                          <Text style={{marginTop:10}}>{file.name}</Text>
-                          <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-                            <Button
-                              title='Choose Another Video'
-                              titleStyle={styles.uploadFileTitle}
-                              buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
-                              containerStyle={styles.uploadFileTitleButtonContainer}
-                              onPress={() => {setFile(''); setCreateButtonDisabled(true)}}
-                            />
-                          </View>
-                        </>)}
-                      </View>)
-                      ||
-                      (<>{showVideoOptions &&
-                        (<View style={styles.showVideoOptions}>
-                          <TouchableOpacity style={styles.showVideoOptionsChooseUpload} onPress={() => {setSelectUpload(true); setCreateButtonDisabled(true)}}>
-                            <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload Video</Text>
-                            <Text style={styles.showVideoOptionsChooseUploadTypes}>mp4, m4a, mov</Text>
-                            <Text style={styles.showVideoOptionsChooseUploadSize}>max 200 MB</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.showVideoOptionsChooseYouTube} onPress={() => {setSelectYouTube(true); setCreateButtonDisabled(true)}}>
-                            <Text style={styles.showVideoOptionsChooseUploadTitle}>Link YouTube Video</Text>
-                          </TouchableOpacity>
-                        </View>)
-                        ||
-                        (<TouchableOpacity style={styles.newPromptVideoEmpty} onPress={() => setVideoOptions(true)}>
-                          <Text style={styles.newPromptVideoEmptyText}>
-                            Upload or link YouTube video.
-                            {"\n"}
-                            (optional)
-                          </Text>
-                        </TouchableOpacity>)}
-                      </>)}
-                    </>)}
+                {showSelectYouTube && (<>
+                  {tempVideoUrl !== '' && (<>
+                    <View style={[styles.reactPlayerContainer]}>
+                      <ReactPlayer controls={true} url={tempVideoUrl} width={'100%'} height={'100%'} />
+                    </View>
+                    <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                      <Button
+                        title='Choose Another Video'
+                        titleStyle={styles.uploadFileTitle}
+                        buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
+                        containerStyle={styles.uploadFileTitleButtonContainer}
+                        onPress={() => {setTempVideoUrl(''); setVideoUrl(''); setCreateButtonDisabled(true)}}
+                      />
+                    </View>
+                  </>)
+                  || (<>
+                    <Text style={styles.newPromptTitleLabel}>YouTube Link</Text>
+                    <TextInput
+                      style={styles.inputStyle}
+                      value={videoUrl}
+                      placeholder='ex. youtu.be/NlhiR1M_XH8'
+                      onChangeText={onYTVideoUrl}
+                    />
+                    <TouchableOpacity style={styles.videoGoBack} onPress={promptVideoGoBack}>
+                      <Icon
+                        name='chevron-back'
+                        type='ionicon'
+                        size={22}
+                        color={colors.mainTextColor}
+                      />
+                      <Text style={styles.videoGoBackText}>Go Back</Text>
+                    </TouchableOpacity>
+                    {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
                   </>)}
+                </>)
+                ||
+                (<>
+                  {showSelectUpload && (<View style={styles.selectUploadContainer}>
+                    <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
+                    {tempVideoUrl == '' && (<>
+                      <Button
+                      title='Choose Video'
+                      titleStyle={styles.uploadFileTitle}
+                      buttonStyle={styles.uploadFileTitleButton}
+                      containerStyle={styles.uploadFileTitleButtonContainer}
+                      onPress={handleClick}
+                      />
+                      <TouchableOpacity style={styles.videoGoBack} onPress={promptVideoGoBack}>
+                        <Icon
+                          name='chevron-back'
+                          type='ionicon'
+                          size={22}
+                          color={colors.mainTextColor}
+                        />
+                        <Text style={styles.videoGoBackText}>Go Back</Text>
+                      </TouchableOpacity>
+                    </>)}
+                    {videoActivityIndicator && (<ActivityIndicatorView />) || (<></>)}
+                    {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
+                    {tempVideoUrl !== '' && (<>
+                      <View style={styles.reactPlayerContainer}>
+                        <ReactPlayer controls={true} url={tempVideoUrl} width={'100%'} height={'100%'} />
+                      </View>
+                      <Text style={{marginTop:10}}>{tempVideoFile.name}</Text>
+                      <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                        <Button
+                          title='Choose Another Video'
+                          titleStyle={styles.uploadFileTitle}
+                          buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
+                          containerStyle={styles.uploadFileTitleButtonContainer}
+                          onPress={() => {setTempVideoUrl(''); setCreateButtonDisabled(true)}}
+                        />
+                      </View>
+                    </>)}
+                  </View>)
+                  ||
+                  (<>{showVideoOptions &&
+                    (<View style={styles.showVideoOptions}>
+                      <TouchableOpacity style={styles.showVideoOptionsChooseUpload} onPress={() => {setSelectUpload(true); setCreateButtonDisabled(true)}}>
+                        <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload Video</Text>
+                        <Text style={styles.showVideoOptionsChooseUploadTypes}>mp4, m4a, mov</Text>
+                        <Text style={styles.showVideoOptionsChooseUploadSize}>max 200 MB</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.showVideoOptionsChooseYouTube} onPress={() => {setSelectYouTube(true); setCreateButtonDisabled(true)}}>
+                        <Text style={styles.showVideoOptionsChooseUploadTitle}>Link YouTube Video</Text>
+                      </TouchableOpacity>
+                    </View>)
+                    ||
+                    (<TouchableOpacity style={styles.newPromptVideoEmpty} onPress={() => setVideoOptions(true)}>
+                      <Text style={styles.newPromptVideoEmptyText}>
+                        Upload or link YouTube video.
+                        {"\n"}
+                        (optional)
+                      </Text>
+                    </TouchableOpacity>)}
+                  </>)}
+                </>)}
                 </View>
               </View>
 

@@ -78,6 +78,8 @@ export default function Main() {
 
   const logout = () => {
     console.log('Log out...')
+    set('Coach',null,ttl)
+    linkTo('/welcome')
   }
 
   return (<ReactFullscreen>
