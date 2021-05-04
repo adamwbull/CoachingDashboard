@@ -12,7 +12,8 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { uploadVideo } from './API.js'
+import { uploadVideo, createPrompt } from './API.js'
+import { Popup } from 'semantic-ui-react'
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -35,7 +36,7 @@ export default function Prompts() {
   const [showSelectUpload, setSelectUpload] = useState(false)
   const [videoError, setVideoError] = useState('')
   const [videoActivityIndicator, setVideoActivityIndicator] = useState(false)
-  const [createButtonDisabled, setCreateButtonDisabled] = useState(false)
+  const [createButtonDisabled, setCreateButtonDisabled] = useState(true)
 
   // Text Prompts data to upload.
   const [textPromptTitle, setTextPromptTitle] = useState('')
@@ -61,16 +62,17 @@ export default function Prompts() {
   const [contracts, setContracts] = useState([])
 
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
-  const data = () => {
+  const refreshTextPrompts = () => {
     console.log('Getting data...')
   }
 
+  // Main loader.
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
       try {
-        data()
+        refreshTextPrompts()
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -144,6 +146,7 @@ export default function Prompts() {
       setVideoError('')
       setCreateButtonDisabled(false)
       setTempVideoUrl(text)
+      setVideoUrl(text)
     }
   }
 
@@ -189,6 +192,7 @@ export default function Prompts() {
 
   const uploadFile = async () => {
     var file = tempVideoFile
+    var ret = false
     if (file != '') {
       var fileArr = file.name.split('.')
       var fileOptions = ['mov','mp4','m4a']
@@ -205,6 +209,30 @@ export default function Prompts() {
       var url = await uploadVideo(newFile) + fileName
       console.log('url:',url)
       setVideoUrl(url)
+      ret = true
+    }
+    return ret
+  }
+
+  const createPrompt = async () => {
+    var fileUploaded = await uploadFile()
+    var promptType = 0
+    if (videoType == 0) {
+      promptType = 3
+    } else if (videoType == 1) {
+      promptType = 4
+    }
+    var created = await createPrompt(coach.Id, textPromptTitle, promptType, textPromptText, videoUrl)
+    if (created) {
+      refreshTextPrompts()
+      setAddingTextPrompt(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        setActivityIndicator(false)
+        setMain(true)
+      },500)
+    } else {
+      console.log('Error creating prompt.')
     }
   }
 
@@ -486,13 +514,21 @@ export default function Prompts() {
               </View>
 
               <View style={styles.newPromptFooter}>
-                <Button
+                {(textPromptTitle.length == 0 || textPromptText.length == 0) && (<Popup
+                  position='top center'
+                  content='All fields need to be filled out first!' trigger={<Button
                   title='Create Prompt'
-                  disabled={createButtonDisabled}
+                  disabled={true}
                   titleStyle={styles.newPromptAddButtonTitle}
                   buttonStyle={styles.newPromptAddButton}
                   containerStyle={styles.newPromptAddButtonContainer}
-                />
+                />}/>) || (<Button
+                  title='Create Prompt'
+                  titleStyle={styles.newPromptAddButtonTitle}
+                  buttonStyle={styles.newPromptAddButton}
+                  containerStyle={styles.newPromptAddButtonContainer}
+                  onPress={createPrompt}
+                />)}
                 <View style={styles.newPromptAddButtonSpacer}></View>
               </View>
 

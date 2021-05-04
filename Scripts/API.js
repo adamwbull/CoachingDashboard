@@ -146,6 +146,32 @@ export async function check() {
 
 */
 
+export async function createPrompt(coachId, title, promptType, text, video) {
+
+  var ret = false;
+  var arr = {CoachId:coachId, Title:title, PromptType:promptType, Text:text, Video:video}
+  console.log('Creating prompt...');
+  const res = await fetch(url + '/prompt/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+
+  });
+
+  const payload = await res.json();
+
+  if (payload.affectedRows == 1) {
+    console.log('Prompt created!');
+    ret = true;
+  }
+
+  return ret;
+
+}
+
 export async function uploadVideo(file) {
 
   var ret = false;
