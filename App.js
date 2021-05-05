@@ -88,7 +88,7 @@ export default function App() {
   return (
     <NavigationContainer linking={linking} theme={MyTheme}>
       <Stack.Navigator headerMode='none'>
-        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Welcome" component={Welcome} options={{title:'Log In - CoachSync'}} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Main" component={Main} />
       </Stack.Navigator>

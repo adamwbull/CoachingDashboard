@@ -24,6 +24,7 @@ export const boxColors = {
   danger: '#fb7161',
   success:'#32D977',
   info:'#48dbfb',
+  default:'#FAFAFA'
 }
 
 var coach = get('Coach')
@@ -815,6 +816,7 @@ export const promptsLight = StyleSheet.create({
     height:200,
     borderWidth:1,
     borderColor:colorsLight.headerBorder,
+    backgroundColor:colorsLight.header,
     borderRadius:10,
     justifyContent:'center',
     alignItems:'center',
@@ -831,6 +833,80 @@ export const promptsLight = StyleSheet.create({
   },
   promptAddButtonContainer: {
     width:'70%'
+  },
+  innerRow: {
+    flexDirection:'row'
+  },
+  taskBox: {
+    width:200,
+    height:200,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    overflow:'hidden',
+    marginRight:10
+  },
+  taskPreview: {
+    flex:1,
+  },
+  taskPreviewHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  taskPreviewHeaderIcon: {
+    padding:10,
+    borderRightColor:colorsLight.headerBorder,
+    borderRightWidth:1
+  },
+  taskPreviewTitle: {
+    flex:1,
+    marginLeft:10,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  taskPreviewText: {
+    fontSize:14,
+    padding:10,
+    color:colorsLight.mainTextColor,
+    textAlign:'left',
+    fontFamily:'Poppins'
+  },
+  taskWarningText: {
+    fontSize:14,
+    padding:10,
+    color:btnColors.danger,
+    textAlign:'center',
+    fontFamily:'Poppins'
+  },
+  taskButtons: {
+    flexDirection:'row'
+  },
+  taskButtonLeft: {
+    flex:1,
+    borderTopWidth:1,
+    borderRightWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderRightColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.info
+  },
+  taskButtonRight: {
+    flex:1,
+    borderTopWidth:1,
+    borderLeftWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderLeftColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.danger
+  },
+  taskButtonText: {
+    color:'#ffffff',
+    fontSize:14,
+    fontFamily:'Poppins',
+    textAlign:'center'
   },
   helpBox: {
     width:400,
@@ -987,6 +1063,14 @@ export const promptsLight = StyleSheet.create({
     justifyContent:'flex-start',
     alignItems:'center',
   },
+  uploadProgressTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    marginBottom:10,
+    marginTop:20
+  },
   uploadInputStyle: {
     marginBottom:10
   },
@@ -1026,7 +1110,8 @@ export const promptsLight = StyleSheet.create({
     color:colorsLight.mainTextColor
   },
   youTubeSection: {
-  }
+  },
+
 });
 
 export const conceptsLight = StyleSheet.create({

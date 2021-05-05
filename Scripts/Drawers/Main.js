@@ -28,6 +28,7 @@ export default function Main() {
   const [userName, setUserName] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [fromWelcome, setFromWelcome] = useState(false)
 
   const linkTo = useLinkTo()
 
@@ -51,8 +52,11 @@ export default function Main() {
         setPlanTitle('Professional Plan')
         setHeaderPlan({color:btnColors.danger})
       }
+    } else {
+      linkTo('/welcome')
+      setFromWelcome(true)
     }
-  }, [])
+  }, [fromWelcome])
 
   const onLoad = () => {
     Animated.timing(opacity, {
@@ -78,6 +82,7 @@ export default function Main() {
 
   const logout = () => {
     console.log('Log out...')
+    setFromWelcome(false)
     set('Coach',null,ttl)
     linkTo('/welcome')
   }

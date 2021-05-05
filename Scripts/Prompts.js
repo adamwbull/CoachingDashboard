@@ -12,7 +12,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { uploadVideo, createPrompt } from './API.js'
+import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt } from './API.js'
 import { Popup } from 'semantic-ui-react'
 
 export default function Prompts() {
@@ -27,6 +27,8 @@ export default function Prompts() {
   const [contractsDisabled, setContractsDisabled] = useState(true)
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
+  // Deletion stage controls.
+  const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
 
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
@@ -36,8 +38,8 @@ export default function Prompts() {
   const [showSelectUpload, setSelectUpload] = useState(false)
   const [videoError, setVideoError] = useState('')
   const [videoActivityIndicator, setVideoActivityIndicator] = useState(false)
-  const [createButtonDisabled, setCreateButtonDisabled] = useState(true)
-
+  const [createButtonDisabled, setCreateButtonDisabled] = useState(false)
+  const [createButtonActivityIndicator, setCreateButtonActivityIndicator] = useState(false)
   // Text Prompts data to upload.
   const [textPromptTitle, setTextPromptTitle] = useState('')
   const [promptType, setPromptType] = useState(0)
@@ -62,17 +64,19 @@ export default function Prompts() {
   const [contracts, setContracts] = useState([])
 
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
-  const refreshTextPrompts = () => {
-    console.log('Getting data...')
+  const refreshTextPrompts = async (id, token) => {
+    var refresh = await getTextPrompts(id, token)
+    setPrompts(refresh)
   }
 
   // Main loader.
   useEffect(() => {
     const sCoach = get('Coach')
+    console.log(sCoach)
     if (sCoach != null) {
       setCoach(sCoach)
       try {
-        refreshTextPrompts()
+        refreshTextPrompts(sCoach.Id, sCoach.Token)
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -116,6 +120,7 @@ export default function Prompts() {
   const selectVideoType = (type) => {
     setVideoUrl('')
     setTempVideoUrl('')
+    setCreateButtonDisabled(true)
     if (type == 0) {
       setSelectYouTube(true)
     } else {
@@ -132,21 +137,24 @@ export default function Prompts() {
     setCreateButtonDisabled(false)
   }
 
-  const getYouTubeUrl = (url) => {
+  const getYouTubeID = (url) => {
     var r, x = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/
     return r = url.match(x)
   }
 
   const onYTVideoUrl = (text) => {
     setVideoUrl(text)
-    if (!getYouTubeUrl(text)) {
+    var yt = getYouTubeID(text)
+    if (!yt) {
       setTempVideoUrl('')
       setVideoError('Invalid YouTube URL!')
     } else {
       setVideoError('')
       setCreateButtonDisabled(false)
       setTempVideoUrl(text)
-      setVideoUrl(text)
+      var genUrl = 'https://youtube.com/embed/' + yt[1]
+      console.log(genUrl)
+      setVideoUrl(genUrl)
     }
   }
 
@@ -190,10 +198,11 @@ export default function Prompts() {
 
   }
 
-  const uploadFile = async () => {
+  const getAttachment = async () => {
     var file = tempVideoFile
     var ret = false
     if (file != '') {
+      console.log('Uploading attachment...')
       var fileArr = file.name.split('.')
       var fileOptions = ['mov','mp4','m4a']
       var fileType = fileArr[1]
@@ -206,25 +215,34 @@ export default function Prompts() {
       var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
       var newFile = new File([file], fileName, {type: fileMime})
       console.log('file:',newFile)
-      var url = await uploadVideo(newFile) + fileName
+      var url = await uploadVideo(newFile) + '/videos/' + fileName
       console.log('url:',url)
-      setVideoUrl(url)
-      ret = true
+      return url
+    } else if (videoUrl !== '') {
+      console.log('YT Video attached.')
+      return videoUrl
+    } else {
+      console.log('No uploaded needed!')
+      return ''
     }
-    return ret
   }
 
-  const createPrompt = async () => {
-    var fileUploaded = await uploadFile()
+  const submitPrompt = async () => {
+    setCreateButtonDisabled(true)
+    setCreateButtonActivityIndicator(true)
+    console.log('Creating prompt...')
+    var fileUploaded = await getAttachment()
     var promptType = 0
     if (videoType == 0) {
       promptType = 3
     } else if (videoType == 1) {
       promptType = 4
     }
-    var created = await createPrompt(coach.Id, textPromptTitle, promptType, textPromptText, videoUrl)
+    var created = await createPrompt(coach.Token, coach.Id, textPromptTitle, promptType, textPromptText, fileUploaded)
     if (created) {
-      refreshTextPrompts()
+      refreshTextPrompts(coach.Id, coach.Token)
+      setTempVideoUrl('')
+      setCreateButtonActivityIndicator(false)
       setAddingTextPrompt(false)
       setActivityIndicator(true)
       setTimeout(() => {
@@ -293,7 +311,7 @@ export default function Prompts() {
             <View style={styles.promptListContainer}>
               <View style={styles.promptHeader}>
                 <Text style={styles.promptHeaderTitle}>Text Prompts</Text>
-                <Text style={styles.promptHeaderCount}>{0} total</Text>
+                <Text style={styles.promptHeaderCount}>{prompts.length} total</Text>
               </View>
               <ScrollView horizontal={true} contentContainerStyle={styles.promptsRow}>
                 <View style={styles.addPromptContainer}>
@@ -304,7 +322,51 @@ export default function Prompts() {
                   containerStyle={styles.promptAddButtonContainer}
                   onPress={addPrompt} />
                 </View>
-                {prompts.length > 0 && (<View>
+                {prompts.length > 0 && (<View style={styles.innerRow}>
+                  {prompts.map((prompt, index) => {
+                    var promptIcon = 'create'
+                    if (prompt.Type !== 0) {
+                      promptIcon = 'videocam'
+                    }
+                    var name = prompt.Title
+                    if (name.length > 13) {
+                      name = name.slice(0,13) + '...'
+                    }
+                    var text = prompt.Text
+                    if (text.length > 80) {
+                      text = text.slice(0,80) + '...'
+                    }
+                    return (<View style={styles.taskBox} key={index}>
+                      <View style={styles.taskPreview}>
+                        <View style={styles.taskPreviewHeader}>
+                          <View style={styles.taskPreviewHeaderIcon}>
+                            <Icon
+                              name={promptIcon}
+                              type='ionicon'
+                              size={22}
+                              color={colors.mainTextColor}
+                            />
+                          </View>
+                          <Text style={styles.taskPreviewTitle}>{name}</Text>
+                        </View>
+                        {deletePromptIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>{text}</Text></>)}
+                      </View>
+                      <View style={styles.taskButtons}>
+                        {deletePromptIndex == index && (<><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => {}}>
+                          <Text style={styles.taskButtonText}>Confirm</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePromptIndex(-1)}>
+                          <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                        </TouchableOpacity></>)
+                        || (<><TouchableOpacity style={styles.taskButtonLeft} onPress={() => {}}>
+                          <Text style={styles.taskButtonText}>Duplicate</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePromptIndex(index)}>
+                          <Text style={styles.taskButtonText}>Delete</Text>
+                        </TouchableOpacity></>)}
+                      </View>
+                    </View>)
+                  })}
                 </View>) || (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>Text prompts with optional video.{"\n"}Assign directly to Clients or include in a Program.</Text>
                 </View>)}
@@ -453,12 +515,15 @@ export default function Prompts() {
                   {showSelectUpload && (<View style={styles.selectUploadContainer}>
                     <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
                     {tempVideoUrl == '' && (<>
+                      <Text style={styles.uploadProgressTitle}>Upload Storage Used</Text>
+                      {getProgressBar(coach.Plan, coach.Storage, colors, btnColors)}
                       <Button
                       title='Choose Video'
                       titleStyle={styles.uploadFileTitle}
                       buttonStyle={styles.uploadFileTitleButton}
                       containerStyle={styles.uploadFileTitleButtonContainer}
                       onPress={handleClick}
+                      disabled={checkStorage(coach.Plan, coach.Storage)}
                       />
                       <TouchableOpacity style={styles.videoGoBack} onPress={promptVideoGoBack}>
                         <Icon
@@ -491,12 +556,12 @@ export default function Prompts() {
                   ||
                   (<>{showVideoOptions &&
                     (<View style={styles.showVideoOptions}>
-                      <TouchableOpacity style={styles.showVideoOptionsChooseUpload} onPress={() => {setSelectUpload(true); setCreateButtonDisabled(true)}}>
+                      <TouchableOpacity style={styles.showVideoOptionsChooseUpload} onPress={() => selectVideoType(1)}>
                         <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload Video</Text>
                         <Text style={styles.showVideoOptionsChooseUploadTypes}>mp4, m4a, mov</Text>
                         <Text style={styles.showVideoOptionsChooseUploadSize}>max 200 MB</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.showVideoOptionsChooseYouTube} onPress={() => {setSelectYouTube(true); setCreateButtonDisabled(true)}}>
+                      <TouchableOpacity style={styles.showVideoOptionsChooseYouTube} onPress={() => selectVideoType(0)}>
                         <Text style={styles.showVideoOptionsChooseUploadTitle}>Link YouTube Video</Text>
                       </TouchableOpacity>
                     </View>)
@@ -527,9 +592,11 @@ export default function Prompts() {
                   titleStyle={styles.newPromptAddButtonTitle}
                   buttonStyle={styles.newPromptAddButton}
                   containerStyle={styles.newPromptAddButtonContainer}
-                  onPress={createPrompt}
+                  onPress={submitPrompt}
+                  disabled={createButtonDisabled}
                 />)}
-                <View style={styles.newPromptAddButtonSpacer}></View>
+                {createButtonActivityIndicator && (<View style={[styles.newPromptAddButtonContainer,{marginTop:10}]}><ActivityIndicatorView /></View>)}
+                <View style={[styles.newPromptAddButtonSpacer]}></View>
               </View>
 
             </View>

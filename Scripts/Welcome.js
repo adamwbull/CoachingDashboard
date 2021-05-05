@@ -34,10 +34,9 @@ export default function Welcome() {
   };
 
   useEffect(() => {
-    document.title = 'Welcome - CoachSync';
     const r = get('Coach')
-    console.log(get('LoginAttempts'))
     if (r !== null) {
+      console.log('r',r)
       if (r.RegistrationCompleted == 0) {
         linkTo('/sign-up')
       } else {
@@ -97,6 +96,7 @@ export default function Welcome() {
       } else {
         set('Coach', success, ttl)
         linkTo('/home')
+        window.location.reload(true); 
       }
     } else {
       var errorText = `Too many failed attempts. ${'\n'}Please try again in ` + parseInt(getTTL('LoginLocked')/60) + ` mins.`;
