@@ -12,7 +12,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt } from './API.js'
+import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup } from 'semantic-ui-react'
 
 export default function Prompts() {
@@ -22,13 +22,14 @@ export default function Prompts() {
   const [colors, setColors] = useState(colorsLight)
   const [coach, setCoach] = useState({})
 
-  // Stage controls.
+  // Main stage controls.
   const [paymentsDisabled, setPaymentsDisabled] = useState(true)
   const [contractsDisabled, setContractsDisabled] = useState(true)
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
-  // Deletion stage controls.
+  // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
+  const [showPromptOptions, setShowPromptOptions] = useState(-1)
 
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
@@ -63,6 +64,11 @@ export default function Prompts() {
   const [payments, setPayments] = useState([])
   const [contracts, setContracts] = useState([])
 
+  // Main page view screens and controls.
+  const [showViewTextPrompt, setViewTextPrompt] = useState(false)
+  const [viewPrompt, setViewPrompt] = useState({})
+  const [viewPromptResponses, setViewPromptResponses] = useState([])
+
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
   const refreshTextPrompts = async (id, token) => {
     var refresh = await getTextPrompts(id, token)
@@ -87,8 +93,44 @@ export default function Prompts() {
     }
   },[])
 
-  // Return to main.
-  const returnToMain = () => {
+
+  // Text prompt controls.
+  const viewPromptTrigger = (i) => {
+    setMain(false)
+    setViewPrompt(prompts[i])
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setViewTextPrompt(true)
+    },500)
+  }
+
+  const returnToMainfromViewTextPrompt = (i) => {
+    setViewTextPrompt(false)
+    setViewPrompt({})
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
+  }
+
+  const addPrompt = () => {
+    setMain(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setAddingTextPrompt(true)
+    },500)
+  }
+
+  const returnToMainFromTextPrompt = () => {
+    setVideoUrl('')
+    setTempVideoUrl('')
+    setTextPromptText('')
+    setTextPromptTitle('')
+    setSelectYouTube(false)
+    setSelectUpload(false)
     setAddingSurveyPrompt(false)
     setAddingTextPrompt(false)
     setActivityIndicator(true)
@@ -98,9 +140,37 @@ export default function Prompts() {
     },500)
   }
 
-  // Text prompt controls.
-  const addPrompt = () => {
+  const deletePromptTrigger = async (i) => {
+    console.log('Deleting prompt:',prompts[i])
+    var deleted = await deletePrompt(prompts[i].Id, coach.Id, coach.Token)
+    if (deleted) {
+      setDeletePromptIndex(-1)
+      setShowPromptOptions(-1)
+      refreshTextPrompts(coach.Id, coach.Token)
+    }
+  }
+
+  const duplicatePrompt = async (i) => {
+    var p = prompts[i]
+    console.log('Duplicating prompt:',p)
     setMain(false)
+    setDeletePromptIndex(-1)
+    setShowPromptOptions(-1)
+    // Set prompt data.
+    setTextPromptTitle(p.Title)
+    setTextPromptText(p.Text)
+    if (p.PromptType != 0) {
+
+      if (p.PromptType == 3) {
+        setSelectYouTube(true)
+        setTempVideoUrl(p.Video)
+        setVideoUrl(p.Video)
+      } else if (p.PromptType == 4) {
+        setSelectUpload(true)
+        setTempVideoUrl(p.Video)
+        setVideoUrl(p.Video)
+      }
+    }
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -139,7 +209,7 @@ export default function Prompts() {
 
   const getYouTubeID = (url) => {
     var r, x = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/
-    return r = url.match(x)
+    return url.match(x)
   }
 
   const onYTVideoUrl = (text) => {
@@ -219,7 +289,7 @@ export default function Prompts() {
       console.log('url:',url)
       return url
     } else if (videoUrl !== '') {
-      console.log('YT Video attached.')
+      console.log('videoUrl Video attached.')
       return videoUrl
     } else {
       console.log('No uploaded needed!')
@@ -313,7 +383,7 @@ export default function Prompts() {
                 <Text style={styles.promptHeaderTitle}>Text Prompts</Text>
                 <Text style={styles.promptHeaderCount}>{prompts.length} total</Text>
               </View>
-              <ScrollView horizontal={true} contentContainerStyle={styles.promptsRow}>
+              <View style={styles.promptsRow}>
                 <View style={styles.addPromptContainer}>
                   <Button
                   title='Add Text Prompt'
@@ -322,10 +392,10 @@ export default function Prompts() {
                   containerStyle={styles.promptAddButtonContainer}
                   onPress={addPrompt} />
                 </View>
-                {prompts.length > 0 && (<View style={styles.innerRow}>
+                {prompts.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
                   {prompts.map((prompt, index) => {
                     var promptIcon = 'create'
-                    if (prompt.Type !== 0) {
+                    if (prompt.PromptType !== 0) {
                       promptIcon = 'videocam'
                     }
                     var name = prompt.Title
@@ -351,26 +421,39 @@ export default function Prompts() {
                         </View>
                         {deletePromptIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>{text}</Text></>)}
                       </View>
-                      <View style={styles.taskButtons}>
-                        {deletePromptIndex == index && (<><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => {}}>
-                          <Text style={styles.taskButtonText}>Confirm</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePromptIndex(-1)}>
-                          <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
-                        </TouchableOpacity></>)
-                        || (<><TouchableOpacity style={styles.taskButtonLeft} onPress={() => {}}>
-                          <Text style={styles.taskButtonText}>Duplicate</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePromptIndex(index)}>
-                          <Text style={styles.taskButtonText}>Delete</Text>
-                        </TouchableOpacity></>)}
-                      </View>
+                      {deletePromptIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePromptTrigger(index)}>
+                        <Text style={styles.taskButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePromptIndex(-1)}>
+                        <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                      </TouchableOpacity></View></>)
+                      || (<>
+                        {showPromptOptions == index &&
+                          (<>
+                            <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPromptOptions(-1)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                            </TouchableOpacity>
+                            <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicatePrompt(index)}>
+                            <Text style={styles.taskButtonText}>Duplicate</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePromptIndex(index)}>
+                            <Text style={styles.taskButtonText}>Delete</Text>
+                          </TouchableOpacity></View></>)
+                          ||
+                          (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPromptOptions(index)}>
+                            <Text style={styles.taskButtonText}>Edit</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPromptTrigger(index)}>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                          </TouchableOpacity>
+                        </View></>)}
+                      </>)}
                     </View>)
                   })}
-                </View>) || (<View style={styles.helpBox}>
+                </ScrollView>) || (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>Text prompts with optional video.{"\n"}Assign directly to Clients or include in a Program.</Text>
                 </View>)}
-              </ScrollView>
+              </View>
             </View>
 
             <View style={styles.promptListContainer}>
@@ -441,6 +524,40 @@ export default function Prompts() {
             </View>
           </>)}
 
+          {showViewTextPrompt && (<>
+            <View style={styles.newPromptContainer}>
+              <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainfromViewTextPrompt}
+                />
+                <Text style={styles.newPromptDescTitle}>{viewPrompt.Title}</Text>
+              </View>
+              <View style={styles.newPromptBody}>
+                <View style={styles.newPromptBodyLeft}>
+                  <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Body Text</Text>
+                  <Text style={styles.viewPromptBodyText}>{viewPrompt.Text}</Text>
+                </View>
+                {viewPrompt.Video != '' && (<View style={[styles.reactPlayerContainer]}>
+                  <ReactPlayer controls={true} url={viewPrompt.Video} width={'100%'} height={'100%'} />
+                </View>)}
+              </View>
+              <View style={styles.viewPromptResponses}>
+                <View style={styles.newPromptHeader}>
+                  <Text style={styles.newPromptDescTitle}>{viewPromptResponses.length} Client Responses</Text>
+                </View>
+                {viewPromptResponses.length > 0 && (<>
+
+                </>) || (<>
+                  <Text style={styles.noPromptResponses}>No clients have responded to this prompt yet.</Text>
+                </>)}
+              </View>
+            </View>
+          </>)}
+
           {showAddingTextPrompt && (<>
             <View style={styles.newPromptContainer}>
 
@@ -450,7 +567,7 @@ export default function Prompts() {
                   type='ionicon'
                   size={25}
                   color={colors.mainTextColor}
-                  onPress={returnToMain}
+                  onPress={returnToMainFromTextPrompt}
                 />
                 <Text style={styles.newPromptDescTitle}>New Text Prompt</Text>
               </View>
@@ -610,7 +727,7 @@ export default function Prompts() {
                   type='ionicon'
                   size={25}
                   color={colors.mainTextColor}
-                  onPress={returnToMain}
+                  onPress={returnToMainFromTextPrompt}
                 />
                 <Text style={styles.newPromptDescTitle}>New Survey</Text>
               </View>

@@ -148,6 +148,34 @@ export async function check() {
 
 */
 
+export async function deletePrompt(promptId, coachId, token) {
+
+  var ret = false
+  var arr = {Token:token, Id:promptId, CoachId:coachId}
+
+  console.log(arr)
+  
+  console.log('Deleting prompt...')
+  const res = await fetch(url + '/prompt/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+  console.log('deletion payload:',payload)
+  if (payload) {
+    console.log('Prompt, assocs, and responses deleted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export function checkStorage(plan, storage) {
 
   var ret = false

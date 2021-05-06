@@ -835,7 +835,8 @@ export const promptsLight = StyleSheet.create({
     width:'70%'
   },
   innerRow: {
-    flexDirection:'row'
+    flexDirection:'row',
+    marginBottom:10
   },
   taskBox: {
     width:200,
@@ -883,6 +884,13 @@ export const promptsLight = StyleSheet.create({
   },
   taskButtons: {
     flexDirection:'row'
+  },
+  taskButtonTop: {
+    width:'100%',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+    padding:1,
+    backgroundColor:colorsLight.header
   },
   taskButtonLeft: {
     flex:1,
@@ -1094,8 +1102,17 @@ export const promptsLight = StyleSheet.create({
     textAlign:'center'
   },
   reactPlayerContainer: {
+    width:500,
+    height:280,
     aspectRatio:16/9,
-    flex:1
+  },
+  viewPromptBodyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  newPromptBodyLeft: {
+    flex:1,
   },
   videoGoBack: {
     flexDirection:'row',
@@ -1111,7 +1128,13 @@ export const promptsLight = StyleSheet.create({
   },
   youTubeSection: {
   },
-
+  noPromptResponses: {
+    fontFamily:'Poppins',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    marginTop:10,
+    marginLeft:5
+  }
 });
 
 export const conceptsLight = StyleSheet.create({
