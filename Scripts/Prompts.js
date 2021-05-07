@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark, btnColors } from '../Scripts/Styles.js'
@@ -13,7 +13,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
 import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
-import { Popup } from 'semantic-ui-react'
+import { Popup, Dropdown } from 'semantic-ui-react'
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -53,9 +53,30 @@ export default function Prompts() {
 
   // Survey Prompts stage controls.
   const [showAddingSurveyPrompt, setAddingSurveyPrompt] = useState(false)
+  const [surveyItemsDropdown, setSurveyItemsDropdown] = useState('')
+  const [currentSurveyItem, setCurrentSurveyItem] = useState(0)
+  const [chosenTask, setChosenTask] = useState({})
+  const [showAddSurveyItemIndicator, setAddSurveyItemIndicator] = useState(false)
+  const [showSurveyItemMain, setSurveyItemMain] = useState(false)
+  const minRangeValues = [
+    { key:0, text:'0', value:0 },
+    { key:1, text:'1', value:1 }
+  ]
+  const maxRangeValues = [
+    { key:2, text:'2', value:2 },
+    { key:3, text:'3', value:3 },
+    { key:4, text:'4', value:4 },
+    { key:5, text:'5', value:5 },
+    { key:6, text:'6', value:6 },
+    { key:7, text:'7', value:7 },
+    { key:8, text:'8', value:8 },
+    { key:9, text:'9', value:9 },
+    { key:10, text:'10', value:10 }
+  ]
 
   // Survey Prompts data to upload.
   const [surveyTitle, setSurveyTitle] = useState('')
+  const [surveyText, setSurveyText] = useState('')
   const [surveyItems, setSurveyItems] = useState([])
 
   // Main page Data.
@@ -333,6 +354,148 @@ export default function Prompts() {
       setActivityIndicator(false)
       setAddingSurveyPrompt(true)
     },500)
+  }
+
+  const toggleSurveyItemsDropdown = () => {
+    if (surveyItemsDropdown) {
+      setSurveyItemsDropdown(false)
+    } else {
+      setSurveyItemsDropdown(true)
+      window.addEventListener('click', closeSurveyDropdown)
+    }
+  }
+
+  const closeSurveyDropdown = () => {
+    setSurveyItemsDropdown(false)
+    window.removeEventListener('click', closeSurveyDropdown)
+  }
+
+  const addTask = (type) => {
+    closeSurveyDropdown()
+    var title = ''
+    switch (type) {
+      case 0:
+        title = 'Unused Input'
+      break
+      case 1:
+        title = 'Unused Slider'
+      break
+      case 2:
+        title = 'Unused Checkbox Group'
+      break
+      case 3:
+        title = 'Unused Radiobox Group'
+      break
+      case 4:
+        title = 'Unused RichText'
+      break
+      default:
+        title = 'Unused Input'
+      break
+    }
+    setCurrentSurveyItem(surveyItems.length)
+    var newTask = {
+      Type:type,
+      TaskId:0,
+      Title:title,
+      Question:'',
+
+    }
+    var list = surveyItems
+    list.push(newTask)
+    setSurveyItems(list)
+    setAddSurveyItemIndicator(true)
+    setChosenTask(newTask)
+    setTimeout(() => {
+      setSurveyItemMain(true)
+      setAddSurveyItemIndicator(false)
+      console.log(newTask)
+    }, 800)
+
+  }
+
+  const moveTaskUp = (index, l) => {
+    var list = l
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index-1]
+    newList[index-1] = list[index]
+    if (currentSurveyItem == index) {
+      setCurrentSurveyItem(index-1)
+    } else if (currentSurveyItem == index-1) {
+      setCurrentSurveyItem(index)
+    }
+    setSurveyItems(newList)
+  }
+
+  const moveTaskDown = (index, l) => {
+    var list = l
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index+1]
+    newList[index+1] = list[index]
+    if (currentSurveyItem == index) {
+      setCurrentSurveyItem(index+1)
+    } else if (currentSurveyItem == index+1) {
+      setCurrentSurveyItem(index)
+    }
+    setSurveyItems(newList)
+  }
+
+  const selectTask = (index, type) => {
+    setCurrentSurveyItem(index)
+    var id = surveyItems[index].TaskId
+    if (id == 0) {
+      setChosenTask({})
+    } else {
+      var task = searchHardlist.filter(task => task.Id === id)
+      setChosenTask(task[0])
+    }
+  }
+
+  const deleteTask = () => {
+    var list = JSON.parse(JSON.stringify(surveyItems))
+    if (list.length == 1) {
+      setSurveyItemMain(false)
+      setCurrentSurveyItem(0)
+    }
+    list.splice(currentSurveyItem, 1)
+    setSurveyItems(list)
+    if (currentSurveyItem == 0) {
+      setCurrentSurveyItem(0)
+    } else {
+      setCurrentSurveyItem(currentSurveyItem-1)
+    }
+  }
+
+  const updateQuestion = (text) => {
+    var list = JSON.parse(JSON.stringify(surveyItems))
+    list[currentSurveyItem].Question = text
+    var title = ''
+    switch (list[currentSurveyItem].Type) {
+      case 0:
+        title = 'Input'
+      break
+      case 1:
+        title = 'Slider'
+      break
+      case 2:
+        title = 'Checkbox Group'
+      break
+      case 3:
+        title = 'Radiobox Group'
+      break
+      case 4:
+        title = 'RichText'
+      break
+      default:
+        title = 'Unused Input'
+      break
+    }
+    list[currentSurveyItem].Title = title
+    setSurveyItems(list)
+  }
+
+  const submitSurvey = () => {
+    console.log('Submitting survey...')
   }
 
   // Payment controls.
@@ -732,15 +895,198 @@ export default function Prompts() {
                 <Text style={styles.newPromptDescTitle}>New Survey</Text>
               </View>
               <View style={styles.newPromptBody}>
+                <View style={styles.newPromptForm}>
+                  <Text style={styles.newPromptTitleLabel}>Title</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    value={surveyTitle}
+                    placeholder='ex. Measurement Survey'
+                    onChangeText={(text) => setSurveyTitle(text)}
+                  />
+                  <Text style={styles.newPromptTitleLabel}>Description</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    value={surveyText}
+                    placeholder='ex. This survey helps establish a baseline to refer back to later.'
+                    onChangeText={(text) => setSurveyText(text)}
+                    multiline={true}
+                    numberOfLines={4}
+                  />
+                </View>
               </View>
+              <View style={styles.newPromptHeader}>
+                <Text style={styles.newPromptDescTitle}>Survey Items</Text>
+              </View>
+
+              <View style={styles.addSurveyBody}>
+                <View style={styles.addSurveyListContainer}>
+                  <Button
+                    title='Add Task'
+                    onPress={toggleSurveyItemsDropdown}
+                    buttonStyle={[styles.addSurveyListButton,{backgroundColor:btnColors.success}]}
+                    containerStyle={styles.addSurveyListButtonContainer}
+                  />
+                  <View contentContainerStyle={styles.addSurveyList}>
+                  {surveyItems.map((item, index) => {
+                    const isCurrent = (index == currentSurveyItem) ? {borderBottomColor:btnColors.info,borderTopColor:btnColors.info} : {}
+                    var icon = ''
+                    switch (item.Type) {
+                      case 0:
+                        icon = 'create'
+                      break
+                      case 1:
+                        icon = 'options'
+                      break
+                      case 2:
+                        icon = 'checkbox'
+                      break
+                      case 3:
+                        icon = 'radio-button-off'
+                      break
+                      case 4:
+                        icon = 'text'
+                      break
+                      default:
+                        icon = 'create'
+                      break
+                    }
+                    var itemQuestion = item.Question
+                    if (itemQuestion.length > 40) {
+                      itemQuestion = itemQuestion.slice(0,40) + '...'
+                    }
+                    return (<View style={[styles.programTask,isCurrent]} key={index}>
+                      <Pressable style={styles.programTaskMain} onPress={() => selectTask(index, item.Type)}>
+                        <Icon
+                          name={icon}
+                          type='ionicon'
+                          size={26}
+                          style={styles.programTaskIcon}
+                          color={colors.mainTextColor}
+                        />
+                        <View>
+                          <Text style={styles.programTaskTitle}>{item.Title}</Text>
+                          <Text style={styles.surveyTaskQuestion}>{itemQuestion}</Text>
+                        </View>
+                      </Pressable>
+                      <View style={styles.programTaskNav}>
+                        <Icon
+                          name='chevron-up'
+                          type='ionicon'
+                          size={25}
+                          color={(index == 0) ? colors.mainBackground : colors.mainTextColor}
+                          onPress={() => moveTaskUp(index, surveyItems)}
+                          disabledStyle={{backgroundColor:colors.mainBackground}}
+                          disabled={(index == 0) ? true : false}
+                        />
+                        <Icon
+                          name='chevron-down'
+                          type='ionicon'
+                          size={25}
+                          color={(index == surveyItems.length-1) ? colors.mainBackground : colors.mainTextColor}
+                          onPress={() => moveTaskDown(index, surveyItems)}
+                          disabledStyle={{backgroundColor:colors.mainBackground}}
+                          disabled={(index == surveyItems.length-1) ? true : false}
+                        />
+                      </View>
+                    </View>)
+                  })}
+                  </View>
+                  {surveyItemsDropdown && (<View style={styles.addSurveyListDropdown}>
+
+                    <Pressable style={[styles.addSurveyListDropdownTouch]} onPress={() => addTask(0)}>
+                      <Text style={styles.addSurveyListDropdownText}>Add Input</Text>
+                    </Pressable>
+
+                    <Pressable style={[styles.addSurveyListDropdownTouch]} onPress={() => addTask(1)}>
+                      <Text style={styles.addSurveyListDropdownText}>Add Slider</Text>
+                    </Pressable>
+
+                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(2)}>
+                      <Text style={styles.addSurveyListDropdownText}>Add Checkbox Group</Text>
+                    </Pressable>
+
+                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(3)}>
+                      <Text style={styles.addSurveyListDropdownText}>Add Radiobox Group</Text>
+                    </Pressable>
+
+                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(4)}>
+                      <Text style={styles.addSurveyListDropdownText}>Add Rich Text</Text>
+                    </Pressable>
+
+                  </View>)}
+                </View>
+                <View style={styles.addSurveyMainContainer}>
+                  {showAddSurveyItemIndicator && (<ActivityIndicatorView />)
+                  || (<>
+                    {showSurveyItemMain &&
+                    (<View style={styles.addSurveyMain}>
+                      <View style={styles.addSurveyMainHeader}>
+                        <View style={styles.addSurveyMainHeaderLeft}>
+                          <Text style={styles.addSurveyMainHeaderTaskText}>Item #{currentSurveyItem+1}</Text>
+                          <Text style={styles.addSurveyMainHeaderTitle}>{surveyItems[currentSurveyItem].Title}</Text>
+                        </View>
+                        <Pressable style={styles.addSurveyMainHeaderRight} onPress={() => deleteTask()}>
+                          <Text style={styles.addSurveyMainHeaderDelete}>Delete</Text>
+                        </Pressable>
+                      </View>
+                      <View style={styles.addSurveyMainBody}>
+                        {surveyItems[currentSurveyItem].Type == 0 && (<>
+                          <Text style={styles.newPromptTitleLabel}>Question</Text>
+                          <TextInput
+                            style={styles.inputStyle}
+                            value={surveyItems[currentSurveyItem].Question}
+                            placeholder='ex. How would you define success?'
+                            onChangeText={(text) => updateQuestion(text)}
+                          />
+                        </>)}
+                        {surveyItems[currentSurveyItem].Type == 1 && (<>
+                          <Text style={styles.newPromptTitleLabel}>Question</Text>
+                          <TextInput
+                            style={styles.inputStyle}
+                            value={surveyItems[currentSurveyItem].Question}
+                            placeholder='ex. How would you define success?'
+                            onChangeText={(text) => updateQuestion(text)}
+                          />
+                          <View style={styles.inputSliderInfo}>
+                            <View style={styles.inputSliderInfoRange}>
+                              <View style={styles.dropdownContainer}>
+                                <Dropdown options={minRangeValues} initialValue={1} onChange={(e, d) => {console.log(e); console.log(d); }}/>
+                              </View>
+                              <Text style={styles.inputSliderInfoRangeSpacer}>to</Text>
+                              <View style={styles.dropdownContainer}>
+                                <Dropdown options={maxRangeValues} initialValue={10} onChange={(e, d) => {console.log(e); console.log(d); }}/>
+                              </View>
+                            </View>
+                          </View>
+                        </>)}
+                      </View>
+                    </View>)
+                    ||
+                    (<Text style={styles.addSurveyMainHelpText}>
+                      {surveyItems.length > 0 && ('Select an Item to configure.') || (`Add an Item to configure.`)}
+                    </Text>)}
+                  </>)}
+                </View>
+              </View>
+
               <View style={styles.newPromptFooter}>
-                <Button
+                {(surveyTitle.length == 0 || surveyText.length == 0 || surveyItems.length == 0) && (<Popup
+                  position='top center'
+                  content='Base fields need to be filled out, and at least one survey item created!' trigger={<Button
                   title='Create Survey'
-                  disabled={createButtonDisabled}
+                  disabled={true}
                   titleStyle={styles.newPromptAddButtonTitle}
                   buttonStyle={styles.newPromptAddButton}
-                  containerStyle={styles.newPromptAddButtonContainer}
-                />
+                  containerStyle={[styles.newPromptAddButtonContainer,{width:'100%',padding:0}]}
+                />}/>) || (<Button
+                  title='Create Survey'
+                  titleStyle={styles.newPromptAddButtonTitle}
+                  buttonStyle={styles.newPromptAddButton}
+                  containerStyle={[styles.newPromptAddButtonContainer,{width:'100%',padding:0}]}
+                  onPress={submitSurvey}
+                  disabled={createButtonDisabled}
+                />)}
+                {createButtonActivityIndicator && (<View style={[styles.newPromptAddButtonContainer,{marginTop:10}]}><ActivityIndicatorView /></View>)}
                 <View style={styles.newPromptAddButtonSpacer}></View>
               </View>
             </View>

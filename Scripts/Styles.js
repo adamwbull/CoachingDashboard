@@ -943,6 +943,7 @@ export const promptsLight = StyleSheet.create({
   newPromptContainer: {
     padding:20,
     borderRadius:10,
+    marginBottom:20,
     backgroundColor:colorsLight.mainBackground,
   },
   newPromptHeader: {
@@ -1134,6 +1135,207 @@ export const promptsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     marginTop:10,
     marginLeft:5
+  },
+  addSurveyBody: {
+    flexDirection:'row',
+    marginBottom:20,
+    borderLeftColor:colorsLight.headerBorder,
+    borderRightColor:colorsLight.headerBorder,
+    borderBottomColor:colorsLight.headerBorder,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:1
+  },
+  addSurveyListContainer: {
+    flex:2,
+    backgroundColor:colorsLight.header,
+    borderRightWidth:1,
+    borderRightColor:colorsLight.headerBorder,
+    borderTopLeftRadius:10,
+    borderBottomLeftRadius:10
+  },
+  addSurveyListButton: {
+    borderRadius:50
+  },
+  addSurveyListButtonContainer: {
+    padding:20,
+  },
+  addSurveyListDropdown: {
+    position:'absolute',
+    width:'80%',
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    padding:10,
+    left:'10%',
+    top:60,
+  },
+  addSurveyListDropdownTouch: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    cursor:'pointer'
+  },
+  addSurveyListDropdownTouchBottom: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    cursor:'pointer'
+  },
+  addSurveyListDropdownText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  addSurveyList: {
+    justifyContent:'flex-start',
+    flex:5,
+  },
+  programTask: {
+    backgroundColor:colorsLight.mainBackground,
+    flexDirection:'row',
+    marginBottom:10,
+    borderTopColor:colorsLight.headerBorder,
+    borderBottomColor:colorsLight.headerBorder,
+    borderTopWidth:2,
+    borderBottomWidth:2
+  },
+  programTaskMain: {
+    flex:1,
+    padding:20,
+    flexDirection:'row',
+    alignItems:'center',
+    cursor:'pointer'
+  },
+  programTaskIcon: {
+    marginRight:15,
+  },
+  programTaskTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  programTaskNav: {
+    width:40,
+    justifyContent:'space-between',
+    paddingTop:4,
+    paddingBottom:4
+  },
+  planRequiredText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:12,
+    color:colorsLight.mainTextColor,
+  },
+  addSurveyMainContainer: {
+    flex:3,
+    minHeight:300,
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  addSurveyMainHelpText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    color:colorsLight.mainTextColor
+  },
+  addSurveyMain: {
+    flex:1,
+    width:'100%',
+    padding:20,
+  },
+  addSurveyMainHeader: {
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    paddingBottom:10,
+    paddingLeft:5,
+    paddingRight:5,
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
+  addSurveyMainHeaderLeft: {
+    flexDirection:'row',
+    flex:3,
+    alignItems:'center'
+  },
+  addSurveyMainHeaderRight: {
+    justifyContent:'center',
+    flex:1,
+    cursor:'pointer'
+  },
+  addSurveyMainHeaderDelete: {
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'right',
+  },
+  addSurveyMainHeaderTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    textAlign:'left',
+    marginRight:10,
+  },
+  addSurveyMainHeaderTitle: {
+    fontFamily:'Poppins',
+    fontSize:22,
+    textAlign:'left'
+  },
+  addSurveyMainBody: {
+    paddingTop:15,
+    justifyContent:'flex-start',
+    alignItems:'flex-start',
+  },
+  addSurveyMainSearch: {
+    zIndex:999
+  },
+  chosenTask: {
+    flex:1,
+    marginLeft:20,
+  },
+  chosenTaskTitle: {
+    fontSize:22,
+    marginTop:10,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  chosenTaskText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    marginTop:5,
+    color:colorsLight.mainTextColor
+  },
+  searchTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+  },
+  addSurveyFooter: {
+    flexDirection:'row',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+  },
+  surveyTaskQuestion: {
+    fontFamily:'Poppins',
+    fontSize:12,
+    color:colorsLight.mainTextColor
+  },
+  inputSliderInfo: {
+
+  },
+  inputSliderInfoRange: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  inputSliderInfoRangeSpacer: {
+    padding:10,
+  },
+  dropdownContainer: {
+    padding:5,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10
   }
 });
 
