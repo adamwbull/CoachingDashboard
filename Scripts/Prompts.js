@@ -59,19 +59,19 @@ export default function Prompts() {
   const [showAddSurveyItemIndicator, setAddSurveyItemIndicator] = useState(false)
   const [showSurveyItemMain, setSurveyItemMain] = useState(false)
   const minRangeValues = [
-    { key:0, text:'0', value:0 },
-    { key:1, text:'1', value:1 }
+    { key:1, text:'1', value:1 },
+    { key:0, text:'0', value:0 }
   ]
   const maxRangeValues = [
-    { key:2, text:'2', value:2 },
-    { key:3, text:'3', value:3 },
-    { key:4, text:'4', value:4 },
-    { key:5, text:'5', value:5 },
-    { key:6, text:'6', value:6 },
-    { key:7, text:'7', value:7 },
-    { key:8, text:'8', value:8 },
+    { key:10, text:'10', value:10 },
     { key:9, text:'9', value:9 },
-    { key:10, text:'10', value:10 }
+    { key:8, text:'8', value:8 },
+    { key:7, text:'7', value:7 },
+    { key:6, text:'6', value:6 },
+    { key:5, text:'5', value:5 },
+    { key:4, text:'4', value:4 },
+    { key:3, text:'3', value:3 },
+    { key:2, text:'2', value:2 },
   ]
 
   // Survey Prompts data to upload.
@@ -399,7 +399,10 @@ export default function Prompts() {
       TaskId:0,
       Title:title,
       Question:'',
-
+      SliderRange:'1,10',
+      SliderLeft:'',
+      SliderRight:'',
+      BoxOptionsArray:''
     }
     var list = surveyItems
     list.push(newTask)
@@ -492,6 +495,59 @@ export default function Prompts() {
     }
     list[currentSurveyItem].Title = title
     setSurveyItems(list)
+  }
+
+  const handleSliderDropdown = (type, e, d) => {
+    var list = JSON.parse(JSON.stringify(surveyItems))
+    var rangeText = list[currentSurveyItem].SliderRange
+    var range = rangeText.split(',')
+    range[type] = d.value
+    list[currentSurveyItem].SliderRange = range.toString()
+    setSurveyItems(list)
+  }
+
+  const updateSliderLabel = (type, text) => {
+    var list = JSON.parse(JSON.stringify(surveyItems))
+    if (type == 0) {
+      list[currentSurveyItem].SliderLeft = text
+    } else if (type == 1) {
+      list[currentSurveyItem].SliderRight = text
+    }
+    setSurveyItems(list)
+  }
+
+  const addBox = () => {
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    var cur = newSurveyItems[currentSurveyItem].BoxOptionsArray
+    newSurveyItems[currentSurveyItem].BoxOptionsArray = cur + ','
+  }
+
+  const moveBoxUp = (index) => {
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    var list = newSurveyItems[currentSurveyItem].BoxOptionsArray.split(',')
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index-1]
+    newList[index-1] = list[index]
+    newSurveyItems[currentSurveyItem].BoxOptionsArray = newList.toString()
+    setSurveyItems(newSurveyItems)
+  }
+
+  const moveBoxDown = (index) => {
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    var list = newSurveyItems[currentSurveyItem].BoxOptionsArray.split(',')
+    var newList = JSON.parse(JSON.stringify(list))
+    newList[index] = list[index+1]
+    newList[index+1] = list[index]
+    newSurveyItems[currentSurveyItem].BoxOptionsArray = newList.toString()
+    setSurveyItems(newSurveyItems)
+  }
+
+  const updateBoxQuestion = (text, index) => {
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    var list = newSurveyItems[currentSurveyItem].BoxOptionsArray.split(',')
+    list[index] = text
+    newSurveyItems[currentSurveyItem].BoxOptionsArray = list.toString()
+    setSurveyItems(newSurveyItems)
   }
 
   const submitSurvey = () => {
@@ -941,7 +997,7 @@ export default function Prompts() {
                         icon = 'checkbox'
                       break
                       case 3:
-                        icon = 'radio-button-off'
+                        icon = 'radio-button-on'
                       break
                       case 4:
                         icon = 'text'
@@ -951,8 +1007,8 @@ export default function Prompts() {
                       break
                     }
                     var itemQuestion = item.Question
-                    if (itemQuestion.length > 40) {
-                      itemQuestion = itemQuestion.slice(0,40) + '...'
+                    if (itemQuestion.length > 50) {
+                      itemQuestion = itemQuestion.slice(0,50) + '...'
                     }
                     return (<View style={[styles.programTask,isCurrent]} key={index}>
                       <Pressable style={styles.programTaskMain} onPress={() => selectTask(index, item.Type)}>
@@ -1044,19 +1100,91 @@ export default function Prompts() {
                           <TextInput
                             style={styles.inputStyle}
                             value={surveyItems[currentSurveyItem].Question}
-                            placeholder='ex. How would you define success?'
+                            placeholder='ex. How comfortable are you with public speaking?'
                             onChangeText={(text) => updateQuestion(text)}
                           />
                           <View style={styles.inputSliderInfo}>
                             <View style={styles.inputSliderInfoRange}>
                               <View style={styles.dropdownContainer}>
-                                <Dropdown options={minRangeValues} initialValue={1} onChange={(e, d) => {console.log(e); console.log(d); }}/>
+                                <Dropdown upward={true} text={surveyItems[currentSurveyItem].SliderRange.split(',')[0]} options={minRangeValues} onChange={(e, d) => handleSliderDropdown(0, e, d)}/>
                               </View>
                               <Text style={styles.inputSliderInfoRangeSpacer}>to</Text>
                               <View style={styles.dropdownContainer}>
-                                <Dropdown options={maxRangeValues} initialValue={10} onChange={(e, d) => {console.log(e); console.log(d); }}/>
+                                <Dropdown upward={true} text={surveyItems[currentSurveyItem].SliderRange.split(',')[1]} options={maxRangeValues} onChange={(e, d) => handleSliderDropdown(1, e, d)}/>
                               </View>
                             </View>
+                            <View style={styles.inputSliderTextContainer}>
+                              <Text style={styles.inputSliderNumDisplay}>{surveyItems[currentSurveyItem].SliderRange.split(',')[0]}</Text>
+                              <View>
+                                <Text style={styles.inputSliderTextTitle}>Left Label</Text>
+                                <TextInput
+                                  style={styles.inputSliderTextLabel}
+                                  placeholder='ex. Not at all'
+                                  value={surveyItems[currentSurveyItem].SliderLeft}
+                                  onChangeText={(text) => updateSliderLabel(0, text)}
+                                />
+                              </View>
+                            </View>
+                            <View style={styles.inputSliderTextContainer}>
+                              <Text style={styles.inputSliderNumDisplay}>{surveyItems[currentSurveyItem].SliderRange.split(',')[1]}</Text>
+                              <View>
+                                <Text style={styles.inputSliderTextTitle}>Right Label</Text>
+                                <TextInput
+                                  style={styles.inputSliderTextLabel}
+                                  placeholder='ex. Right at home'
+                                  value={surveyItems[currentSurveyItem].SliderRight}
+                                  onChangeText={(text) => updateSliderLabel(1, text)}
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        </>)}
+                        {surveyItems[currentSurveyItem].Type == 2 && (<>
+                          <Text style={styles.newPromptTitleLabel}>Question</Text>
+                          <TextInput
+                            style={styles.inputStyle}
+                            value={surveyItems[currentSurveyItem].Question}
+                            placeholder='ex. What emotions have you felt today? Select all that apply.'
+                            onChangeText={(text) => updateQuestion(text)}
+                          />
+                          <View style={styles.surveyBoxes}>
+                            {surveyItems[currentSurveyItem].BoxOptionsArray.split(',').map((item, index) => {
+                              var curArr = surveyItems[currentSurveyItem].BoxOptionsArray.split(',')
+                              return (<View style={styles.boxItem} key={index + '-' + index}>
+                                <Icon
+                                  name='square-outline'
+                                  type='ionicon'
+                                  size={30}
+                                  color={colors.mainTextColor}
+                                />
+                                <TextInput
+                                  style={styles.inputStyle}
+                                  value={curArr[index]}
+                                  placeholder='ex. What emotions have you felt today? Select all that apply.'
+                                  onChangeText={(text) => updateBoxQuestion(text, index)}
+                                />
+                                <View style={styles.programTaskNav}>
+                                  <Icon
+                                    name='chevron-up'
+                                    type='ionicon'
+                                    size={25}
+                                    color={(index == 0) ? colors.mainBackground : colors.mainTextColor}
+                                    onPress={() => moveBoxUp(index)}
+                                    disabledStyle={{backgroundColor:colors.mainBackground}}
+                                    disabled={(index == 0) ? true : false}
+                                  />
+                                  <Icon
+                                    name='chevron-down'
+                                    type='ionicon'
+                                    size={25}
+                                    color={(index == curArr.length-1) ? colors.mainBackground : colors.mainTextColor}
+                                    onPress={() => moveBoxDown(index)}
+                                    disabledStyle={{backgroundColor:colors.mainBackground}}
+                                    disabled={(index == curArr.length-1) ? true : false}
+                                  />
+                                </View>
+                              </View>)
+                            })}
                           </View>
                         </>)}
                       </View>

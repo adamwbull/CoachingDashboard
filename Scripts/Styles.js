@@ -1327,7 +1327,8 @@ export const promptsLight = StyleSheet.create({
   },
   inputSliderInfoRange: {
     flexDirection:'row',
-    alignItems:'center'
+    alignItems:'center',
+    marginBottom:20
   },
   inputSliderInfoRangeSpacer: {
     padding:10,
@@ -1336,6 +1337,42 @@ export const promptsLight = StyleSheet.create({
     padding:5,
     backgroundColor:colorsLight.secondaryBackground,
     borderRadius:10
+  },
+  inputSliderTextContainer: {
+    flexDirection:'row',
+    alignItems:'center',
+    marginBottom:10
+  },
+  inputSliderNumDisplay: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    height:30,
+    width:30,
+    marginRight:10
+  },
+  inputSliderTextTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+  },
+  inputSliderTextLabel: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:14,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  surveyBoxes: {
+    justifyContent:'flex-start',
+    alignItems:'center',
+    flex:1
+  },
+  boxItem: {
+    flexDirection:'row',
+    justifyContent:'center'
   }
 });
 
