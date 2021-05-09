@@ -1368,11 +1368,30 @@ export const promptsLight = StyleSheet.create({
   surveyBoxes: {
     justifyContent:'flex-start',
     alignItems:'center',
-    flex:1
+    flex:1,
+    marginBottom:10
   },
   boxItem: {
     flexDirection:'row',
-    justifyContent:'center'
+    alignItems:'center',
+    marginTop:10,
+    paddingTop:15,
+    marginBottom:10,
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder
+  },
+  boxItemInput: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'50%',
+    fontFamily:'Poppins',
+    fontSize:14,
+  },
+  boxItemNav: {
+    backgroundColor:colorsLight.mainBackground,
+    marginRight:10
   }
 });
 

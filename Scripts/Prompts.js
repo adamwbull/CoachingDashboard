@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
@@ -14,6 +14,7 @@ import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
 import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup, Dropdown } from 'semantic-ui-react'
+import JoditEditor from "jodit-react";
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -27,6 +28,8 @@ export default function Prompts() {
   const [contractsDisabled, setContractsDisabled] = useState(true)
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
+  const [scrollToEnd, setScrollToEnd] = useState(false)
+
   // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
   const [showPromptOptions, setShowPromptOptions] = useState(-1)
@@ -73,6 +76,14 @@ export default function Prompts() {
     { key:3, text:'3', value:3 },
     { key:2, text:'2', value:2 },
   ]
+  const editor = useRef(null)
+  const editorConfig = {
+		readonly: false, // all options from https://xdsoft.net/jodit/doc/
+    cleanHTML: true,
+    limitChars:3000,
+    askBeforePasteHTML:false
+	}
+  const [editorState, setEditorState] = useState('<p>Create your <strong>awesome content</strong> here! 😁</p>')
 
   // Survey Prompts data to upload.
   const [surveyTitle, setSurveyTitle] = useState('')
@@ -138,6 +149,7 @@ export default function Prompts() {
 
   const addPrompt = () => {
     setMain(false)
+    setScrollToEnd(true)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -156,6 +168,7 @@ export default function Prompts() {
     setAddingTextPrompt(false)
     setActivityIndicator(true)
     setTimeout(() => {
+      setScrollToEnd(false)
       setActivityIndicator(false)
       setMain(true)
     },500)
@@ -337,6 +350,7 @@ export default function Prompts() {
       setAddingTextPrompt(false)
       setActivityIndicator(true)
       setTimeout(() => {
+        setScrollToEnd(false)
         setActivityIndicator(false)
         setMain(true)
       },500)
@@ -351,6 +365,7 @@ export default function Prompts() {
     setMain(false)
     setActivityIndicator(true)
     setTimeout(() => {
+      setScrollToEnd(true)
       setActivityIndicator(false)
       setAddingSurveyPrompt(true)
     },500)
@@ -402,7 +417,8 @@ export default function Prompts() {
       SliderRange:'1,10',
       SliderLeft:'',
       SliderRight:'',
-      BoxOptionsArray:''
+      BoxOptionsArray:'',
+      RichText:''
     }
     var list = surveyItems
     list.push(newTask)
@@ -495,6 +511,7 @@ export default function Prompts() {
     }
     list[currentSurveyItem].Title = title
     setSurveyItems(list)
+    console.log(list)
   }
 
   const handleSliderDropdown = (type, e, d) => {
@@ -520,6 +537,16 @@ export default function Prompts() {
     var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
     var cur = newSurveyItems[currentSurveyItem].BoxOptionsArray
     newSurveyItems[currentSurveyItem].BoxOptionsArray = cur + ','
+    setSurveyItems(newSurveyItems)
+  }
+
+  const removeBox = (i) => {
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    var cur = newSurveyItems[currentSurveyItem].BoxOptionsArray
+    var arr = cur.split(',')
+    arr.splice(i, i+1)
+    newSurveyItems[currentSurveyItem].BoxOptionsArray = arr.toString()
+    setSurveyItems(newSurveyItems)
   }
 
   const moveBoxUp = (index) => {
@@ -550,6 +577,14 @@ export default function Prompts() {
     setSurveyItems(newSurveyItems)
   }
 
+  const onRichText = (editorState) => {
+    setEditorState(editorState)
+    var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
+    newSurveyItems[currentSurveyItem].RichText = editorState
+    setSurveyItems(newSurveyItems)
+    console.log(newSurveyItems)
+  }
+
   const submitSurvey = () => {
     console.log('Submitting survey...')
   }
@@ -564,7 +599,7 @@ export default function Prompts() {
     console.log ('Add new contract...')
   }
 
-  return (<ScrollView contentContainerStyle={styles.scrollView}>
+  return (<ScrollView contentContainerStyle={styles.scrollView} scrollToEnd={scrollToEnd}>
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
@@ -1057,11 +1092,11 @@ export default function Prompts() {
                       <Text style={styles.addSurveyListDropdownText}>Add Slider</Text>
                     </Pressable>
 
-                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(2)}>
+                    <Pressable style={[styles.addSurveyListDropdownTouch]} onPress={() => addTask(2)}>
                       <Text style={styles.addSurveyListDropdownText}>Add Checkbox Group</Text>
                     </Pressable>
 
-                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(3)}>
+                    <Pressable style={[styles.addSurveyListDropdownTouch]} onPress={() => addTask(3)}>
                       <Text style={styles.addSurveyListDropdownText}>Add Radiobox Group</Text>
                     </Pressable>
 
@@ -1147,23 +1182,12 @@ export default function Prompts() {
                             placeholder='ex. What emotions have you felt today? Select all that apply.'
                             onChangeText={(text) => updateQuestion(text)}
                           />
+                          <Text style={styles.newPromptTitleLabel}>Options</Text>
                           <View style={styles.surveyBoxes}>
                             {surveyItems[currentSurveyItem].BoxOptionsArray.split(',').map((item, index) => {
                               var curArr = surveyItems[currentSurveyItem].BoxOptionsArray.split(',')
                               return (<View style={styles.boxItem} key={index + '-' + index}>
-                                <Icon
-                                  name='square-outline'
-                                  type='ionicon'
-                                  size={30}
-                                  color={colors.mainTextColor}
-                                />
-                                <TextInput
-                                  style={styles.inputStyle}
-                                  value={curArr[index]}
-                                  placeholder='ex. What emotions have you felt today? Select all that apply.'
-                                  onChangeText={(text) => updateBoxQuestion(text, index)}
-                                />
-                                <View style={styles.programTaskNav}>
+                                <View style={styles.boxItemNav}>
                                   <Icon
                                     name='chevron-up'
                                     type='ionicon'
@@ -1183,10 +1207,122 @@ export default function Prompts() {
                                     disabled={(index == curArr.length-1) ? true : false}
                                   />
                                 </View>
+                                <Icon
+                                  name='square-outline'
+                                  type='ionicon'
+                                  size={30}
+                                  color={colors.mainTextColor}
+                                  style={{marginRight:10}}
+                                />
+                                <TextInput
+                                  style={styles.boxItemInput}
+                                  value={curArr[index]}
+                                  placeholder=''
+                                  onChangeText={(text) => updateBoxQuestion(text, index)}
+                                />
+                                <Icon
+                                  name='close'
+                                  type='ionicon'
+                                  size={25}
+                                  color={(curArr.length == 1) ? colors.mainBackground : btnColors.danger}
+                                  onPress={() => removeBox(index)}
+                                  style={{marginLeft:10}}
+                                  disabledStyle={{backgroundColor:colors.mainBackground}}
+                                  disabled={(curArr.length == 1) ? true : false}
+                                />
                               </View>)
                             })}
                           </View>
+                          <Button
+                            title='Add Checkbox'
+                            titleStyle={styles.newPromptAddButtonTitle}
+                            buttonStyle={[styles.newPromptAddButton,{paddingLeft:15,paddingRight:15,paddingTop:5,paddingBottom:5}]}
+                            onPress={addBox}
+                          />
                         </>)}
+                        {surveyItems[currentSurveyItem].Type == 3 && (<>
+                          <Text style={styles.newPromptTitleLabel}>Question</Text>
+                          <TextInput
+                            style={styles.inputStyle}
+                            value={surveyItems[currentSurveyItem].Question}
+                            placeholder='ex. How often do you want to meet? Choose one.'
+                            onChangeText={(text) => updateQuestion(text)}
+                          />
+                          <Text style={styles.newPromptTitleLabel}>Options</Text>
+                          <View style={styles.surveyBoxes}>
+                            {surveyItems[currentSurveyItem].BoxOptionsArray.split(',').map((item, index) => {
+                              var curArr = surveyItems[currentSurveyItem].BoxOptionsArray.split(',')
+                              return (<View style={styles.boxItem} key={index + '-' + index + '-'}>
+                                <View style={styles.boxItemNav}>
+                                  <Icon
+                                    name='chevron-up'
+                                    type='ionicon'
+                                    size={25}
+                                    color={(index == 0) ? colors.mainBackground : colors.mainTextColor}
+                                    onPress={() => moveBoxUp(index)}
+                                    disabledStyle={{backgroundColor:colors.mainBackground}}
+                                    disabled={(index == 0) ? true : false}
+                                  />
+                                  <Icon
+                                    name='chevron-down'
+                                    type='ionicon'
+                                    size={25}
+                                    color={(index == curArr.length-1) ? colors.mainBackground : colors.mainTextColor}
+                                    onPress={() => moveBoxDown(index)}
+                                    disabledStyle={{backgroundColor:colors.mainBackground}}
+                                    disabled={(index == curArr.length-1) ? true : false}
+                                  />
+                                </View>
+                                <Icon
+                                  name='radio-button-off-outline'
+                                  type='ionicon'
+                                  size={30}
+                                  color={colors.mainTextColor}
+                                  style={{marginRight:10}}
+                                />
+                                <TextInput
+                                  style={styles.boxItemInput}
+                                  value={curArr[index]}
+                                  placeholder=''
+                                  onChangeText={(text) => updateBoxQuestion(text, index)}
+                                />
+                                <Icon
+                                  name='close'
+                                  type='ionicon'
+                                  size={25}
+                                  color={(curArr.length == 1) ? colors.mainBackground : btnColors.danger}
+                                  onPress={() => removeBox(index)}
+                                  style={{marginLeft:10}}
+                                  disabledStyle={{backgroundColor:colors.mainBackground}}
+                                  disabled={(curArr.length == 1) ? true : false}
+                                />
+                              </View>)
+                            })}
+                          </View>
+                          <Button
+                            title='Add Radiobox'
+                            titleStyle={styles.newPromptAddButtonTitle}
+                            buttonStyle={[styles.newPromptAddButton,{paddingLeft:15,paddingRight:15,paddingTop:5,paddingBottom:5}]}
+                            onPress={addBox}
+                          />
+                        </>)}
+                        {surveyItems[currentSurveyItem].Type == 4 && (<View style={{width:'100%'}}>
+                          <Text style={styles.newPromptTitleLabel}>Section Title</Text>
+                          <TextInput
+                            style={styles.inputStyle}
+                            value={surveyItems[currentSurveyItem].Question}
+                            placeholder='ex. Coach Bio'
+                            onChangeText={(text) => updateQuestion(text)}
+                          />
+                          <JoditEditor
+                          	ref={editor}
+                            value={editorState}
+                            config={editorConfig}
+              		          tabIndex={1} // tabIndex of textarea
+              		          onBlur={newContent => onRichText(newContent)}
+
+                          />
+                        </View>)}
                       </View>
                     </View>)
                     ||
