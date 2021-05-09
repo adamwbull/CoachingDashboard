@@ -148,13 +148,65 @@ export async function check() {
 
 */
 
+export async function createSurveyItem(token, surveyId, type, question, richText, sliderRange, boxOptionsArray, itemOrder) {
+
+  var ret = false
+  var arr = {Token:token, SurveyId:surveyId, Active:1, Type:type, KeyboardType:'default', Question:question, RichText:richText, SliderRange:sliderRange, BoxOptionsArray:boxOptionsArray, ItemOrder:itemOrder}
+
+  console.log('Creating survey item...')
+  const res = await fetch(url + '/survey-item/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Survey item created!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function createMeasurementSurvey(id, token, title, text) {
+
+  var ret = false
+  var arr = {CoachId:id, Token:token, Title:title, Text:text, Type:1}
+
+  console.log('Creating survey...')
+  const res = await fetch(url + '/survey/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Survey created!')
+    ret = payload.insertId
+  }
+
+  return ret
+
+}
+
 export async function deletePrompt(promptId, coachId, token) {
 
   var ret = false
   var arr = {Token:token, Id:promptId, CoachId:coachId}
 
   console.log(arr)
-  
+
   console.log('Deleting prompt...')
   const res = await fetch(url + '/prompt/delete', {
     method:'POST',

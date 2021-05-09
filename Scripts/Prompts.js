@@ -12,7 +12,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
+import { createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup, Dropdown } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 
@@ -585,8 +585,18 @@ export default function Prompts() {
     console.log(newSurveyItems)
   }
 
-  const submitSurvey = () => {
-    console.log('Submitting survey...')
+  const submitSurvey = async () => {
+    var createdSurveyId = await createMeasurementSurvey(coach.Id, coach.Token, surveyTitle, surveyText)
+    var i = 0
+    if (createdSurveyId != false) {
+      while(i < surveyItems.length) {
+        var item = surveyItems[i]
+        var createdSurveyItem = await createSurveyItem(coach.Token, createdSurveyId, item.Type, item.Question, item.RichText, item.SliderRange, item.BoxOptionsArray, i)
+        if (createdSurveyItem) {
+          i++
+        }
+      }
+    }
   }
 
   // Payment controls.
