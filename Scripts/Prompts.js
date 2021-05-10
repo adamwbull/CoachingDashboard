@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useRef, useState } from 'react'
 import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark, btnColors } from '../Scripts/Styles.js'
 import { useLinkTo, Link } from '@react-navigation/native'
@@ -12,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
+import { getSurveys, createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup, Dropdown } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 
@@ -33,6 +32,10 @@ export default function Prompts() {
   // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
   const [showPromptOptions, setShowPromptOptions] = useState(-1)
+
+  // Survey main stage controls.
+  const [deleteSurveyIndex, setDeleteSurveyIndex] = useState(-1)
+  const [showSurveyOptions, setShowSurveyOptions] = useState(-1)
 
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
@@ -56,7 +59,7 @@ export default function Prompts() {
 
   // Survey Prompts stage controls.
   const [showAddingSurveyPrompt, setAddingSurveyPrompt] = useState(false)
-  const [surveyItemsDropdown, setSurveyItemsDropdown] = useState('')
+  const [surveyItemsDropdown, setSurveyItemsDropdown] = useState(false)
   const [currentSurveyItem, setCurrentSurveyItem] = useState(0)
   const [chosenTask, setChosenTask] = useState({})
   const [showAddSurveyItemIndicator, setAddSurveyItemIndicator] = useState(false)
@@ -107,14 +110,19 @@ export default function Prompts() {
     setPrompts(refresh)
   }
 
+  const refreshSurveys = async (id, token) => {
+    var refresh = await getSurveys(id, token)
+    setSurveys(refresh)
+  }
+
   // Main loader.
   useEffect(() => {
     const sCoach = get('Coach')
-    console.log(sCoach)
     if (sCoach != null) {
       setCoach(sCoach)
       try {
         refreshTextPrompts(sCoach.Id, sCoach.Token)
+        refreshSurveys(sCoach.Id, sCoach.Token)
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -137,7 +145,7 @@ export default function Prompts() {
     },500)
   }
 
-  const returnToMainfromViewTextPrompt = (i) => {
+  const returnToMainFromViewTextPrompt = () => {
     setViewTextPrompt(false)
     setViewPrompt({})
     setActivityIndicator(true)
@@ -175,7 +183,6 @@ export default function Prompts() {
   }
 
   const deletePromptTrigger = async (i) => {
-    console.log('Deleting prompt:',prompts[i])
     var deleted = await deletePrompt(prompts[i].Id, coach.Id, coach.Token)
     if (deleted) {
       setDeletePromptIndex(-1)
@@ -186,7 +193,6 @@ export default function Prompts() {
 
   const duplicatePrompt = async (i) => {
     var p = prompts[i]
-    console.log('Duplicating prompt:',p)
     setMain(false)
     setDeletePromptIndex(-1)
     setShowPromptOptions(-1)
@@ -257,7 +263,6 @@ export default function Prompts() {
       setCreateButtonDisabled(false)
       setTempVideoUrl(text)
       var genUrl = 'https://youtube.com/embed/' + yt[1]
-      console.log(genUrl)
       setVideoUrl(genUrl)
     }
   }
@@ -306,7 +311,6 @@ export default function Prompts() {
     var file = tempVideoFile
     var ret = false
     if (file != '') {
-      console.log('Uploading attachment...')
       var fileArr = file.name.split('.')
       var fileOptions = ['mov','mp4','m4a']
       var fileType = fileArr[1]
@@ -318,15 +322,11 @@ export default function Prompts() {
       ts = ts.toString();
       var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
       var newFile = new File([file], fileName, {type: fileMime})
-      console.log('file:',newFile)
       var url = await uploadVideo(newFile) + '/videos/' + fileName
-      console.log('url:',url)
       return url
     } else if (videoUrl !== '') {
-      console.log('videoUrl Video attached.')
       return videoUrl
     } else {
-      console.log('No uploaded needed!')
       return ''
     }
   }
@@ -334,7 +334,6 @@ export default function Prompts() {
   const submitPrompt = async () => {
     setCreateButtonDisabled(true)
     setCreateButtonActivityIndicator(true)
-    console.log('Creating prompt...')
     var fileUploaded = await getAttachment()
     var promptType = 0
     if (videoType == 0) {
@@ -361,7 +360,6 @@ export default function Prompts() {
 
   // Survey controls.
   const addSurvey = () => {
-    console.log ('Add new survey...')
     setMain(false)
     setActivityIndicator(true)
     setTimeout(() => {
@@ -428,7 +426,6 @@ export default function Prompts() {
     setTimeout(() => {
       setSurveyItemMain(true)
       setAddSurveyItemIndicator(false)
-      console.log(newTask)
     }, 800)
 
   }
@@ -511,7 +508,6 @@ export default function Prompts() {
     }
     list[currentSurveyItem].Title = title
     setSurveyItems(list)
-    console.log(list)
   }
 
   const handleSliderDropdown = (type, e, d) => {
@@ -582,7 +578,6 @@ export default function Prompts() {
     var newSurveyItems = JSON.parse(JSON.stringify(surveyItems))
     newSurveyItems[currentSurveyItem].RichText = editorState
     setSurveyItems(newSurveyItems)
-    console.log(newSurveyItems)
   }
 
   const submitSurvey = async () => {
@@ -591,13 +586,93 @@ export default function Prompts() {
     if (createdSurveyId != false) {
       while(i < surveyItems.length) {
         var item = surveyItems[i]
-        var createdSurveyItem = await createSurveyItem(coach.Token, createdSurveyId, item.Type, item.Question, item.RichText, item.SliderRange, item.BoxOptionsArray, i)
+        var createdSurveyItem = await createSurveyItem(coach.Token, createdSurveyId, item.Type, item.Question, item.RichText, item.SliderRange, item.SliderLeft, item.SliderRight, item.BoxOptionsArray, i)
         if (createdSurveyItem) {
           i++
         }
       }
     }
+    if (createdSurveyId) {
+      refreshSurveys(coach.Id, coach.Token)
+      setCreateButtonActivityIndicator(true)
+      setAddingSurveyPrompt(false)
+      setActivityIndicator(true)
+      setChosenTask({})
+      setCurrentSurveyItem(0)
+      setSurveyItemMain(false)
+      setSurveyTitle('')
+      setSurveyText('')
+      setSurveyItems([])
+      setTimeout(() => {
+        setScrollToEnd(false)
+        setActivityIndicator(false)
+        setMain(true)
+      },500)
+    } else {
+    }
   }
+
+  const viewSurveyTrigger = (i) => {
+    setMain(false)
+    setViewPrompt(prompts[i])
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setViewTextPrompt(true)
+    },500)
+  }
+
+  const returnToMainFromViewSurvey = () => {
+    setAddingSurveyPrompt(false)
+    setActivityIndicator(true)
+    setChosenTask({})
+    setCurrentSurveyItem(0)
+    setSurveyItemMain(false)
+    setSurveyTitle('')
+    setSurveyText('')
+    setSurveyItems([])
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
+  }
+
+  const duplicateSurvey = async (i) => {
+    var p = prompts[i]
+    setMain(false)
+    setDeletePromptIndex(-1)
+    setShowPromptOptions(-1)
+    // Set prompt data.
+    setTextPromptTitle(p.Title)
+    setTextPromptText(p.Text)
+    if (p.PromptType != 0) {
+
+      if (p.PromptType == 3) {
+        setSelectYouTube(true)
+        setTempVideoUrl(p.Video)
+        setVideoUrl(p.Video)
+      } else if (p.PromptType == 4) {
+        setSelectUpload(true)
+        setTempVideoUrl(p.Video)
+        setVideoUrl(p.Video)
+      }
+    }
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setAddingTextPrompt(true)
+    },500)
+  }
+
+  const deleteSurveyTrigger = async (i) => {
+    var deleted = await deletePrompt(prompts[i].Id, coach.Id, coach.Token)
+    if (deleted) {
+      setDeletePromptIndex(-1)
+      setShowPromptOptions(-1)
+      refreshTextPrompts(coach.Id, coach.Token)
+    }
+  }
+
 
   // Payment controls.
   const addPayment = () => {
@@ -734,8 +809,62 @@ export default function Prompts() {
                   containerStyle={styles.promptAddButtonContainer}
                   onPress={addSurvey} />
                 </View>
-                {surveys.length > 0 && (<View>
-                </View>) || (<View style={styles.helpBox}>
+                {surveys.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                  {surveys.map((survey, index) => {
+                    var promptIcon = 'clipboard-outline'
+                    var name = survey.Title
+                    if (name.length > 13) {
+                      name = name.slice(0,13) + '...'
+                    }
+                    var text = survey.Text
+                    if (text.length > 80) {
+                      text = text.slice(0,80) + '...'
+                    }
+                    return (<View style={styles.taskBox} key={index + '-'}>
+                      <View style={styles.taskPreview}>
+                        <View style={styles.taskPreviewHeader}>
+                          <View style={styles.taskPreviewHeaderIcon}>
+                            <Icon
+                              name={promptIcon}
+                              type='ionicon'
+                              size={22}
+                              color={colors.mainTextColor}
+                            />
+                          </View>
+                          <Text style={styles.taskPreviewTitle}>{name}</Text>
+                        </View>
+                        {deleteSurveyIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>{text}</Text></>)}
+                      </View>
+                      {deleteSurveyIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteSurveyTrigger(index)}>
+                        <Text style={styles.taskButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeleteSurveyIndex(-1)}>
+                        <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                      </TouchableOpacity></View></>)
+                      || (<>
+                        {showSurveyOptions == index &&
+                          (<>
+                            <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowSurveyOptions(-1)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                            </TouchableOpacity>
+                            <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicateSurvey(index)}>
+                            <Text style={styles.taskButtonText}>Duplicate</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeleteSurveyIndex(index)}>
+                            <Text style={styles.taskButtonText}>Delete</Text>
+                          </TouchableOpacity></View></>)
+                          ||
+                          (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowSurveyOptions(index)}>
+                            <Text style={styles.taskButtonText}>Edit</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                          </TouchableOpacity>
+                        </View></>)}
+                      </>)}
+                    </View>)
+                  })}
+                </ScrollView>) || (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>Surveys to collect data or establish baselines.{"\n"}Assign directly to Clients or include in a Program.</Text>
                 </View>)}
               </View>
@@ -796,7 +925,7 @@ export default function Prompts() {
                   type='ionicon'
                   size={25}
                   color={colors.mainTextColor}
-                  onPress={returnToMainfromViewTextPrompt}
+                  onPress={returnToMainFromViewTextPrompt}
                 />
                 <Text style={styles.newPromptDescTitle}>{viewPrompt.Title}</Text>
               </View>
@@ -991,7 +1120,7 @@ export default function Prompts() {
                   type='ionicon'
                   size={25}
                   color={colors.mainTextColor}
-                  onPress={returnToMainFromTextPrompt}
+                  onPress={returnToMainFromViewSurvey}
                 />
                 <Text style={styles.newPromptDescTitle}>New Survey</Text>
               </View>

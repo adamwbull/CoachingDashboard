@@ -1914,7 +1914,7 @@ export const brandDesignLight = StyleSheet.create({
   scrollView: {
     paddingTop:20,
     paddingLeft:20,
-    paddingRight:20
+    paddingRight:20,
   },
   body: {
     flex:1,
@@ -1946,4 +1946,27 @@ export const brandDesignLight = StyleSheet.create({
     lineHeight:14,
     fontFamily:'Poppins'
   },
+  brandColoringContainer: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  brandColoringGroup: {
+    flex:1
+  },
+  brandColoringGroupTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  brandColoringGroup: {
+    flex:1,
+    borderRadius:10,
+    height:60
+  }
 })

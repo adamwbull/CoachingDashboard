@@ -148,10 +148,10 @@ export async function check() {
 
 */
 
-export async function createSurveyItem(token, surveyId, type, question, richText, sliderRange, boxOptionsArray, itemOrder) {
+export async function createSurveyItem(token, surveyId, type, question, richText, sliderRange, sliderLeft, sliderRight, boxOptionsArray, itemOrder) {
 
   var ret = false
-  var arr = {Token:token, SurveyId:surveyId, Active:1, Type:type, KeyboardType:'default', Question:question, RichText:richText, SliderRange:sliderRange, BoxOptionsArray:boxOptionsArray, ItemOrder:itemOrder}
+  var arr = {Token:token, SurveyId:surveyId, Active:1, Type:type, KeyboardType:'default', Question:question, RichText:richText, SliderRange:sliderRange, SliderLeft:sliderLeft, SliderRight:sliderRight, BoxOptionsArray:boxOptionsArray, ItemOrder:itemOrder}
 
   console.log('Creating survey item...')
   const res = await fetch(url + '/survey-item/create', {
@@ -164,8 +164,7 @@ export async function createSurveyItem(token, surveyId, type, question, richText
   })
 
   const payload = await res.json()
-
-  if (payload.affectedRows > 0) {
+  if (payload[1].affectedRows > 0) {
     console.log('Survey item created!')
     ret = true
   }

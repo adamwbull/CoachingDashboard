@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+;
 import { homeLight, colorsLight, innerDrawerLight } from '../Styles.js';
 import { homeDark, colorsDark, innerDrawerDark } from '../StylesDark.js';
 import { useLinkTo } from '@react-navigation/native';
@@ -102,24 +102,6 @@ export default function MobileApp() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Social Feed</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="Notifications" component={Notifications}
-        options={{
-          title:'Notifications - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='notifications-circle'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Notifications</Text>)
           }
         }}
       />
