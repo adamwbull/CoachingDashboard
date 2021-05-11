@@ -4403,7 +4403,7 @@
   "resolved" "https://registry.npmjs.org/lodash.throttle/-/lodash.throttle-4.1.1.tgz"
   "version" "4.1.1"
 
-"lodash@^4.0.1", "lodash@^4.17.13", "lodash@^4.17.14", "lodash@^4.17.15", "lodash@^4.17.19", "lodash@^4.3.0":
+"lodash@^4.0.1", "lodash@^4.17.11", "lodash@^4.17.13", "lodash@^4.17.14", "lodash@^4.17.15", "lodash@^4.17.19", "lodash@^4.3.0":
   "integrity" "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
   "resolved" "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
   "version" "4.17.21"
@@ -5433,14 +5433,13 @@
     "merge-class-names" "^1.1.1"
     "prop-types" "^15.6.0"
 
-"react-color@^2.19.3":
-  "integrity" "sha512-LEeGE/ZzNLIsFWa1TMe8y5VYqr7bibneWmvJwm1pCn/eNmrabWDh659JSPn9BuaMpEfU83WTOJfnCcjDZwNQTA=="
-  "resolved" "https://registry.npmjs.org/react-color/-/react-color-2.19.3.tgz"
-  "version" "2.19.3"
+"react-color@^2.18.0":
+  "integrity" "sha512-FyVeU1kQiSokWc8NPz22azl1ezLpJdUyTbWL0LPUpcuuYDrZ/Y1veOk9rRK5B3pMlyDGvTk4f4KJhlkIQNRjEA=="
+  "resolved" "https://registry.npmjs.org/react-color/-/react-color-2.18.0.tgz"
+  "version" "2.18.0"
   dependencies:
     "@icons/material" "^0.2.4"
-    "lodash" "^4.17.15"
-    "lodash-es" "^4.17.15"
+    "lodash" "^4.17.11"
     "material-colors" "^1.2.1"
     "prop-types" "^15.5.10"
     "reactcss" "^1.2.0"

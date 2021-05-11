@@ -342,10 +342,11 @@ export default function AddProgram() {
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
+
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Add Program</Text>
-              <Text style={styles.bodyDesc}></Text>
+              <Text style={styles.bodyDesc}>Create a new program to add Clients to.</Text>
             </View>
           </View>
 

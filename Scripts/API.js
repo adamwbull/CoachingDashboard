@@ -148,6 +148,32 @@ export async function check() {
 
 */
 
+export async function updateCoachColoring(id, token, primary, secondary) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, Primary:primary, Secondary:secondary}
+
+  console.log('Updating coach colors...')
+  const res = await fetch(url + '/coach-data/update-coloring', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Colors updated')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function createSurveyItem(token, surveyId, type, question, richText, sliderRange, sliderLeft, sliderRight, boxOptionsArray, itemOrder) {
 
   var ret = false

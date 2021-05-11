@@ -1946,27 +1946,191 @@ export const brandDesignLight = StyleSheet.create({
     lineHeight:14,
     fontFamily:'Poppins'
   },
-  brandColoringContainer: {
+  brandContainer: {
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  brandColoringRow: {
     flexDirection:'row',
     justifyContent:'center',
+    alignItems:'flex-end',
+  },
+  brandColoringGroup: {
+    flex:1,
+    justifyContent:'center'
+  },
+  brandColoringGroupTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    marginBottom:20
+  },
+  brandColoringTouch: {
+    borderRadius:10,
+    height:30,
+    width:'100%',
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  sectionTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+  },
+  sectionContent: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:16,
+    marginBottom:20
+  },
+  saveColoringText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveColoringButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  saveColoringContainer: {
+    width:'100%'
+  },
+})
+
+export const allClientsLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
     alignItems:'center',
     padding:20,
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
   },
-  brandColoringGroup: {
-    flex:1
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
   },
-  brandColoringGroupTitle: {
-    fontFamily:'PoppinsSemiBold',
-    fontSize:18,
-    color:colorsLight.mainTextColor,
-    textAlign:'center'
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
   },
-  brandColoringGroup: {
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+})
+
+export const inviteClientsLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
     flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
     borderRadius:10,
-    height:60
-  }
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+})
+
+export const socialFeedLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
 })

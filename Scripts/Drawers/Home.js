@@ -46,7 +46,8 @@ export default function Home() {
       drawerType='permanent'
       drawerStyle={drawerStyles.drawer}
       sceneContainerStyle={{
-        borderWidth:0,
+        height:'100%' + 60,
+        marginTop:-60
       }}
       screenContainerStyle={{}}
       drawerContentOptions={{

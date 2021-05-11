@@ -21,7 +21,7 @@
     "jodit-react": "^1.0.86",
     "luxon": "^1.26.0",
     "react": "^16.8.2",
-    "react-color": "^2.19.3",
+    "react-color": "^2.18.0",
     "react-date-countdown-timer": "^1.0.9",
     "react-date-picker": "^8.1.1",
     "react-dom": "^16.13.1",
