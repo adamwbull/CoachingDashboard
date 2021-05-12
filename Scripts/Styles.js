@@ -2027,7 +2027,30 @@ export const brandDesignLight = StyleSheet.create({
     color:btnColors.danger,
     textAlign:'center',
     marginBottom:10
-  }
+  },
+  resetToDefault: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:btnColors.primary,
+    textAlign:'center'
+  },
+  brandHeaderRow: {
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  headerInputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    height:38,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:10
+  },
 })
 
 export const allClientsLight = StyleSheet.create({

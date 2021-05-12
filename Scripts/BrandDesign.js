@@ -35,7 +35,7 @@ export default function BrandDesign() {
 
   const [showActivityIndicator, setActivityIndicator] = useState(true)
 
-  // Logo variables
+  // Logo variables.
   const [customLogo, setCustomLogo] = useState('')
   const [logoVideoIndicator, setLogoActivityIndicator] = useState(false)
   const [logoError, setLogoError] = useState('')
@@ -44,6 +44,11 @@ export default function BrandDesign() {
   const [showPrimaryColoringPicker, setPrimaryColoringPicker] = useState(false)
   const [showSecondaryColoringPicker, setSecondaryColoringPicker] = useState(false)
   const scrollRef = useRef()
+
+  // Headers variables.
+  const [homeSectionName, setHomeSectionName] = useState('')
+  const [promptsSectionName, setPromptsSectionName] = useState('')
+  const [conceptsSectionName, setConceptsSectionName] = useState('')
 
   useEffect(() => {
     console.log('Welcome to brand design.')
@@ -59,6 +64,9 @@ export default function BrandDesign() {
       } else {
         setCustomLogo(sCoach.BrandLogo)
       }
+      setHomeSectionName(sCoach.HomeSectionName)
+      setPromptsSectionName(sCoach.PromptsSectionName)
+      setConceptsSectionName(sCoach.ConceptsSectionName)
       setActivityIndicator(true)
       setTimeout(() => {
         setActivityIndicator(false)
@@ -270,6 +278,9 @@ export default function BrandDesign() {
               <View style={{flex:2}}></View>
               <View style={{flex:1}}>
                 <Text style={styles.logoError}>{logoError}</Text>
+                <TouchableOpacity onPress={resetToDefault} style={{marginBottom:20}}>
+                  <Text style={styles.resetToDefault}>Reset to Default</Text>
+                </TouchableOpacity>
                 <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
                 <Button
                   title='Change Logo'
@@ -285,6 +296,41 @@ export default function BrandDesign() {
           {showBrandHeaders && (<View style={styles.brandContainer}>
             <Text style={styles.sectionTitle}>Headers</Text>
             <Text style={styles.sectionContent}>Set custom headers to appear above sections on the app.</Text>
+            <View style={styles.brandColoringRow}>
+              <View style={{flex:1}}>
+                <Text style={styles.testAccLabel}>Home</Text>
+                <TextInput
+                  style={styles.headerInputStyle}
+                  value={homeSectionName}
+                  placeholder='ex. Home'
+                  onChangeText={(text) => setHomeSectionName(text)}
+                />
+                <Text style={styles.testAccLabel}>Prompts</Text>
+                <TextInput
+                  style={styles.headerInputStyle}
+                  value={promptsSectionName}
+                  placeholder='ex. Home'
+                  onChangeText={(text) => setPromptsSectionName(text)}
+                />
+                <Text style={styles.testAccLabel}>Concepts</Text>
+                <TextInput
+                  style={styles.headerInputStyle}
+                  value={conceptsSectionName}
+                  placeholder='ex. Home'
+                  onChangeText={(text) => setConceptsSectionName(text)}
+                />
+              </View>
+              <View style={{flex:2}}></View>
+              <View style={{flex:1}}>
+                <Button
+                  title='Save Headers'
+                  titleStyle={styles.saveColoringText}
+                  buttonStyle={styles.saveColoringButton}
+                  containerStyle={styles.saveColoringContainer}
+                  onPress={handleClick}
+                />
+              </View>
+            </View>
           </View>)}
 
         </View>
