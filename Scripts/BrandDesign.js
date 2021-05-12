@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useRef } from 'react'
-import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { brandDesignLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -10,7 +10,11 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button } from 'react-native-elements'
 import { TwitterPicker } from 'react-color';
-import { updateCoachColoring } from './API.js'
+import { setLogoDefault, updateCoachColoring, uploadLogo } from './API.js'
+import { TextInput } from 'react-native-web'
+import IOSAppDownload from '../assets/app-store-download/iosdownload.svg'
+import AndroidAppDownload from '../assets/app-store-download/google-play-badge.png'
+import DefaultLogo from '../assets/nav-logo.png'
 
 export default function BrandDesign() {
   const linkTo = useLinkTo()
@@ -31,10 +35,14 @@ export default function BrandDesign() {
 
   const [showActivityIndicator, setActivityIndicator] = useState(true)
 
+  // Logo variables
+  const [customLogo, setCustomLogo] = useState('')
+  const [logoVideoIndicator, setLogoActivityIndicator] = useState(false)
+  const [logoError, setLogoError] = useState('')
+
   // Brand coloring stage controls.
   const [showPrimaryColoringPicker, setPrimaryColoringPicker] = useState(false)
   const [showSecondaryColoringPicker, setSecondaryColoringPicker] = useState(false)
-
   const scrollRef = useRef()
 
   useEffect(() => {
@@ -44,6 +52,13 @@ export default function BrandDesign() {
       setCoach(sCoach)
       setPrimaryColor(sCoach.PrimaryHighlight)
       setSecondaryColor(sCoach.SecondaryHighlight)
+      console.log('logo',sCoach.BrandLogo)
+      if (sCoach.BrandLogo.length == 0) {
+        console.log('here')
+        setCustomLogo(DefaultLogo)
+      } else {
+        setCustomLogo(sCoach.BrandLogo)
+      }
       setActivityIndicator(true)
       setTimeout(() => {
         setActivityIndicator(false)
@@ -55,6 +70,7 @@ export default function BrandDesign() {
     }
   },[])
 
+  // Coloring functions.
   const setColoring = (type, hex) => {
     console.log(hex)
     if (type == 0) {
@@ -92,6 +108,71 @@ export default function BrandDesign() {
     }
   }
 
+  // Logo functions.
+  const hiddenFileInput = React.useRef(null)
+
+  const handleClick = event => {
+    hiddenFileInput.current.click()
+    window.addEventListener('focus', handleFocusBack)
+    setLogoActivityIndicator(true)
+    setLogoError('')
+  }
+
+  const handleFocusBack = () => {
+    window.removeEventListener('focus', handleFocusBack)
+    setLogoActivityIndicator(false)
+  }
+
+  const handleFile = async () => {
+
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['png','jpg','jpeg']
+      var fileType = fileArr[1]
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 1000000) {
+          var fileArr = file.name.split('.')
+          var fileType = fileArr[1]
+          var fileMime = 'video/jpeg'
+          if (fileType == 'png') {
+            fileMime = 'video/png'
+          }
+          var ts = Math.floor(Math.random() * (999999999999+1) + 1);
+          ts = ts.toString();
+          var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
+          var newFile = new File([file], fileName, {type: fileMime})
+          var base = await uploadLogo(newFile)
+          if (base != false) {
+            var url = base + '/logos/' + fileName
+            var tempCoach = JSON.parse(JSON.stringify(coach))
+            tempCoach.BrandLogo = url
+            set('Coach',tempCoach,ttl)
+            window.location.reload();
+          } else {
+            setLogoError('There was a problem uploading! Please try again.')
+          }
+
+        } else {
+          setLogoError('File size should be less than 1 MB.')
+        }
+      } else {
+        setLogoError('File type should be png or jpg.')
+      }
+    } else {
+      setLogoActivityIndicator(false)
+    }
+
+  }
+
+  const resetToDefault = async () => {
+    var tempCoach = JSON.parse(JSON.stringify(coach))
+    tempCoach.BrandLogo = ''
+    set('Coach',tempCoach,ttl)
+    var updated = await setLogoDefault(coach.Id, coach.Token)
+    window.location.reload();
+  }
+
   return (<View style={{flex:1}} ref={scrollRef}><ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -100,15 +181,29 @@ export default function BrandDesign() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Brand Design</Text>
-              <Text style={styles.bodyDesc}>Customize your Client's experience.</Text>
+              <Text style={styles.bodyDesc}>Customize your Client's in-app experience.</Text>
             </View>
           </View>
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showBrandLogin && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>Testing Account</Text>
-            <Text style={styles.sectionContent}>You can login as a Client to test changes within the app with the following info.</Text>
+            <Text style={styles.sectionTitle}>Testing the App</Text>
+            <Text style={styles.sectionContent}>You can login as a Client to test changes within the app with your Dashboard credentials.</Text>
+            <View style={[styles.brandColoringRow,{backgroundColor:'#fff',borderRadius:10}]}>
+              <View style={{flex:1,alignItems:'center'}}>
+                <Text style={styles.testAccLabel}>Client App for iOS</Text>
+                <TouchableOpacity style={{width:200,height:77,paddingTop:10}} onPress={() => console.log('iOS')}>
+                  <img src={IOSAppDownload} style={{width:200,height:50,marginLeft:'auto',marginRight:'auto'}} />
+                </TouchableOpacity>
+              </View>
+              <View style={{flex:1,alignItems:'center'}}>
+                <Text style={styles.testAccLabel}>Client App for Android</Text>
+                <TouchableOpacity style={{width:200,height:77}} onPress={() => console.log('Android')}>
+                  <img src={AndroidAppDownload} style={{width:200,height:77,marginLeft:'auto',marginRight:'auto'}} />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>)}
 
           {showBrandColoring && (<View style={styles.brandContainer}>
@@ -164,8 +259,27 @@ export default function BrandDesign() {
           </View>)}
 
           {showBrandLogo && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>Logo</Text>
+            <Text style={styles.sectionTitle}>App Header Logo</Text>
             <Text style={styles.sectionContent}>Specify a custom logo to show up within the mobile app for your Clients.</Text>
+            <View style={[styles.brandColoringRow,{alignItems:'flex-end'}]}>
+              <View style={{flex:1}}>
+                <Text style={styles.testAccLabel}>Current Header Logo</Text>
+                <Image source={customLogo} style={{width:200,height:100,margin:'auto'}} />
+                <Text style={styles.logoBelow}>recommended size{"\n"}200px by 100px</Text>
+              </View>
+              <View style={{flex:2}}></View>
+              <View style={{flex:1}}>
+                <Text style={styles.logoError}>{logoError}</Text>
+                <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
+                <Button
+                  title='Change Logo'
+                  titleStyle={styles.saveColoringText}
+                  buttonStyle={styles.saveColoringButton}
+                  containerStyle={styles.saveColoringContainer}
+                  onPress={handleClick}
+                />
+              </View>
+            </View>
           </View>)}
 
           {showBrandHeaders && (<View style={styles.brandContainer}>

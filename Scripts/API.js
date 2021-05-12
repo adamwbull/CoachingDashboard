@@ -148,6 +148,55 @@ export async function check() {
 
 */
 
+export async function setLogoDefault(id, token) {
+
+  var ret = false
+  var arr = {Id:id, Token:token}
+
+  console.log('Setting logo to default...')
+  const res = await fetch(url + '/coach-data/update-logo-default', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Default set!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function uploadLogo(file) {
+
+  var ret = false
+  let formData = new FormData()
+  formData.append('logo', file)
+
+  console.log('Attempting logo upload...')
+  const res = await fetch(uploadUrl + '/api/logo', {
+    method:'POST',
+    body: formData,
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows == 1) {
+    console.log('Upload complete!')
+    ret = uploadUrl
+  }
+
+  return ret
+
+}
+
 export async function updateCoachColoring(id, token, primary, secondary) {
 
   var ret = false

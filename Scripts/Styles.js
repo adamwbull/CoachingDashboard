@@ -1954,7 +1954,7 @@ export const brandDesignLight = StyleSheet.create({
   },
   brandColoringRow: {
     flexDirection:'row',
-    justifyContent:'center',
+    justifyContent:'flex-start',
     alignItems:'flex-end',
   },
   brandColoringGroup: {
@@ -1998,6 +1998,36 @@ export const brandDesignLight = StyleSheet.create({
   saveColoringContainer: {
     width:'100%'
   },
+  testAccLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    width:'100%',
+    textAlign:'center',
+    color:'#000'
+  },
+  logoUploadPreview: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    width:200,
+    height:200
+  },
+  logoBelow: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  logoError: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:btnColors.danger,
+    textAlign:'center',
+    marginBottom:10
+  }
 })
 
 export const allClientsLight = StyleSheet.create({
