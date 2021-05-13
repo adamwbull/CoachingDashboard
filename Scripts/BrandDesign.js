@@ -10,7 +10,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button } from 'react-native-elements'
 import { TwitterPicker } from 'react-color';
-import { setLogoDefault, updateCoachColoring, uploadLogo } from './API.js'
+import { updateBrandHeaders, setLogoDefault, updateCoachColoring, uploadLogo } from './API.js'
 import { TextInput } from 'react-native-web'
 import IOSAppDownload from '../assets/app-store-download/iosdownload.svg'
 import AndroidAppDownload from '../assets/app-store-download/google-play-badge.png'
@@ -35,20 +35,21 @@ export default function BrandDesign() {
 
   const [showActivityIndicator, setActivityIndicator] = useState(true)
 
-  // Logo variables.
-  const [customLogo, setCustomLogo] = useState('')
-  const [logoVideoIndicator, setLogoActivityIndicator] = useState(false)
-  const [logoError, setLogoError] = useState('')
-
   // Brand coloring stage controls.
   const [showPrimaryColoringPicker, setPrimaryColoringPicker] = useState(false)
   const [showSecondaryColoringPicker, setSecondaryColoringPicker] = useState(false)
   const scrollRef = useRef()
 
+  // Logo variables.
+  const [customLogo, setCustomLogo] = useState('')
+  const [logoVideoIndicator, setLogoActivityIndicator] = useState(false)
+  const [logoError, setLogoError] = useState('')
+
   // Headers variables.
   const [homeSectionName, setHomeSectionName] = useState('')
   const [promptsSectionName, setPromptsSectionName] = useState('')
   const [conceptsSectionName, setConceptsSectionName] = useState('')
+  const [headersError, setheadersError] = useState('')
 
   useEffect(() => {
     console.log('Welcome to brand design.')
@@ -92,8 +93,10 @@ export default function BrandDesign() {
 
   const toggleColoringPicker = (type) => {
     if (type == 0) {
+      setSecondaryColoringPicker(false)
       setPrimaryColoringPicker(!showPrimaryColoringPicker)
     } else {
+      setPrimaryColoringPicker(false)
       setSecondaryColoringPicker(!showSecondaryColoringPicker)
     }
   }
@@ -181,6 +184,30 @@ export default function BrandDesign() {
     window.location.reload();
   }
 
+  const updateHeaders = async (type) => {
+    var created = false
+    var arr = ['', '', '']
+
+    if (type == 0) {
+      created = await updateBrandHeaders(coach.Id, coach.Token, 'Home', 'Prompts', 'Concepts')
+      arr = ['Home', 'Prompts', 'Concepts']
+    } else {
+      created = await updateBrandHeaders(coach.Id, coach.Token, homeSectionName, promptsSectionName, conceptsSectionName)
+      arr = [homeSectionName, promptsSectionName, conceptsSectionName]
+    }
+
+    if (created) {
+      var tempCoach = JSON.parse(JSON.stringify(coach))
+      tempCoach.HomeSectionName = arr[0]
+      tempCoach.PromptsSectionName = arr[1]
+      tempCoach.ConceptsSectionName = arr[2]
+      set('Coach',tempCoach,ttl)
+      window.location.reload();
+    } else {
+      setHeadersError('There was a problem! Please try again or notify support.')
+    }
+  }
+
   return (<View style={{flex:1}} ref={scrollRef}><ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -229,8 +256,9 @@ export default function BrandDesign() {
                     color={colors.mainBackground}
                   />
                 </TouchableOpacity>
-                {showPrimaryColoringPicker && (<View style={{position:'absolute',marginTop:155}}><TwitterPicker
+                {showPrimaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
                   color={primaryColor}
+                  triangle='hide'
                   onChangeComplete={(color) => setColoring(0, color.hex)}
                   colors={['#2ecc71', '#7CF2A1', '#FCB900', '#FF6900', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#C50BD9']}
                 /></View>)}
@@ -247,8 +275,9 @@ export default function BrandDesign() {
                     color={colors.mainBackground}
                   />
                 </TouchableOpacity>
-                {showSecondaryColoringPicker && (<View style={{position:'absolute',marginTop:155}}><TwitterPicker
+                {showSecondaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
                   color={secondaryColor}
+                  triangle='hide'
                   onChangeComplete={(color) => setColoring(1, color.hex)}
                   colors={['#27ae60', '#7BDCB5', '#E6950B', '#E8470C', '#759DE6', '#0560FA', '#929CA6', '#D41608', '#E8849D', '#9900EF']}
                 /></View>)}
@@ -277,8 +306,8 @@ export default function BrandDesign() {
               </View>
               <View style={{flex:2}}></View>
               <View style={{flex:1}}>
-                <Text style={styles.logoError}>{logoError}</Text>
-                <TouchableOpacity onPress={resetToDefault} style={{marginBottom:20}}>
+                <Text style={styles.errorText}>{logoError}</Text>
+                <TouchableOpacity onPress={resetToDefault} style={{margin:10}}>
                   <Text style={styles.resetToDefault}>Reset to Default</Text>
                 </TouchableOpacity>
                 <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
@@ -309,25 +338,29 @@ export default function BrandDesign() {
                 <TextInput
                   style={styles.headerInputStyle}
                   value={promptsSectionName}
-                  placeholder='ex. Home'
+                  placeholder='ex. Prompts'
                   onChangeText={(text) => setPromptsSectionName(text)}
                 />
                 <Text style={styles.testAccLabel}>Concepts</Text>
                 <TextInput
                   style={styles.headerInputStyle}
                   value={conceptsSectionName}
-                  placeholder='ex. Home'
+                  placeholder='ex. Concepts'
                   onChangeText={(text) => setConceptsSectionName(text)}
                 />
               </View>
               <View style={{flex:2}}></View>
               <View style={{flex:1}}>
+                <Text style={styles.errorText}>{headersError}</Text>
+                <TouchableOpacity onPress={() => updateHeaders(0)} style={{margin:10}}>
+                  <Text style={styles.resetToDefault}>Reset to Default</Text>
+                </TouchableOpacity>
                 <Button
                   title='Save Headers'
                   titleStyle={styles.saveColoringText}
                   buttonStyle={styles.saveColoringButton}
                   containerStyle={styles.saveColoringContainer}
-                  onPress={handleClick}
+                  onPress={() => updateHeaders(1)}
                 />
               </View>
             </View>

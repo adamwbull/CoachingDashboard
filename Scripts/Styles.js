@@ -2021,12 +2021,11 @@ export const brandDesignLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     textAlign:'center'
   },
-  logoError: {
+  errorText: {
     fontSize:14,
     fontFamily:'Poppins',
     color:btnColors.danger,
-    textAlign:'center',
-    marginBottom:10
+    textAlign:'center'
   },
   resetToDefault: {
     fontSize:14,
@@ -2049,7 +2048,8 @@ export const brandDesignLight = StyleSheet.create({
     width:'100%',
     fontFamily:'Poppins',
     fontSize:18,
-    marginBottom:10
+    marginBottom:10,
+    textAlign:'center'
   },
 })
 

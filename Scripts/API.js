@@ -148,6 +148,32 @@ export async function check() {
 
 */
 
+export async function updateBrandHeaders(id, token, home, prompts, concepts) {
+
+  var ret = false
+  var arr = {Id:id, Token:token, HomeSectionName:home, PromptsSectionName:prompts, ConceptsSectionName:concepts}
+
+  console.log('Updating brand headers...')
+  const res = await fetch(url + '/coach-data/update-brand-headers', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Brand headers updated!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function setLogoDefault(id, token) {
 
   var ret = false
