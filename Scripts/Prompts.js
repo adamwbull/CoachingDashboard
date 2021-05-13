@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getSurveys, createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
+import { deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup, Dropdown } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 
@@ -104,14 +104,20 @@ export default function Prompts() {
   const [viewPrompt, setViewPrompt] = useState({})
   const [viewPromptResponses, setViewPromptResponses] = useState([])
 
+  const [showViewSurveyPrompt, setViewSurveyPrompt] = useState(false)
+  const [viewSurvey, setViewSurvey] = useState({})
+  const [viewSurveyResponses, setViewSurveyResponses] = useState([])
+
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
   const refreshTextPrompts = async (id, token) => {
     var refresh = await getTextPrompts(id, token)
+    console.log('prompts:',refresh)
     setPrompts(refresh)
   }
 
   const refreshSurveys = async (id, token) => {
     var refresh = await getSurveys(id, token)
+    console.log(refresh)
     setSurveys(refresh)
   }
 
@@ -120,6 +126,12 @@ export default function Prompts() {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
+      if (sCoach.Plan == 1) {
+        setPaymentsDisabled(false)
+      } else if (sCoach.Plan == 2) {
+        setPaymentsDisabled(false)
+        setContractsDisabled(false)
+      }
       try {
         refreshTextPrompts(sCoach.Id, sCoach.Token)
         refreshSurveys(sCoach.Id, sCoach.Token)
@@ -135,9 +147,11 @@ export default function Prompts() {
 
 
   // Text prompt controls.
-  const viewPromptTrigger = (i) => {
+  const viewPromptTrigger = async (i) => {
     setMain(false)
     setViewPrompt(prompts[i])
+    // var responses = await getPromptResponses()
+    setViewPromptResponses([])
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -457,14 +471,8 @@ export default function Prompts() {
   }
 
   const selectTask = (index, type) => {
+    console.log('seltask',index,type)
     setCurrentSurveyItem(index)
-    var id = surveyItems[index].TaskId
-    if (id == 0) {
-      setChosenTask({})
-    } else {
-      var task = searchHardlist.filter(task => task.Id === id)
-      setChosenTask(task[0])
-    }
   }
 
   const deleteTask = () => {
@@ -612,18 +620,21 @@ export default function Prompts() {
     }
   }
 
-  const viewSurveyTrigger = (i) => {
+  const viewSurveyTrigger = async (i) => {
     setMain(false)
-    setViewPrompt(prompts[i])
+    setViewSurvey(surveys[i])
+    // var responses = await getSurveyResponses()
+    setViewSurveyResponses([])
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
-      setViewTextPrompt(true)
+      setViewSurveyPrompt(true)
     },500)
   }
 
   const returnToMainFromViewSurvey = () => {
     setAddingSurveyPrompt(false)
+    setViewSurveyPrompt(false)
     setActivityIndicator(true)
     setChosenTask({})
     setCurrentSurveyItem(0)
@@ -638,38 +649,31 @@ export default function Prompts() {
   }
 
   const duplicateSurvey = async (i) => {
-    var p = prompts[i]
+    var s = surveys[i]
     setMain(false)
-    setDeletePromptIndex(-1)
-    setShowPromptOptions(-1)
+    setDeleteSurveyIndex(-1)
+    setShowSurveyOptions(-1)
+    setCurrentSurveyItem(0)
     // Set prompt data.
-    setTextPromptTitle(p.Title)
-    setTextPromptText(p.Text)
-    if (p.PromptType != 0) {
-
-      if (p.PromptType == 3) {
-        setSelectYouTube(true)
-        setTempVideoUrl(p.Video)
-        setVideoUrl(p.Video)
-      } else if (p.PromptType == 4) {
-        setSelectUpload(true)
-        setTempVideoUrl(p.Video)
-        setVideoUrl(p.Video)
-      }
-    }
+    setSurveyTitle(s.Title)
+    setSurveyText(s.Text)
+    console.log('sitems:',s.Items)
+    setSurveyItems(s.Items)
     setActivityIndicator(true)
     setTimeout(() => {
+      console.log('items:',surveyItems)
       setActivityIndicator(false)
-      setAddingTextPrompt(true)
+      setSurveyItemMain(true)
+      setAddingSurveyPrompt(true)
     },500)
   }
 
   const deleteSurveyTrigger = async (i) => {
-    var deleted = await deletePrompt(prompts[i].Id, coach.Id, coach.Token)
+    var deleted = await deleteSurvey(surveys[i].Id, coach.Id, coach.Token)
     if (deleted) {
-      setDeletePromptIndex(-1)
-      setShowPromptOptions(-1)
-      refreshTextPrompts(coach.Id, coach.Token)
+      setDeleteSurveyIndex(-1)
+      setShowSurveyOptions(-1)
+      refreshSurveys(coach.Id, coach.Token)
     }
   }
 
@@ -1109,6 +1113,37 @@ export default function Prompts() {
                 <View style={[styles.newPromptAddButtonSpacer]}></View>
               </View>
 
+            </View>
+          </>)}
+
+          {showViewSurveyPrompt && (<>
+            <View style={styles.newPromptContainer}>
+              <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromViewSurvey}
+                />
+                <Text style={styles.newPromptDescTitle}>{viewSurvey.Title}</Text>
+              </View>
+              <View style={styles.newPromptBody}>
+                <View style={styles.newPromptBodyLeft}>
+                  <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Description</Text>
+                  <Text style={styles.viewPromptBodyText}>{viewSurvey.Text}</Text>
+                </View>
+              </View>
+              <View style={styles.viewPromptResponses}>
+                <View style={styles.newPromptHeader}>
+                  <Text style={styles.newPromptDescTitle}>{viewSurveyResponses.length} Client Responses</Text>
+                </View>
+                {viewSurveyResponses.length > 0 && (<>
+
+                </>) || (<>
+                  <Text style={styles.noPromptResponses}>No clients have responded to this prompt yet.</Text>
+                </>)}
+              </View>
             </View>
           </>)}
 

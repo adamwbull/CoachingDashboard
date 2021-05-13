@@ -148,6 +148,32 @@ export async function check() {
 
 */
 
+export async function deleteSurvey(surveyId, id, token) {
+
+  var ret = false
+  var arr = {Id:surveyId, CoachId:id, Token:token}
+
+  console.log('Deleting survey...')
+  const res = await fetch(url + '/survey/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Survey deleted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function updateBrandHeaders(id, token, home, prompts, concepts) {
 
   var ret = false
