@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useRef, useState } from 'react'
-import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark, btnColors } from '../Scripts/Styles.js'
 import { useLinkTo, Link } from '@react-navigation/native'
@@ -11,8 +11,8 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
-import { Popup, Dropdown } from 'semantic-ui-react'
+import { getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getPromptResponses, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
+import { Popup, Dropdown, Tab } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 
 export default function Prompts() {
@@ -107,6 +107,39 @@ export default function Prompts() {
   const [showViewSurveyPrompt, setViewSurveyPrompt] = useState(false)
   const [viewSurvey, setViewSurvey] = useState({})
   const [viewSurveyResponses, setViewSurveyResponses] = useState([])
+  const surveyPanes = [
+    {
+      menuItem: { key: 'Summary', icon:'pie graph', content:'Summary' },
+      render: () => <Tab.Pane attached={false}>Hello</Tab.Pane>,
+    },
+    {
+      menuItem: { key: 'Individuals', icon:'user', content:'Individuals' },
+      render: () => <Tab.Pane attached={false} style={{padding:0,margin:0}}>
+        {viewSurveyResponses.map((response, index) => {
+          return (<View style={[styles.responseRow]} key={index + '++'}>
+            <View style={styles.responseClientInfo}>
+              <View style={styles.responseClientInfoInner}>
+                <Image source={response.Client[0].Avatar} style={{width:30,height:30,borderRadius:40}} />
+                <Text style={styles.responseClientText}>{response.Client[0].FirstName + ' ' + response.Client[0].LastName}</Text>
+              </View>
+              <Text style={styles.responseClientCreated}>
+                {parseSimpleDateText(sqlToJsDate(response.CompletedDate))}
+              </Text>
+            </View>
+            <View style={styles.responseTextInfo}>
+              {response.Responses.map((r, i) => {
+                var q = viewSurvey.Items[i]
+                return (<View key={i + '+++'}>
+                  <Text style={styles.surveyQuestion}>{q.Question}</Text>
+                  <Text style={styles.surveyResponseText}>{r.Response}</Text>
+                </View>)
+              })}
+            </View>
+          </View>)
+        })}
+      </Tab.Pane>
+    }
+  ]
 
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
   const refreshTextPrompts = async (id, token) => {
@@ -150,8 +183,8 @@ export default function Prompts() {
   const viewPromptTrigger = async (i) => {
     setMain(false)
     setViewPrompt(prompts[i])
-    // var responses = await getPromptResponses()
-    setViewPromptResponses([])
+    var responses = await getPromptResponses(prompts[i].Id, coach.Id, coach.Token)
+    setViewPromptResponses(responses)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -623,8 +656,8 @@ export default function Prompts() {
   const viewSurveyTrigger = async (i) => {
     setMain(false)
     setViewSurvey(surveys[i])
-    // var responses = await getSurveyResponses()
-    setViewSurveyResponses([])
+    var responses = await getSurveyResponses(surveys[i].Id, coach.Id, coach.Token)
+    setViewSurveyResponses(responses)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -944,10 +977,25 @@ export default function Prompts() {
               </View>
               <View style={styles.viewPromptResponses}>
                 <View style={styles.newPromptHeader}>
-                  <Text style={styles.newPromptDescTitle}>{viewPromptResponses.length} Client Responses</Text>
+                  <Text style={styles.newPromptDescTitle}>{viewPromptResponses.length} Client Response{(viewPromptResponses.length == 1) ? '' : 's'}</Text>
                 </View>
                 {viewPromptResponses.length > 0 && (<>
-
+                  {viewPromptResponses.map((response, index) => {
+                    return (<View style={[styles.responseRow]} key={index + '+'}>
+                      <View style={styles.responseClientInfo}>
+                        <View style={styles.responseClientInfoInner}>
+                          <Image source={response.Responses[0].Client[0].Avatar} style={{width:30,height:30,borderRadius:40}} />
+                          <Text style={styles.responseClientText}>{response.Responses[0].Client[0].FirstName + ' ' + response.Responses[0].Client[0].LastName}</Text>
+                        </View>
+                        <Text style={styles.responseClientCreated}>
+                          {parseSimpleDateText(sqlToJsDate(response.CompletedDate))}
+                        </Text>
+                      </View>
+                      <View style={styles.responseTextInfo}>
+                        <Text style={styles.responseText}>{response.Responses[0].Text}</Text>
+                      </View>
+                    </View>)
+                  })}
                 </>) || (<>
                   <Text style={styles.noPromptResponses}>No clients have responded to this prompt yet.</Text>
                 </>)}
@@ -1130,16 +1178,16 @@ export default function Prompts() {
               </View>
               <View style={styles.newPromptBody}>
                 <View style={styles.newPromptBodyLeft}>
-                  <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Description</Text>
+                  <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Survey Description</Text>
                   <Text style={styles.viewPromptBodyText}>{viewSurvey.Text}</Text>
                 </View>
               </View>
               <View style={styles.viewPromptResponses}>
-                <View style={styles.newPromptHeader}>
-                  <Text style={styles.newPromptDescTitle}>{viewSurveyResponses.length} Client Responses</Text>
+                <View style={[styles.newPromptHeader,{borderBottomWidth:0}]}>
+                  <Text style={[styles.newPromptDescTitle]}>{viewSurveyResponses.length} Client Response{viewSurveyResponses.length == 1 ? '' : 's'}</Text>
                 </View>
                 {viewSurveyResponses.length > 0 && (<>
-
+                  <Tab menu={{secondary: true}} panes={surveyPanes} />
                 </>) || (<>
                   <Text style={styles.noPromptResponses}>No clients have responded to this prompt yet.</Text>
                 </>)}
@@ -1272,10 +1320,6 @@ export default function Prompts() {
 
                     <Pressable style={[styles.addSurveyListDropdownTouch]} onPress={() => addTask(3)}>
                       <Text style={styles.addSurveyListDropdownText}>Add Radiobox Group</Text>
-                    </Pressable>
-
-                    <Pressable style={[styles.addSurveyListDropdownTouchBottom]} onPress={() => addTask(4)}>
-                      <Text style={styles.addSurveyListDropdownText}>Add Rich Text</Text>
                     </Pressable>
 
                   </View>)}

@@ -1392,6 +1392,43 @@ export const promptsLight = StyleSheet.create({
   boxItemNav: {
     backgroundColor:colorsLight.mainBackground,
     marginRight:10
+  },
+  responseRow: {
+    flexDirection:'column',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  responseClientInfo: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:10,
+    backgroundColor:colorsLight.header
+  },
+  responseClientInfoInner: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  },
+  responseClientText: {
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    marginLeft:10,
+  },
+  responseClientCreated: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+  },
+  responseTextInfo: {
+    padding:5
+  },
+  responseText: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
   }
 });
 

@@ -41,6 +41,7 @@ export function parseDateText(date) {
                           " " + hours + ":" + minutes +
                           " " + ampm
     return dateText
+
 }
 
 export function toFullDate(date) {
@@ -147,6 +148,52 @@ export async function check() {
 }
 
 */
+
+export async function getSurveyResponses(surveyId, id, token) {
+
+  var ret = []
+
+  console.log('Getting survey responses...')
+  const res = await fetch(url + '/prompt-assoc/survey-responses/' + surveyId + '/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Survey responses found!')
+    console.log(payload)
+    ret = payload
+  } else {
+    console.log('No responses found.')
+  }
+
+  return ret
+
+}
+
+export async function getPromptResponses(promptId, id, token) {
+
+  var ret = []
+
+  console.log('Getting prompt responses...')
+  const res = await fetch(url + '/prompt-assoc/responses/' + promptId + '/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Prompt responses found!')
+    ret = payload
+  } else {
+    console.log('No responses found.')
+  }
+
+  return ret
+
+}
+
 
 export async function deleteSurvey(surveyId, id, token) {
 
