@@ -1429,6 +1429,69 @@ export const promptsLight = StyleSheet.create({
     fontSize:16,
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
+  },
+  surveyResponseContainer: {
+    padding:5,
+  },
+  surveyQuestion: {
+    fontSize:20,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  surveyResponseText: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+  },
+  sliderThumb: {
+    width:10,
+    height:10,
+    backgroundColor:colorsLight.primaryHighlight
+  },
+  sliderRow: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  },
+  sliderInfo: {
+    alignItems:'center',
+    justifyContent:'center',
+    padding:5
+  },
+  sliderLeftVal: {
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  sliderDesc: {
+    fontSize:14,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  sliderVal: {
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  sliderResponse: {
+    fontSize:14,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  surveyBoxRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    padding:5
+  },
+  boxText: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    marginLeft:10,
+    color:colorsLight.mainTextColor,
+  },
+  surveyDataRow: {
+    marginBottom:10
   }
 });
 
@@ -1439,7 +1502,6 @@ export const conceptsLight = StyleSheet.create({
   main: {
     flex:1,
     flexDirection:'row',
-
   },
   scrollView: {
     paddingTop:20,
@@ -1487,13 +1549,13 @@ export const conceptsLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:14
   },
-  promptListContainer: {
+  conceptListContainer: {
     padding:20,
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
   },
-  promptHeader: {
+  conceptHeader: {
     flexDirection:'row',
     borderBottomWidth:1,
     borderBottomColor:colorsLight.headerBorder,
@@ -1501,43 +1563,126 @@ export const conceptsLight = StyleSheet.create({
     alignItems:'flex-end',
     paddingBottom:5
   },
-  promptHeaderTitle: {
+  conceptHeaderTitle: {
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
     fontSize:24,
     paddingLeft:5,
     paddingRight:10,
   },
-  promptHeaderCount: {
+  conceptHeaderCount: {
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor,
     fontSize:16
   },
-  promptsRow: {
+  conceptsRow: {
     paddingTop:10,
     flexDirection:'row'
   },
-  addPromptContainer: {
+  addConceptContainer: {
     width:200,
     height:200,
     borderWidth:1,
     borderColor:colorsLight.headerBorder,
+    backgroundColor:colorsLight.header,
     borderRadius:10,
     justifyContent:'center',
     alignItems:'center',
     marginRight:10,
   },
-  promptAddButtonTitle: {
+  conceptAddButtonTitle: {
     fontSize:14,
     fontFamily:'Poppins'
   },
-  promptAddButton: {
+  conceptAddButton: {
     backgroundColor:btnColors.primary,
     borderRadius:50,
     padding:5,
   },
-  promptAddButtonContainer: {
+  conceptAddButtonContainer: {
     width:'70%'
+  },
+  innerRow: {
+    flexDirection:'row',
+    marginBottom:10
+  },
+  taskBox: {
+    width:200,
+    height:200,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    overflow:'hidden',
+    marginRight:10
+  },
+  taskPreview: {
+    flex:1,
+  },
+  taskPreviewHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  taskPreviewHeaderIcon: {
+    padding:10,
+    borderRightColor:colorsLight.headerBorder,
+    borderRightWidth:1
+  },
+  taskPreviewTitle: {
+    flex:1,
+    marginLeft:10,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  taskPreviewText: {
+    fontSize:14,
+    padding:10,
+    color:colorsLight.mainTextColor,
+    textAlign:'left',
+    fontFamily:'Poppins'
+  },
+  taskWarningText: {
+    fontSize:14,
+    padding:10,
+    color:btnColors.danger,
+    textAlign:'center',
+    fontFamily:'Poppins'
+  },
+  taskButtons: {
+    flexDirection:'row'
+  },
+  taskButtonTop: {
+    width:'100%',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+    padding:1,
+    backgroundColor:colorsLight.header
+  },
+  taskButtonLeft: {
+    flex:1,
+    borderTopWidth:1,
+    borderRightWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderRightColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.info
+  },
+  taskButtonRight: {
+    flex:1,
+    borderTopWidth:1,
+    borderLeftWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderLeftColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.danger
+  },
+  taskButtonText: {
+    color:'#ffffff',
+    fontSize:14,
+    fontFamily:'Poppins',
+    textAlign:'center'
   },
   helpBox: {
     width:400,
@@ -1562,7 +1707,497 @@ export const conceptsLight = StyleSheet.create({
   },
   proPlanText: {
     color:btnColors.danger
-  }
+  },
+  newConceptContainer: {
+    padding:20,
+    borderRadius:10,
+    marginBottom:20,
+    backgroundColor:colorsLight.mainBackground,
+  },
+  newConceptHeader: {
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
+    paddingBottom:5,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  newConceptDescTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    paddingLeft:5,
+    paddingRight:10,
+  },
+  newConceptBody: {
+    flexDirection:'row',
+    padding:10,
+  },
+  newConceptForm: {
+    flex:3,
+  },
+  newConceptVideoSection: {
+    flex:2,
+    paddingLeft:10,
+    paddingRight:10,
+    marginLeft:10,
+  },
+  newConceptTitleLabel: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  newConceptVideoEmpty: {
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    justifyContent:'center',
+    alignItems:'center',
+    flex:1
+  },
+  newConceptVideoEmptyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  newConceptFooter: {
+    flex:1,
+  },
+  newConceptAddButtonTitle: {
+    fontSize:16,
+    fontFamily:'Poppins'
+  },
+  newConceptAddButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  newConceptAddButtonContainer: {
+    width:'60%',
+    paddingLeft:10,
+    paddingRight:20
+  },
+  showVideoOptions: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    padding:20
+  },
+  showVideoOptionsChooseUpload: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    width:'40%',
+    height:200,
+    marginRight:10
+  },
+  showVideoOptionsChooseUploadTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseUploadTypes: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseUploadSize: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showVideoOptionsChooseYouTube: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    width:'40%',
+    height:200,
+    marginLeft:10
+  },
+  selectUploadContainer: {
+    flex:1,
+    justifyContent:'flex-start',
+    alignItems:'center',
+  },
+  uploadProgressTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    marginBottom:10,
+    marginTop:20
+  },
+  uploadInputStyle: {
+    marginBottom:10
+  },
+  uploadFileTitle: {
+    fontSize:16,
+    fontFamily:'Poppins',
+  },
+  uploadFileTitleButton: {
+    marginTop:10,
+    backgroundColor:btnColors.success,
+    borderRadius:50,
+    padding:10,
+  },
+  uploadFileTitleButtonContainer: {
+    padding:5,
+  },
+  videoError: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:btnColors.danger,
+    textAlign:'center'
+  },
+  reactPlayerContainer: {
+    width:500,
+    height:280,
+    aspectRatio:16/9,
+  },
+  viewConceptBodyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  newConceptBodyLeft: {
+    flex:1,
+  },
+  videoGoBack: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:10,
+    marginTop:10
+  },
+  videoGoBackText: {
+    fontFamily:'Poppins',
+    fontSize:20,
+    color:colorsLight.mainTextColor
+  },
+  youTubeSection: {
+  },
+  noConceptResponses: {
+    fontFamily:'Poppins',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    marginTop:10,
+    marginLeft:5
+  },
+  addSurveyBody: {
+    flexDirection:'row',
+    marginBottom:20,
+    borderLeftColor:colorsLight.headerBorder,
+    borderRightColor:colorsLight.headerBorder,
+    borderBottomColor:colorsLight.headerBorder,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:1
+  },
+  addSurveyListContainer: {
+    flex:2,
+    backgroundColor:colorsLight.header,
+    borderRightWidth:1,
+    borderRightColor:colorsLight.headerBorder,
+    borderTopLeftRadius:10,
+    borderBottomLeftRadius:10
+  },
+  addSurveyListButton: {
+    borderRadius:50
+  },
+  addSurveyListButtonContainer: {
+    padding:20,
+  },
+  addSurveyListDropdown: {
+    position:'absolute',
+    width:'80%',
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    padding:10,
+    left:'10%',
+    top:60,
+  },
+  addSurveyListDropdownTouch: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    cursor:'pointer'
+  },
+  addSurveyListDropdownTouchBottom: {
+    paddingLeft:10,
+    paddingTop:4,
+    paddingBottom:4,
+    cursor:'pointer'
+  },
+  addSurveyListDropdownText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  addSurveyList: {
+    justifyContent:'flex-start',
+    flex:5,
+  },
+  programTask: {
+    backgroundColor:colorsLight.mainBackground,
+    flexDirection:'row',
+    marginBottom:10,
+    borderTopColor:colorsLight.headerBorder,
+    borderBottomColor:colorsLight.headerBorder,
+    borderTopWidth:2,
+    borderBottomWidth:2
+  },
+  programTaskMain: {
+    flex:1,
+    padding:20,
+    flexDirection:'row',
+    alignItems:'center',
+    cursor:'pointer'
+  },
+  programTaskIcon: {
+    marginRight:15,
+  },
+  programTaskTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  programTaskNav: {
+    width:40,
+    justifyContent:'space-between',
+    paddingTop:4,
+    paddingBottom:4
+  },
+  planRequiredText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:12,
+    color:colorsLight.mainTextColor,
+  },
+  addSurveyMainContainer: {
+    flex:3,
+    minHeight:300,
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  addSurveyMainHelpText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    color:colorsLight.mainTextColor
+  },
+  addSurveyMain: {
+    flex:1,
+    width:'100%',
+    padding:20,
+  },
+  addSurveyMainHeader: {
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    paddingBottom:10,
+    paddingLeft:5,
+    paddingRight:5,
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
+  addSurveyMainHeaderLeft: {
+    flexDirection:'row',
+    flex:3,
+    alignItems:'center'
+  },
+  addSurveyMainHeaderRight: {
+    justifyContent:'center',
+    flex:1,
+    cursor:'pointer'
+  },
+  addSurveyMainHeaderDelete: {
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'right',
+  },
+  addSurveyMainHeaderTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    textAlign:'left',
+    marginRight:10,
+  },
+  addSurveyMainHeaderTitle: {
+    fontFamily:'Poppins',
+    fontSize:22,
+    textAlign:'left'
+  },
+  addSurveyMainBody: {
+    paddingTop:15,
+    justifyContent:'flex-start',
+    alignItems:'flex-start',
+  },
+  addSurveyMainSearch: {
+    zIndex:999
+  },
+  chosenTask: {
+    flex:1,
+    marginLeft:20,
+  },
+  chosenTaskTitle: {
+    fontSize:22,
+    marginTop:10,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  chosenTaskText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    marginTop:5,
+    color:colorsLight.mainTextColor
+  },
+  searchTaskText: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+  },
+  addSurveyFooter: {
+    flexDirection:'row',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+  },
+  surveyTaskQuestion: {
+    fontFamily:'Poppins',
+    fontSize:12,
+    color:colorsLight.mainTextColor
+  },
+  inputSliderInfo: {
+
+  },
+  inputSliderInfoRange: {
+    flexDirection:'row',
+    alignItems:'center',
+    marginBottom:20
+  },
+  inputSliderInfoRangeSpacer: {
+    padding:10,
+  },
+  dropdownContainer: {
+    padding:5,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10
+  },
+  inputSliderTextContainer: {
+    flexDirection:'row',
+    alignItems:'center',
+    marginBottom:10
+  },
+  inputSliderNumDisplay: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    height:30,
+    width:30,
+    marginRight:10
+  },
+  inputSliderTextTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+  },
+  inputSliderTextLabel: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:14,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  surveyBoxes: {
+    justifyContent:'flex-start',
+    alignItems:'center',
+    flex:1,
+    marginBottom:10
+  },
+  boxItem: {
+    flexDirection:'row',
+    alignItems:'center',
+    marginTop:10,
+    paddingTop:15,
+    marginBottom:10,
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder
+  },
+  boxItemInput: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'50%',
+    fontFamily:'Poppins',
+    fontSize:14,
+  },
+  boxItemNav: {
+    backgroundColor:colorsLight.mainBackground,
+    marginRight:10
+  },
+  responseRow: {
+    flexDirection:'column',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  responseClientInfo: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:10,
+    backgroundColor:colorsLight.header
+  },
+  responseClientInfoInner: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  },
+  responseClientText: {
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    marginLeft:10,
+  },
+  responseClientCreated: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+  },
+  responseTextInfo: {
+    padding:5
+  },
+  responseText: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+  },
 });
 
 export const programsLight = StyleSheet.create({

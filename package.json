@@ -8,6 +8,10 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@nivo/bar": "^0.69.1",
+    "@nivo/bullet": "^0.69.1",
+    "@nivo/core": "^0.69.0",
+    "@nivo/pie": "^0.69.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/drawer": "^5.12.5",
     "@react-navigation/native": "^5.9.4",
@@ -22,6 +26,7 @@
     "luxon": "^1.26.0",
     "react": "^16.8.2",
     "react-color": "^2.18.0",
+    "react-currency-input-field": "^3.3.2",
     "react-date-countdown-timer": "^1.0.9",
     "react-date-picker": "^8.1.1",
     "react-dom": "^16.13.1",

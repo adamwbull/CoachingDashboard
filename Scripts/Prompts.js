@@ -11,9 +11,15 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getPromptResponses, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
+import { getPayments, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getPromptResponses, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
 import { Popup, Dropdown, Tab } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
+import { Slider } from 'react-native-elements';
+import { ResponsivePie, } from '@nivo/pie'
+import { ResponsiveBullet } from '@nivo/bullet'
+import { ResponsiveBar } from '@nivo/bar'
+import CurrencyInput from 'react-currency-input-field';
+import StripeImage from '../assets/stripe-purple.png'
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -36,6 +42,10 @@ export default function Prompts() {
   // Survey main stage controls.
   const [deleteSurveyIndex, setDeleteSurveyIndex] = useState(-1)
   const [showSurveyOptions, setShowSurveyOptions] = useState(-1)
+
+  // Payment main stage controls.
+  const [deletePaymentIndex, setDeletePaymentIndex] = useState(-1)
+  const [showPaymentOptions, setShowPaymentOptions] = useState(-1)
 
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
@@ -93,6 +103,15 @@ export default function Prompts() {
   const [surveyText, setSurveyText] = useState('')
   const [surveyItems, setSurveyItems] = useState([])
 
+  // Payment prompts stage controls.
+  const [showAddingPayment, setAddingPayment] = useState(false)
+
+  // Payment prompt data to upload.
+  const [paymentTitle, setPaymentTitle] = useState('')
+  const [paymentMemo, setPaymentMemo] = useState('')
+  const [paymentAmount, setPaymentAmount] = useState(0)
+
+
   // Main page Data.
   const [prompts, setPrompts] = useState([])
   const [surveys, setSurveys] = useState([])
@@ -107,44 +126,14 @@ export default function Prompts() {
   const [showViewSurveyPrompt, setViewSurveyPrompt] = useState(false)
   const [viewSurvey, setViewSurvey] = useState({})
   const [viewSurveyResponses, setViewSurveyResponses] = useState([])
-  const surveyPanes = [
-    {
-      menuItem: { key: 'Summary', icon:'pie graph', content:'Summary' },
-      render: () => <Tab.Pane attached={false}>Hello</Tab.Pane>,
-    },
-    {
-      menuItem: { key: 'Individuals', icon:'user', content:'Individuals' },
-      render: () => <Tab.Pane attached={false} style={{padding:0,margin:0}}>
-        {viewSurveyResponses.map((response, index) => {
-          return (<View style={[styles.responseRow]} key={index + '++'}>
-            <View style={styles.responseClientInfo}>
-              <View style={styles.responseClientInfoInner}>
-                <Image source={response.Client[0].Avatar} style={{width:30,height:30,borderRadius:40}} />
-                <Text style={styles.responseClientText}>{response.Client[0].FirstName + ' ' + response.Client[0].LastName}</Text>
-              </View>
-              <Text style={styles.responseClientCreated}>
-                {parseSimpleDateText(sqlToJsDate(response.CompletedDate))}
-              </Text>
-            </View>
-            <View style={styles.responseTextInfo}>
-              {response.Responses.map((r, i) => {
-                var q = viewSurvey.Items[i]
-                return (<View key={i + '+++'}>
-                  <Text style={styles.surveyQuestion}>{q.Question}</Text>
-                  <Text style={styles.surveyResponseText}>{r.Response}</Text>
-                </View>)
-              })}
-            </View>
-          </View>)
-        })}
-      </Tab.Pane>
-    }
-  ]
+
+  const [showViewPayment, setShowViewPayment] = useState(false)
+  const [viewPayment, setViewPayment] = useState({})
+  const [viewPaymentResponses, setViewPaymentResponses] = useState([])
 
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
   const refreshTextPrompts = async (id, token) => {
     var refresh = await getTextPrompts(id, token)
-    console.log('prompts:',refresh)
     setPrompts(refresh)
   }
 
@@ -154,20 +143,27 @@ export default function Prompts() {
     setSurveys(refresh)
   }
 
+  const refreshPayments = async (id, token) => {
+    var refresh = await getPayments(id, token)
+    console.log('payments:',refresh)
+    setPayments(refresh)
+  }
+
   // Main loader.
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
-      if (sCoach.Plan == 1) {
+      if (sCoach.Plan != 0 && sCoach.StripePublicKey != '') {
         setPaymentsDisabled(false)
-      } else if (sCoach.Plan == 2) {
-        setPaymentsDisabled(false)
+      }
+      if (sCoach.Plan == 2) {
         setContractsDisabled(false)
       }
       try {
         refreshTextPrompts(sCoach.Id, sCoach.Token)
         refreshSurveys(sCoach.Id, sCoach.Token)
+        refreshPayments(sCoach.Id, sCoach.Token)
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -406,6 +402,247 @@ export default function Prompts() {
   }
 
   // Survey controls.
+  const surveyPanes = [
+    {
+      menuItem: { key: 'Summary', icon:'pie graph', content:'Summary' },
+      render: () => <Tab.Pane attached={false}>
+      {viewSurvey.Items.map((q, index) => {
+        var i;
+        // Get list of input responses.
+        var responses = []
+        for (i = 0; i < viewSurveyResponses.length; i++) {
+          var cur = viewSurveyResponses[i].Responses[index]
+          responses.push(cur)
+        }
+        if (q.Type == 0) {
+          return (<View style={styles.surveyDataRow} key={index + '-'}>
+            <Text style={styles.surveyQuestion}>{q.Question}</Text>
+            {responses.map((res, ind) => {
+              var line = {borderTopColor:colors.headerBorder,borderTopWidth:1}
+              if (ind == 0) {
+                line = {}
+              }
+              return (<Text key={ind + '--'} style={[styles.responseClientText,line]}>
+                {res.Response}
+              </Text>)
+            })}
+          </View>)
+        } else if (q.Type == 1) {
+          // Get range.
+          var rangeStrs = q.SliderRange.split(',')
+          var minRange = parseInt(rangeStrs[0])
+          var maxRange = parseInt(rangeStrs[1])
+          // Get average.
+          var top = 0
+          var cnt = 0
+          for (i = 0; i < viewSurveyResponses.length; i++) {
+            var cur = parseFloat(viewSurveyResponses[i].Responses[index].Response)
+            top += cur
+            cnt++
+          }
+          console.log('top:',top,'cnt:',cnt)
+          var average = parseFloat((top/cnt).toFixed(2))
+          var data = [{
+            "id": "Average Response",
+            "ranges": [
+              minRange,
+              maxRange
+            ],
+            "markers": [
+              average
+            ],
+            "measures": [
+              average
+            ]
+          }]
+          return (<View style={styles.surveyDataRow} key={index + '-'} style={{width:'100%',height:150}}>
+            <Text style={styles.surveyQuestion}>{q.Question}</Text>
+            <ResponsiveBullet
+              data={data}
+              margin={{ top: 20, right: 40, bottom: 70, left: 40 }}
+              titleAlign="start"
+              titleOffsetX={0}
+              titleOffsetY={-40}
+              measureSize={0.7}
+              markerSize={0.7}
+              markerColors={[colors.primaryHighlight]}
+              rangeColors={[colors.secondaryBackground]}
+              measureColors={[colors.primaryHighlight]}
+            />
+          </View>)
+        } else if (q.Type == 2 || q.Type == 3) {
+          var data = []
+          var ids = q.BoxOptionsArray.split(',')
+          for (i = 0; i < ids.length; i++) {
+            var color = colors.primaryHighlight
+            if (i >= 1 && i <= 5) {
+              var colorsArr = [colors.secondaryHighlight]
+              for (var k = 0; k < 4; k++) {
+                colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+              }
+              color = colorsArr[(i % 5)]
+            }
+            console.log(colorsArr)
+            var total = 0
+            for (var j = 0; j < viewSurveyResponses.length; j++) {
+              var thisPersonsResponses = viewSurveyResponses[j].Responses[index].Response.split(',')
+              if (thisPersonsResponses[i] == 'true') {
+                total++;
+              }
+            }
+            var cur = {
+              "id":ids[i],
+              "label":ids[i],
+              "value":total,
+              "color":color
+            }
+            data.push(cur)
+          }
+          return (<View style={styles.surveyDataRow} key={index + '-'} style={{width:'100%',height:300,marginBottom:30}}>
+            <Text style={styles.surveyQuestion}>{q.Question}</Text>
+            <ResponsivePie
+              data={data}
+              colors={{ datum: 'data.color' }}
+              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+              innerRadius={0.5}
+              padAngle={0.7}
+              cornerRadius={3}
+              activeOuterRadiusOffset={8}
+              borderWidth={1}
+              borderColor={colors.headerBorder}
+              arcLinkLabelsSkipAngle={10}
+              arcLinkLabelsTextColor={colors.mainTextColor}
+              arcLinkLabelsThickness={2}
+              arcLinkLabelsColor={colors.mainTextColor}
+              arcLabelsSkipAngle={10}
+              arcLabelsTextColor={colors.mainTextColor}
+              legends={[
+                  {
+                      anchor: 'bottom',
+                      direction: 'row',
+                      justify: false,
+                      translateX: 40,
+                      translateY: 56,
+                      itemsSpacing: 0,
+                      itemWidth: 100,
+                      itemHeight: 18,
+                      itemTextColor: colors.mainTextColor,
+                      itemDirection: 'left-to-right',
+                      itemOpacity: 1,
+                      symbolSize: 18,
+                      symbolShape: 'circle',
+                      effects: [
+                          {
+                              on: 'hover',
+                              style: {
+                                  itemTextColor: '#000'
+                              }
+                          }
+                      ]
+                  }
+              ]}
+          />
+          </View>)
+        }
+      })}
+      </Tab.Pane>,
+    },
+    {
+      menuItem: { key: 'Individuals', icon:'user', content:'Individuals' },
+      render: () => <Tab.Pane attached={false} style={{padding:0,margin:0}}>
+        {viewSurveyResponses.map((response, index) => {
+          return (<View style={[styles.responseRow]} key={index + '++'}>
+            <View style={styles.responseClientInfo}>
+              <View style={styles.responseClientInfoInner}>
+                <Image source={response.Client[0].Avatar} style={{width:30,height:30,borderRadius:40}} />
+                <Text style={styles.responseClientText}>{response.Client[0].FirstName + ' ' + response.Client[0].LastName}</Text>
+              </View>
+              <Text style={styles.responseClientCreated}>
+                {parseSimpleDateText(sqlToJsDate(response.CompletedDate))}
+              </Text>
+            </View>
+            <View style={styles.responseTextInfo}>
+              {response.Responses.map((r, i) => {
+                var q = viewSurvey.Items[i]
+                if (q.Type == 0) {
+                  // Input.
+                  return (<View style={styles.surveyResponseContainer} key={i + '+++'}>
+                    <Text style={styles.surveyQuestion}>{q.Question}</Text>
+                    <Text style={styles.surveyResponseText}>{r.Response}</Text>
+                  </View>)
+                } else if (q.Type == 1) {
+                  // Slider.
+                  var sliderVals = q.SliderRange.split(',')
+                  return (<View style={styles.surveyResponseContainer} key={i + '+++'}>
+                    <Text style={styles.surveyQuestion}>{q.Question}</Text>
+                    <View style={styles.sliderRow}>
+                      <View style={styles.sliderInfo}>
+                        <Text style={styles.sliderVal}>{sliderVals[0]}</Text>
+                        <Text style={styles.sliderDesc}>{q.SliderLeft}</Text>
+                      </View>
+                      <View style={{flex:1,margin:5}}>
+                        <Slider
+                          value={r.Response}
+                          onValueChange={(value) => console.log('val')}
+                          disabled={true}
+                          thumbStyle={styles.sliderThumb}
+                          minimumValue={sliderVals[0]}
+                          maximumValue={sliderVals[1]}
+                          minimumTrackTintColor={colors.primaryHighlight}
+                        />
+                        <Text style={styles.sliderResponse}>Response: {r.Response}</Text>
+                      </View>
+                      <View style={styles.sliderInfo}>
+                        <Text style={styles.sliderVal}>{sliderVals[1]}</Text>
+                        <Text style={styles.sliderDesc}>{q.SliderRight}</Text>
+                      </View>
+                    </View>
+                  </View>)
+                } else if (q.Type == 2) {
+                  // Checkbox
+                  var boxOptions = q.BoxOptionsArray.split(',')
+                  var boxRes = r.Response.split(',')
+                  return (<View style={styles.surveyResponseContainer} key={i + '+++'}>
+                    <Text style={styles.surveyQuestion}>{q.Question}</Text>
+                    {boxOptions.map((box, boxI) => {
+                      return (<View key={boxI + '++++'} style={styles.surveyBoxRow}>
+                        <Icon
+                          name={(boxRes[boxI] == 'true') ? 'checkbox-outline' : 'square-outline'}
+                          type='ionicon'
+                          size={22}
+                          color={colors.mainTextColor}
+                        />
+                        <Text style={styles.boxText}>{boxOptions[boxI]}</Text>
+                      </View>)
+                    })}
+                  </View>)
+                } else if (q.Type == 3) {
+                  // Radiobox
+                  var boxOptions = q.BoxOptionsArray.split(',')
+                  var boxRes = r.Response.split(',')
+                  return (<View style={styles.surveyResponseContainer} key={i + '+++'}>
+                    <Text style={styles.surveyQuestion}>{q.Question}</Text>
+                    {boxOptions.map((box, boxI) => {
+                      return (<View key={boxI + '++++'} style={styles.surveyBoxRow}>
+                        <Icon
+                          name={(boxRes[boxI] == 'true') ? 'checkmark-circle-outline' : 'ellipse-outline'}
+                          type='ionicon'
+                          size={22}
+                          color={colors.mainTextColor}
+                        />
+                        <Text style={styles.boxText}>{boxOptions[boxI]}</Text>
+                      </View>)
+                    })}
+                  </View>)
+                }
+              })}
+            </View>
+          </View>)
+        })}
+      </Tab.Pane>
+    }
+  ]
+
   const addSurvey = () => {
     setMain(false)
     setActivityIndicator(true)
@@ -710,15 +947,88 @@ export default function Prompts() {
     }
   }
 
-
   // Payment controls.
   const addPayment = () => {
-    console.log ('Add new payment...')
+    setMain(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setScrollToEnd(true)
+      setActivityIndicator(false)
+      setAddingPayment(true)
+    },500)
+  }
+
+  const duplicatePayment = async (i) => {
+    var s = surveys[i]
+    setMain(false)
+    setDeleteSurveyIndex(-1)
+    setShowSurveyOptions(-1)
+    setCurrentSurveyItem(0)
+    // Set prompt data.
+    setSurveyTitle(s.Title)
+    setSurveyText(s.Text)
+    console.log('sitems:',s.Items)
+    setSurveyItems(s.Items)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      console.log('items:',surveyItems)
+      setActivityIndicator(false)
+      setSurveyItemMain(true)
+      setAddingSurveyPrompt(true)
+    },500)
+  }
+
+  const deletePaymentTrigger = async (i) => {
+    var deleted = await deleteSurvey(surveys[i].Id, coach.Id, coach.Token)
+    if (deleted) {
+      setDeleteSurveyIndex(-1)
+      setShowSurveyOptions(-1)
+      refreshSurveys(coach.Id, coach.Token)
+    }
+  }
+
+  const returnToMainFromPayment = () => {
+    setAddingPayment(false)
+    setViewPayment(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
   }
 
   // Contract controls.
   const addContract = () => {
     console.log ('Add new contract...')
+  }
+
+  const duplicateContract = async (i) => {
+    var s = surveys[i]
+    setMain(false)
+    setDeleteSurveyIndex(-1)
+    setShowSurveyOptions(-1)
+    setCurrentSurveyItem(0)
+    // Set prompt data.
+    setSurveyTitle(s.Title)
+    setSurveyText(s.Text)
+    console.log('sitems:',s.Items)
+    setSurveyItems(s.Items)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      console.log('items:',surveyItems)
+      setActivityIndicator(false)
+      setSurveyItemMain(true)
+      setAddingSurveyPrompt(true)
+    },500)
+  }
+
+  const deleteContractTrigger = async (i) => {
+    var deleted = await deleteSurvey(surveys[i].Id, coach.Id, coach.Token)
+    if (deleted) {
+      setDeleteSurveyIndex(-1)
+      setShowSurveyOptions(-1)
+      refreshSurveys(coach.Id, coach.Token)
+    }
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView} scrollToEnd={scrollToEnd}>
@@ -884,7 +1194,7 @@ export default function Prompts() {
                             <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowSurveyOptions(-1)}>
                               <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
                             </TouchableOpacity>
-                            <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicateSurvey(index)}>
+                            <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicatePayment(index)}>
                             <Text style={styles.taskButtonText}>Duplicate</Text>
                           </TouchableOpacity>
                           <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeleteSurveyIndex(index)}>
@@ -894,7 +1204,7 @@ export default function Prompts() {
                           (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowSurveyOptions(index)}>
                             <Text style={styles.taskButtonText}>Edit</Text>
                           </TouchableOpacity>
-                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPaymentTrigger(index)}>
                             <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
                           </TouchableOpacity>
                         </View></>)}
@@ -922,11 +1232,71 @@ export default function Prompts() {
                   containerStyle={styles.promptAddButtonContainer}
                   onPress={addPayment} />
                 </View>
-                {payments.length > 0 && (<View>
-                </View>) || (<View style={styles.helpBox}>
-                  {paymentsDisabled && (<Text style={styles.helpBoxError}><Text style={styles.standardPlanText}>Standard Plan</Text> is needed to use this feature.</Text>) || (<></>)}
-                  <Text style={styles.helpBoxText}>Invoice templates to charge Clients with.{"\n"}Assign directly to Clients or include in a Program.</Text>
-                </View>)}
+                {paymentsDisabled && (<View style={styles.helpBox}>
+                  <Text style={styles.helpBoxText}>
+                    {coach.Plan == 1 && (<Text style={styles.helpBoxError}><Text style={styles.standardPlanText}>Standard Plan</Text> is needed to use this feature.</Text>) || (<></>)}
+                    {coach.StripePublicKey == '' && (<Text>Must set up <Link to='/settings' style={{color:btnColors.primary}}>Stripe keys in Settings</Link>.</Text>)}{"\n"}
+                    Collect payments directly from Clients.{"\n"}
+                    Assign directly to Clients or include in a Program.
+                  </Text>
+                </View>) || (<>
+                  {payments.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                    {payments.map((payment, index) => {
+                      var icon = 'card-outline'
+                      var name = payment.Title
+                      if (name.length > 13) {
+                        name = name.slice(0,13) + '...'
+                      }
+                      var text = survey.Text
+                      if (text.length > 80) {
+                        text = text.slice(0,80) + '...'
+                      }
+                      return (<View style={styles.taskBox} key={index + '-'}>
+                        <View style={styles.taskPreview}>
+                          <View style={styles.taskPreviewHeader}>
+                            <View style={styles.taskPreviewHeaderIcon}>
+                              <Icon
+                                name={promptIcon}
+                                type='ionicon'
+                                size={22}
+                                color={colors.mainTextColor}
+                              />
+                            </View>
+                            <Text style={styles.taskPreviewTitle}>{name}</Text>
+                          </View>
+                          {deletePaymentIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>{text}</Text></>)}
+                        </View>
+                        {deletePaymentIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteSurveyTrigger(index)}>
+                          <Text style={styles.taskButtonText}>Confirm</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePaymentIndex(-1)}>
+                          <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                        </TouchableOpacity></View></>)
+                        || (<>
+                          {showPaymentOptions == index &&
+                            (<>
+                              <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPaymentOptions(-1)}>
+                                <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                              </TouchableOpacity>
+                              <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicateSurvey(index)}>
+                              <Text style={styles.taskButtonText}>Duplicate</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePaymentIndex(index)}>
+                              <Text style={styles.taskButtonText}>Delete</Text>
+                            </TouchableOpacity></View></>)
+                            ||
+                            (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPaymentOptions(index)}>
+                              <Text style={styles.taskButtonText}>Edit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                            </TouchableOpacity>
+                          </View></>)}
+                        </>)}
+                      </View>)
+                    })}
+                  </ScrollView>) || (<View style={styles.helpBox}><Text style={styles.helpBoxText}>Invoice templates to charge Clients with.{"\n"}Assign directly to Clients or include in a Program.</Text></View>)}
+                </>)}
               </View>
             </View>
 
@@ -1570,6 +1940,82 @@ export default function Prompts() {
                 />)}
                 {createButtonActivityIndicator && (<View style={[styles.newPromptAddButtonContainer,{marginTop:10}]}><ActivityIndicatorView /></View>)}
                 <View style={styles.newPromptAddButtonSpacer}></View>
+              </View>
+            </View>
+          </>)}
+
+          {showAddingPayment && (<>
+            <View style={styles.newPromptContainer}>
+              <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPayment}
+                />
+                <Text style={styles.newPromptDescTitle}>New Payment</Text>
+              </View>
+              <View style={styles.newPromptBody}>
+                <View style={styles.newPromptForm}>
+                  <Text style={styles.newPromptTitleLabel}>Title</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    value={paymentTitle}
+                    placeholder='ex. Standard Program Payment'
+                    onChangeText={(text) => setPaymentTitle(text)}
+                  />
+                  <Text style={styles.newPromptTitleLabel}>Memo</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    value={paymentMemo}
+                    placeholder='ex. Payment to join my Standard Program.'
+                    onChangeText={(text) => setPaymentMemo(text)}
+                    multiline={true}
+                    numberOfLines={2}
+                  />
+                  <Text style={styles.newPromptTitleLabel}>Amount (USD)</Text>
+                  <CurrencyInput
+                    id="input-example"
+                    name="input-name"
+                    placeholder="ex. 100.00"
+                    prefix='$'
+                    style={{color:colors.mainTextColor,
+                    backgroundColor:colors.secondaryBackground,
+                    borderRadius:10,
+                    borderWidth:0,
+                    padding:10,
+                    width:'100%',
+                    fontFamily:'Poppins',
+                    fontSize:18,
+                    marginBottom:20}}
+                    defaultValue={undefined}
+                    decimalsLimit={2}
+                    onValueChange={(value, name) => console.log(value, name)}
+                  />
+                </View>
+              </View>
+              <View style={[styles.newPromptFooter,{flexDirection:'row',alignItems:'center',justifyContent:'center'}]}>
+                {(surveyTitle.length == 0 || surveyText.length == 0 || surveyItems.length == 0) && (<Popup
+                  position='top center'
+                  content='Base fields need to be filled out, and at least one survey item created!' trigger={<Button
+                  title='Create Payment'
+                  disabled={true}
+                  titleStyle={styles.newPromptAddButtonTitle}
+                  buttonStyle={styles.newPromptAddButton}
+                  containerStyle={[styles.newPromptAddButtonContainer,{flex:1,padding:0}]}
+                />}/>) || (<Button
+                  title='Create Payment'
+                  titleStyle={styles.newPromptAddButtonTitle}
+                  buttonStyle={styles.newPromptAddButton}
+                  containerStyle={[styles.newPromptAddButtonContainer,{flex:1,padding:0}]}
+                  onPress={submitSurvey}
+                  disabled={createButtonDisabled}
+                />)}
+                {createButtonActivityIndicator && (<View style={[styles.newPromptAddButtonContainer,{marginTop:10}]}><ActivityIndicatorView /></View>)}
+                <View style={{paddingLeft:10,alignItems:'flex-end',justifyContent:'center'}}>
+                  <Image source={StripeImage} style={{width:150,height:34}} />
+                </View>
               </View>
             </View>
           </>)}
