@@ -1908,7 +1908,6 @@ export default function Prompts() {
                             config={editorConfig}
               		          tabIndex={1} // tabIndex of textarea
               		          onBlur={newContent => onRichText(newContent)}
-
                           />
                         </View>)}
                       </View>

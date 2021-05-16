@@ -9,6 +9,7 @@ import { drawerLight, colorsLight, navLogo, btnColors, windowHeight } from '../S
 import { drawerDark, colorsDark } from '../StylesDark.js'
 import { set, get, getTTL, ttl } from '../Storage.js'
 import ReactFullscreen from 'react-easyfullscreen'
+import { refreshCoach } from '../API.js'
 
 // Sub Drawers.
 import Home from './Home.js'
@@ -32,26 +33,36 @@ export default function Main() {
 
   const linkTo = useLinkTo()
 
+  const refreshStoredCoach = async (id, token) => {
+    console.log('Refreshing coach data...')
+    var refresh = await refreshCoach(id, token)
+    console.log('New coach:',refresh)
+    set('Coach',refresh,ttl)
+  }
+
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
-      if (sCoach.Theme == 1) {
-        setStyles(drawerDark)
-        setColors(colorsDark)
-      }
-      var name = sCoach.FirstName + ' ' + sCoach.LastName.charAt(0) + '.'
-      setUserName(name)
-      if (sCoach.Plan == 0) {
-        setPlanTitle('Free Plan')
-        setHeaderPlan({color:btnColors.primary})
-      } else if (sCoach.Plan == 1) {
-        setPlanTitle('Standard Plan')
-        setHeaderPlan({color:btnColors.success})
-      } else if (sCoach.Plan == 2) {
-        setPlanTitle('Professional Plan')
-        setHeaderPlan({color:btnColors.danger})
-      }
+      setTimeout(() => {
+        refreshStoredCoach(sCoach.Id, sCoach.Token)
+        if (sCoach.Theme == 1) {
+          setStyles(drawerDark)
+          setColors(colorsDark)
+        }
+        var name = sCoach.FirstName + ' ' + sCoach.LastName.charAt(0) + '.'
+        setUserName(name)
+        if (sCoach.Plan == 0) {
+          setPlanTitle('Free Plan')
+          setHeaderPlan({color:btnColors.primary})
+        } else if (sCoach.Plan == 1) {
+          setPlanTitle('Standard Plan')
+          setHeaderPlan({color:btnColors.success})
+        } else if (sCoach.Plan == 2) {
+          setPlanTitle('Professional Plan')
+          setHeaderPlan({color:btnColors.danger})
+        }
+      })
     } else {
       linkTo('/welcome')
       setFromWelcome(true)

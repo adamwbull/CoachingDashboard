@@ -1,18 +1,19 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { conceptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
-import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
+import { conceptsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
+import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/StylesDark.js'
 import { useLinkTo, Link } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
-import { getConcepts } from './API.js'
+import { deleteConcept, checkStorage, getConcepts, createConcept, uploadVideo, getProgressBar } from './API.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
 import { Popup, Dropdown, Tab } from 'semantic-ui-react'
+import JoditEditor from "jodit-react";
 
 export default function Concepts() {
   const linkTo = useLinkTo()
@@ -38,7 +39,7 @@ export default function Concepts() {
   // Text Concepts data to upload.
   const [conceptTitle, setConceptTitle] = useState('')
   const [conceptType, setConceptType] = useState(0)
-  const [conceptText, setConceptText] = useState('')
+  const [conceptText, setConceptText] = useState('<p>Create your <strong>awesome content</strong> here! 😁</p>')
   const [videoUrl, setVideoUrl] = useState('')
   const [videoType, setVideoType] = useState(-1) // 0 - YT, 1 - Upload
   // Text Concepts builder data
@@ -67,11 +68,15 @@ export default function Concepts() {
   // Main page view screens and controls.
   const [showViewConcept, setShowViewConcept] = useState(false)
   const [viewConcept, setViewConcept] = useState({})
+  const [showConceptOptions, setShowConceptOptions] = useState(-1)
+  const [deleteConceptIndex, setDeleteConceptIndex] = useState(-1)
+
 
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
+      console.log(sCoach)
       try {
         refreshConcepts(sCoach.Id, sCoach.Token)
       } finally {
@@ -90,7 +95,7 @@ export default function Concepts() {
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
-      setViewConcept(true)
+      setShowViewConcept(true)
     },500)
   }
 
@@ -104,6 +109,8 @@ export default function Concepts() {
   }
 
   const returnToMainFromConcept = () => {
+    setShowViewConcept(false)
+    setActivityIndicator(true)
     setVideoUrl('')
     setViewConcept({})
     setTempVideoUrl('')
@@ -112,8 +119,6 @@ export default function Concepts() {
     setSelectYouTube(false)
     setSelectUpload(false)
     setAddingConcept(false)
-    setViewConcept(false)
-    setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
       setMain(true)
@@ -136,14 +141,14 @@ export default function Concepts() {
     setShowConceptOptions(-1)
     // Set concept data.
     setConceptTitle(p.Title)
-    setConceptText(p.Text)
-    if (p.ConceptType != 0) {
+    setConceptText(p.RichText)
+    if (p.Type != 0) {
 
-      if (p.ConceptType == 3) {
+      if (p.Type == 4) {
         setSelectYouTube(true)
         setTempVideoUrl(p.Video)
         setVideoUrl(p.Video)
-      } else if (p.ConceptType == 4) {
+      } else if (p.Type == 5) {
         setSelectUpload(true)
         setTempVideoUrl(p.Video)
         setVideoUrl(p.Video)
@@ -156,13 +161,13 @@ export default function Concepts() {
     },500)
   }
 
-  const onConceptTitle = (text) => {
-    setConceptTitle(text)
-  }
-
-  const onConceptText = (text) => {
-    setConceptText(text)
-  }
+  const editor = useRef(null)
+  const editorConfig = {
+		readonly: false, // all options from https://xdsoft.net/jodit/doc/
+    cleanHTML: true,
+    limitChars:3000,
+    askBeforePasteHTML:false
+	}
 
   // Select video type to control showing youtube link or video upload form.
   const selectVideoType = (type) => {
@@ -275,9 +280,9 @@ export default function Concepts() {
     var fileUploaded = await getAttachment()
     var conceptType = 0
     if (videoType == 0) {
-      conceptType = 3
-    } else if (videoType == 1) {
       conceptType = 4
+    } else if (videoType == 1) {
+      conceptType = 5
     }
     var created = await createConcept(coach.Token, coach.Id, conceptTitle, conceptType, conceptText, fileUploaded)
     if (created) {
@@ -287,9 +292,8 @@ export default function Concepts() {
       setAddingConcept(false)
       setActivityIndicator(true)
       setTimeout(() => {
-        setActivityIndicator(false)
-        setMain(true)
-      },500)
+        window.location.reload()
+      },1000)
     } else {
       console.log('Error creating concept.')
     }
@@ -339,8 +343,62 @@ export default function Concepts() {
                   containerStyle={styles.conceptAddButtonContainer}
                   onPress={addConcept} />
                 </View>
-                {concepts.length > 0 && (<View>
-                </View>) || (<View style={styles.helpBox}>
+                {concepts.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                  {concepts.map((concept, index) => {
+                    var conceptIcon = 'book'
+                    var name = concept.Title
+                    if (name.length > 13) {
+                      name = name.slice(0,13) + '...'
+                    }
+                    var text = concept.RichText
+                    if (text.length > 120) {
+                      text = text.slice(0,120) + '...'
+                    }
+                    return (<View style={styles.taskBox} key={index}>
+                      <View style={styles.taskPreview}>
+                        <View style={styles.taskPreviewHeader}>
+                          <View style={styles.taskPreviewHeaderIcon}>
+                            <Icon
+                              name={conceptIcon}
+                              type='ionicon'
+                              size={22}
+                              color={colors.mainTextColor}
+                            />
+                          </View>
+                          <Text style={styles.taskPreviewTitle}>{name}</Text>
+                        </View>
+                        {deleteConceptIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                      </View>
+                      {deleteConceptIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteConceptTrigger(index)}>
+                        <Text style={styles.taskButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeleteConceptIndex(-1)}>
+                        <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                      </TouchableOpacity></View></>)
+                      || (<>
+                        {showConceptOptions == index &&
+                          (<>
+                            <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowConceptOptions(-1)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                            </TouchableOpacity>
+                            <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicateConcept(index)}>
+                            <Text style={styles.taskButtonText}>Duplicate</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeleteConceptIndex(index)}>
+                            <Text style={styles.taskButtonText}>Delete</Text>
+                          </TouchableOpacity></View></>)
+                          ||
+                          (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowConceptOptions(index)}>
+                            <Text style={styles.taskButtonText}>Edit</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewConceptTrigger(index)}>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                          </TouchableOpacity>
+                        </View></>)}
+                      </>)}
+                    </View>)
+                  })}
+                </ScrollView>) || (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>Static text concepts with optional video.{"\n"}Assign directly to Clients or include in a Program.</Text>
                 </View>)}
               </ScrollView>
@@ -367,6 +425,30 @@ export default function Concepts() {
             </View>
           </>)}
 
+          {showViewConcept && (<>
+            <View style={styles.newConceptContainer}>
+              <View style={styles.newConceptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromConcept}
+                />
+                <Text style={styles.newConceptDescTitle}>{viewConcept.Title}</Text>
+              </View>
+              <View style={styles.newConceptBody}>
+                <View style={styles.newConceptBodyLeft}>
+                  <Text style={[styles.newConceptTitleLabel,{fontSize:20}]}>Body Text</Text>
+                  <Text style={styles.viewConceptBodyText}><div dangerouslySetInnerHTML={{__html: viewConcept.RichText}} /></Text>
+                </View>
+                {viewConcept.Video != '' && (<View style={[styles.reactPlayerContainer]}>
+                  <ReactPlayer controls={true} url={viewConcept.Video} width={'100%'} height={'100%'} />
+                </View>)}
+              </View>
+            </View>
+          </>)}
+
           {showAddingConcept && (<>
             <View style={styles.newConceptContainer}>
 
@@ -387,16 +469,15 @@ export default function Concepts() {
                   style={styles.inputStyle}
                   value={conceptTitle}
                   placeholder='ex. Building Mindful Awareness'
-                  onChangeText={onConceptTitle}
+                  onChangeText={(text) => setConceptTitle(text)}
                 />
-                <Text style={styles.newConceptTitleLabel}>Body Text</Text>
-                <TextInput
-                  style={styles.inputStyle}
+                <Text style={styles.newConceptTitleLabel}>Content</Text>
+                <JoditEditor
+                  ref={editor}
                   value={conceptText}
-                  placeholder='I need to add a RichText here.'
-                  onChangeText={onConceptText}
-                  multiline={true}
-                  numberOfLines={4}
+                  config={editorConfig}
+                  tabIndex={1} // tabIndex of textarea
+                  onBlur={newContent => setConceptText(newContent)}
                 />
                 </View>
 

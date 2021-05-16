@@ -179,6 +179,32 @@ export async function check() {
 
 */
 
+export async function createConcept(coachToken, coachId, title, type, text, video) {
+
+  var ret = false
+  var arr = {Token:coachToken, CoachId:coachId, Title:title, Type:type, Text:text, Video:video}
+
+  console.log('Uploading this concept...')
+  const res = await fetch(url + '/concept/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows == 1) {
+    console.log('Prompt uploaded!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function getConcepts(id, token) {
 
   var ret = [[],[]]
@@ -494,6 +520,8 @@ export function getProgressBar(plan, storage, colors, btn) {
       overflow:'hidden'
     }
   })
+
+  console.log('storage',storage)
 
   var maxInBytes = 0
   var leftSuffix = ' GB'
