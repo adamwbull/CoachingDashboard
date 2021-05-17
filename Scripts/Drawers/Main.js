@@ -35,9 +35,8 @@ export default function Main() {
   const linkTo = useLinkTo()
 
   const refreshStoredCoach = async (id, token) => {
-    console.log('Refreshing coach data...')
     var refresh = await refreshCoach(id, token)
-    console.log('New coach:',refresh)
+    console.log('Main.js: Coach Response -',refresh)
     set('Coach',refresh,ttl)
   }
 

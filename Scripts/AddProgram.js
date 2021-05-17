@@ -209,7 +209,6 @@ export default function AddProgram() {
 
       setLoading(false)
       var res = _.filter(searchList, isMatch)
-      console.log(res)
       setSearchResults(res)
     }, 300)
   })

@@ -233,8 +233,6 @@ export async function deleteConcept(conceptId, coachId, token) {
   var ret = false
   var arr = {Token:token, Id:conceptId, CoachId:coachId}
 
-  console.log(arr)
-
   console.log('Deleting concept...')
   const res = await fetch(url + '/concept/delete', {
     method:'POST',
@@ -315,7 +313,6 @@ export async function getSurveyResponses(surveyId, id, token) {
 
   if (payload.length > 0) {
     console.log('Survey responses found!')
-    console.log(payload)
     ret = payload
   } else {
     console.log('No responses found.')
@@ -531,8 +528,6 @@ export async function deletePrompt(promptId, coachId, token) {
   var ret = false
   var arr = {Token:token, Id:promptId, CoachId:coachId}
 
-  console.log(arr)
-
   console.log('Deleting prompt...')
   const res = await fetch(url + '/prompt/delete', {
     method:'POST',
@@ -597,8 +592,6 @@ export function getProgressBar(plan, storage, colors, btn) {
       overflow:'hidden'
     }
   })
-
-  console.log('storage',storage)
 
   var maxInBytes = 0
   var leftSuffix = ' GB'
@@ -783,7 +776,6 @@ export async function getSurveys(id, token) {
 export async function getTextPrompts(id, token) {
 
   var ret = false
-  console.log(id,token)
   console.log('Getting text prompts...')
   const res = await fetch(url + '/prompts/' + id + '/' + token, {
     method:'GET'
@@ -950,7 +942,6 @@ export async function createAccount(email, dob, firstName, lastName, password) {
   console.log('account:',payload)
   if (payload[0].Id > 0) {
     console.log('Account created!')
-    console.log(payload)
     ret = payload[0]
   }
 

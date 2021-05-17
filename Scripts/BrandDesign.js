@@ -58,9 +58,7 @@ export default function BrandDesign() {
       setCoach(sCoach)
       setPrimaryColor(sCoach.PrimaryHighlight)
       setSecondaryColor(sCoach.SecondaryHighlight)
-      console.log('logo',sCoach.BrandLogo)
       if (sCoach.BrandLogo.length == 0) {
-        console.log('here')
         setCustomLogo(DefaultLogo)
       } else {
         setCustomLogo(sCoach.BrandLogo)
@@ -81,7 +79,6 @@ export default function BrandDesign() {
 
   // Coloring functions.
   const setColoring = (type, hex) => {
-    console.log(hex)
     if (type == 0) {
       setPrimaryColor(hex)
       setPrimaryColoringPicker(false)
@@ -102,7 +99,6 @@ export default function BrandDesign() {
   }
 
   const closeColoringPicker = () => {
-    console.log('closing')
     setSecondaryColoringPicker(false)
     setPrimaryColoringPicker(false)
   }
