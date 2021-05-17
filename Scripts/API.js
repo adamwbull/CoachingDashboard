@@ -179,6 +179,83 @@ export async function check() {
 
 */
 
+export async function createPDFConcept(coachToken, coachId, title, file) {
+
+  var ret = false
+  var arr = {Token:coachToken, CoachId:coachId, Title:title, File:file}
+
+  console.log('Uploading this concept...')
+  const res = await fetch(url + '/concept/pdf/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows == 1) {
+    console.log('Prompt uploaded!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function uploadPDF(file) {
+
+  var ret = false
+  let formData = new FormData()
+  formData.append('pdf', file)
+
+  console.log('Attempting pdf upload...')
+  const res = await fetch(uploadUrl + '/api/pdf', {
+    method:'POST',
+    body: formData,
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows == 1) {
+    console.log('Upload complete!')
+    ret = uploadUrl
+  }
+
+  return ret
+
+}
+
+export async function deleteConcept(conceptId, coachId, token) {
+
+  var ret = false
+  var arr = {Token:token, Id:conceptId, CoachId:coachId}
+
+  console.log(arr)
+
+  console.log('Deleting concept...')
+  const res = await fetch(url + '/concept/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+  console.log('deletion payload:',payload)
+  if (payload) {
+    console.log('Concept and assocs deleted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function createConcept(coachToken, coachId, title, type, text, video) {
 
   var ret = false
@@ -217,7 +294,7 @@ export async function getConcepts(id, token) {
   const payload = await res.json()
 
   if (payload.length > 0) {
-    console.log('Connection established!')
+    console.log('Connection established, lists returned!')
     ret = payload
   }
 

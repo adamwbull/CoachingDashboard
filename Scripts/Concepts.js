@@ -9,11 +9,13 @@ import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
-import { deleteConcept, checkStorage, getConcepts, createConcept, uploadVideo, getProgressBar } from './API.js'
+import { createPDFConcept, uploadPDF, deleteConcept, checkStorage, getConcepts, createConcept, uploadVideo, getProgressBar } from './API.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
 import { Popup, Dropdown, Tab } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
+import { Document, Page, pdfjs } from "react-pdf";
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 export default function Concepts() {
   const linkTo = useLinkTo()
@@ -26,7 +28,7 @@ export default function Concepts() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
 
-  // Text Concepts stage controls.
+  // Concepts stage controls.
   const [showAddingConcept, setAddingConcept] = useState(false)
   const [videoSelected, setVideoSelected] = useState(false)
   const [showVideoOptions, setVideoOptions] = useState(false)
@@ -36,7 +38,7 @@ export default function Concepts() {
   const [videoActivityIndicator, setVideoActivityIndicator] = useState(false)
   const [createButtonDisabled, setCreateButtonDisabled] = useState(false)
   const [createButtonActivityIndicator, setCreateButtonActivityIndicator] = useState(false)
-  // Text Concepts data to upload.
+  // Concepts data to upload.
   const [conceptTitle, setConceptTitle] = useState('')
   const [conceptType, setConceptType] = useState(0)
   const [conceptText, setConceptText] = useState('<p>Create your <strong>awesome content</strong> here! 😁</p>')
@@ -49,7 +51,14 @@ export default function Concepts() {
   // PDFs stage controls.
   const [showAddingPDF, setAddingPDF] = useState(false)
 
-  // Data.
+  // PDF data.
+  const [pdfTitle, setPDFTitle] = useState('')
+  const [pdf, setPDF] = useState(false)
+  const [pdfUrl, setPDFUrl] = useState('')
+  const [numPDFPages, setNumPDFPages] = useState(1)
+  const [pdfPageIndex, setPDFPageIndex] = useState(1)
+
+  // Main Data.
   const [concepts, setConcepts] = useState([])
   const [pdfs, setPDFs] = useState([])
 
@@ -60,8 +69,6 @@ export default function Concepts() {
       setConcepts(refresh[0])
       setPDFs(refresh[1])
       console.log(refresh[0],refresh[1])
-    } else {
-      console.log('No concepts found!')
     }
   }
 
@@ -70,13 +77,15 @@ export default function Concepts() {
   const [viewConcept, setViewConcept] = useState({})
   const [showConceptOptions, setShowConceptOptions] = useState(-1)
   const [deleteConceptIndex, setDeleteConceptIndex] = useState(-1)
-
+  const [showViewPDF, setShowViewPDF] = useState(false)
+  const [viewPDF, setViewPDF] = useState(false)
+  const [showPDFOptions, setShowPDFOptions] = useState(-1)
+  const [deletePDFIndex, setDeletePDFIndex] = useState(-1)
 
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
-      console.log(sCoach)
       try {
         refreshConcepts(sCoach.Id, sCoach.Token)
       } finally {
@@ -302,8 +311,132 @@ export default function Concepts() {
   // Survey controls.
   const addPDF = () => {
     console.log ('Add new pdf...')
+    setMain(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setAddingPDF(true)
+    },500)
   }
 
+  const viewPDFTrigger = async (i) => {
+    setMain(false)
+    setViewPDF(pdfs[i])
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowViewPDF(true)
+    },500)
+  }
+
+  const returnToMainFromPDF = () => {
+    setActivityIndicator(true)
+    setPDFTitle('')
+    setPDF(false)
+    setPDFPageIndex(1)
+    setNumPDFPages(1)
+    setCreateButtonDisabled(true)
+    setAddingPDF(false)
+    setShowViewPDF(false)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
+  }
+
+  const deletePDFTrigger = async (i) => {
+    var deleted = await deleteConcept(pdfs[i].Id, coach.Id, coach.Token)
+    if (deleted) {
+      setDeletePDFIndex(-1)
+      setShowPDFOptions(-1)
+      refreshConcepts(coach.Id, coach.Token)
+    }
+  }
+
+  const hiddenPDFInput = React.useRef(null)
+
+  const handlePDFFocusBack = () => {
+    window.removeEventListener('focus', handlePDFFocusBack)
+    setVideoActivityIndicator(false)
+  }
+
+  const handlePDFClick = event => {
+    hiddenPDFInput.current.click()
+    window.addEventListener('focus', handlePDFFocusBack)
+    setVideoActivityIndicator(true)
+    setVideoError('')
+  }
+
+  const handlePDFFile = async () => {
+
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['pdf']
+      var fileType = fileArr[1]
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 20000000) {
+          setVideoActivityIndicator(false)
+          console.log('file:',file)
+          var url = URL.createObjectURL(file)
+          console.log('url:',url)
+          setPDFUrl(url)
+          setPDF(file)
+        } else {
+          setVideoError('File size should be less than 20 MB.')
+        }
+      } else {
+        setVideoError('File type should be pdf.')
+      }
+    } else {
+      setVideoActivityIndicator(false)
+    }
+
+  }
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    console.log(numPages)
+    setNumPDFPages(numPages)
+  }
+
+  const getPDFAttachment = async () => {
+    var file = pdf
+    var ret = false
+    if (file != '') {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['pdf']
+      var fileType = fileArr[1]
+      var fileMime = 'application/pdf'
+      var ts = Math.floor(Math.random() * (999999999999+1) + 1);
+      ts = ts.toString();
+      var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
+      var newFile = new File([file], fileName, {type: fileMime})
+      var url = await uploadPDF(newFile) + '/pdfs/' + fileName
+      return url
+    } else {
+      return ''
+    }
+  }
+
+  const submitPDF = async () => {
+    setCreateButtonDisabled(true)
+    setCreateButtonActivityIndicator(true)
+    var fileUploaded = await getPDFAttachment()
+    var created = await createPDFConcept(coach.Token, coach.Id, pdfTitle, fileUploaded)
+    if (created) {
+      refreshConcepts(coach.Id, coach.Token)
+      setPDF(false)
+      setPDFUrl('')
+      setCreateButtonActivityIndicator(false)
+      setAddingPDF(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        window.location.reload()
+      },1000)
+    } else {
+      console.log('Error creating PDF concept.')
+    }
+  }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
@@ -367,7 +500,7 @@ export default function Concepts() {
                           </View>
                           <Text style={styles.taskPreviewTitle}>{name}</Text>
                         </View>
-                        {deleteConceptIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                        {deleteConceptIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
                       </View>
                       {deleteConceptIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteConceptTrigger(index)}>
                         <Text style={styles.taskButtonText}>Confirm</Text>
@@ -417,8 +550,59 @@ export default function Concepts() {
                   containerStyle={styles.conceptAddButtonContainer}
                   onPress={addPDF} />
                 </View>
-                {pdfs.length > 0 && (<View>
-                </View>) || (<View style={styles.helpBox}>
+                {pdfs.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                  {pdfs.map((concept, index) => {
+                    var conceptIcon = 'document'
+                    var name = 'PDF'
+                    if (name.length > 13) {
+                      name = name.slice(0,13) + '...'
+                    }
+                    var text = concept.Title
+                    return (<View style={styles.taskBox} key={index}>
+                      <View style={styles.taskPreview}>
+                        <View style={styles.taskPreviewHeader}>
+                          <View style={styles.taskPreviewHeaderIcon}>
+                            <Icon
+                              name={conceptIcon}
+                              type='ionicon'
+                              size={22}
+                              color={colors.mainTextColor}
+                            />
+                          </View>
+                          <Text style={styles.taskPreviewTitle}>{name}</Text>
+                        </View>
+                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                      </View>
+                      {deletePDFIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePDFTrigger(index)}>
+                        <Text style={styles.taskButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePDFIndex(-1)}>
+                        <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                      </TouchableOpacity></View></>)
+                      || (<>
+                        {showPDFOptions == index &&
+                          (<>
+                            <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPDFOptions(-1)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                            </TouchableOpacity>
+                            <View style={styles.taskButtons}>
+                              <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePDFIndex(index)}>
+                                <Text style={styles.taskButtonText}>Delete</Text>
+                              </TouchableOpacity>
+                            </View>
+                          </>)
+                          ||
+                          (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPDFOptions(index)}>
+                            <Text style={styles.taskButtonText}>Edit</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPDFTrigger(index)}>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                          </TouchableOpacity>
+                        </View></>)}
+                      </>)}
+                    </View>)
+                  })}
+                </ScrollView>) || (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>Static viewable PDFs.{"\n"}Assign directly to Clients or include in a Program.</Text>
                 </View>)}
               </ScrollView>
@@ -606,6 +790,145 @@ export default function Concepts() {
                 <View style={[styles.newConceptAddButtonSpacer]}></View>
               </View>
 
+            </View>
+          </>)}
+
+          {showAddingPDF && (<>
+            <View style={styles.newConceptContainer}>
+
+              <View style={styles.newConceptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPDF}
+                />
+                <Text style={styles.newConceptDescTitle}>New PDF</Text>
+              </View>
+
+              <View style={styles.newConceptBody}>
+                <View style={styles.newConceptForm}>
+                <Text style={styles.newConceptTitleLabel}>Title</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  value={pdfTitle}
+                  placeholder='ex. 5 Stages of Development'
+                  onChangeText={(text) => setPDFTitle(text)}
+                />
+                <View style={{flex:1,alignItems:'center'}}>
+                  <input type="file" ref={hiddenPDFInput} onChange={handlePDFFile} style={{display:'none'}} />
+                  {pdf == false && (<TouchableOpacity style={[styles.showVideoOptionsChooseUpload,{marginBottom:10}]} onPress={handlePDFClick}>
+                    <Text style={styles.showVideoOptionsChooseUploadTitle}>Upload PDF</Text>
+                    <Text style={styles.showVideoOptionsChooseUploadSize}>max 20 MB</Text>
+                    {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
+                  </TouchableOpacity>) || (<>
+                    <View style={{padding:10,backgroundColor:colors.secondaryBackground}}>
+                      {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',padding:10,flex:1,marginBottom:10}}>
+                        <Icon
+                          name='chevron-back'
+                          type='ionicon'
+                          size={35}
+                          color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
+                          onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+                        />
+                        <Icon
+                          name='chevron-forward'
+                          type='ionicon'
+                          size={35}
+                          color={colors.mainTextColor}
+                          color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
+                          onPress={() => setPDFPageIndex(pdfPageIndex+1)}
+                        />
+                      </View>)}
+                      <Document
+                        file={pdf}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page
+                          key={`page_${pdfPageIndex}`}
+                          pageNumber={pdfPageIndex}
+                        />
+                      </Document>
+                    </View>
+                    <Button
+                      title='Choose Another PDF'
+                      titleStyle={styles.uploadFileTitle}
+                      buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
+                      containerStyle={styles.uploadFileTitleButtonContainer}
+                      onPress={() => {setPDF(false); setPDFPageIndex(1); setNumPDFPages(1)}}
+                    />
+                  </>)}
+                  {videoActivityIndicator && (<ActivityIndicatorView />)}
+                </View>
+                </View>
+              </View>
+
+              <View style={styles.newConceptFooter}>
+                {(pdfTitle.length == 0 || pdf == false) && (<Popup
+                  position='top center'
+                  content='All fields need to be filled out first!' trigger={<Button
+                  title='Create PDF'
+                  disabled={true}
+                  titleStyle={styles.newConceptAddButtonTitle}
+                  buttonStyle={styles.newConceptAddButton}
+                  containerStyle={[styles.newConceptAddButtonContainer,{width:'100%',padding:0}]}
+                />}/>) || (<Button
+                  title='Create PDF'
+                  titleStyle={styles.newConceptAddButtonTitle}
+                  buttonStyle={styles.newConceptAddButton}
+                  containerStyle={[styles.newConceptAddButtonContainer,{width:'100%',padding:0}]}
+                  onPress={submitPDF}
+                />)}
+                {createButtonActivityIndicator && (<View style={[styles.newConceptAddButtonContainer,{marginTop:10,width:'100%',padding:0}]}><ActivityIndicatorView /></View>)}
+                <View style={[styles.newConceptAddButtonSpacer]}></View>
+              </View>
+
+            </View>
+          </>)}
+
+          {showViewPDF && (<>
+            <View style={styles.newConceptContainer}>
+              <View style={styles.newConceptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPDF}
+                />
+                <Text style={styles.newConceptDescTitle}>{viewPDF.Title}</Text>
+              </View>
+              <View style={styles.newConceptBody}>
+              <View style={{padding:10,backgroundColor:colors.secondaryBackground}}>
+                {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',padding:10,flex:1,marginBottom:10}}>
+                  <Icon
+                    name='chevron-back'
+                    type='ionicon'
+                    size={35}
+                    color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
+                    onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+                  />
+                  <Icon
+                    name='chevron-forward'
+                    type='ionicon'
+                    size={35}
+                    color={colors.mainTextColor}
+                    color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
+                    onPress={() => setPDFPageIndex(pdfPageIndex+1)}
+                  />
+                </View>)}
+                <Document
+                  file={viewPDF.File}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                >
+                  <Page
+                    key={`page_${pdfPageIndex}`}
+                    pageNumber={pdfPageIndex}
+                  />
+                </Document>
+              </View>
+              </View>
             </View>
           </>)}
 

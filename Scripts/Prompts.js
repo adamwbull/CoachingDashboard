@@ -1000,6 +1000,12 @@ export default function Prompts() {
   // Contract controls.
   const addContract = () => {
     console.log ('Add new contract...')
+    setMain(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setAddingPDF(true)
+    },500)
   }
 
   const duplicateContract = async (i) => {
