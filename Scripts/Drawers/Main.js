@@ -15,6 +15,7 @@ import { refreshCoach } from '../API.js'
 import Home from './Home.js'
 import MobileApp from './MobileApp.js'
 import Programs from './Programs.js'
+import Settings from './Settings.js'
 
 // Create Sidebar.
 const Drawer = createDrawerNavigator()
@@ -23,7 +24,7 @@ export default function Main() {
   const [styles, setStyles] = useState(drawerLight)
   const [colors, setColors] = useState(colorsLight)
   const [opacity, setOpacity] = useState(new Animated.Value(0))
-  const [coach, setCoach] = useState({})
+  const [coach, setCoach] = useState({test:'test'})
   const [headerPlan, setHeaderPlan] = useState({})
   const [planTitle, setPlanTitle] = useState('')
   const [userName, setUserName] = useState('')
@@ -250,9 +251,25 @@ export default function Main() {
           )
         }}
       />
+      <Drawer.Screen name="Settings" component={Settings}
+        options={{
+          title:'Settings - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='cog'
+              type='ionicon'
+              size={30}
+              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
+            />
+          )
+        }}
+      />
     </Drawer.Navigator>
     {dropdownVisible && (<View style={styles.dropdownBox}>
+      <Link to="/account" style={styles.dropdownBoxText}>Account</Link>
       <Link to="/manage-plan" style={styles.dropdownBoxText}>Manage Plan</Link>
+      <Link to="/payments" style={styles.dropdownBoxText}>Payments</Link>
+      <Link to="/integrations" style={styles.dropdownBoxText}>Integrations</Link>
       <TouchableOpacity style={styles.dropdownBoxLogoutContainer} onPress={logout}>
         <Icon
           name='log-out-outline'

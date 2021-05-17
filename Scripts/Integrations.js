@@ -7,7 +7,7 @@ import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 
-export default function Overview() {
+export default function Integrations() {
   const linkTo = useLinkTo()
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(socialFeedLight)
@@ -16,7 +16,7 @@ export default function Overview() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
 
   useEffect(() => {
-    console.log('Welcome to statistics.')
+    console.log('Welcome to integrations.')
   },[])
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -26,8 +26,8 @@ export default function Overview() {
 
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Overview</Text>
-              <Text style={styles.bodyDesc}>Track client activity, statistics, and more!</Text>
+              <Text style={styles.bodyTitle}>Integrations</Text>
+              <Text style={styles.bodyDesc}>Connect with other software.</Text>
             </View>
           </View>
 

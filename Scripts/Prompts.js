@@ -1241,7 +1241,7 @@ export default function Prompts() {
                 {paymentsDisabled && (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>
                     {coach.Plan == 1 && (<Text style={styles.helpBoxError}><Text style={styles.standardPlanText}>Standard Plan</Text> is needed to use this feature.</Text>) || (<></>)}
-                    {coach.StripePublicKey == '' && (<Text>Must set up <Link to='/settings' style={{color:btnColors.primary}}>Stripe keys in Settings</Link>.</Text>)}{"\n"}
+                    {coach.StripePublicKey == '' && (<Text>Must set up <Link to='/payments' style={{color:btnColors.primary}}>Stripe keys in Settings</Link>.</Text>)}{"\n"}
                     Collect payments directly from Clients.{"\n"}
                     Assign directly to Clients or include in a Program.
                   </Text>

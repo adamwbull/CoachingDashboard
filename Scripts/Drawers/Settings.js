@@ -14,11 +14,12 @@ import { set, get, getTTL, ttl } from '../Storage.js'
 const Drawer = createDrawerNavigator()
 
 // Items.
-import Overview from '../Overview.js'
-import AllClients from '../AllClients.js'
-import InviteClients from '../InviteClients.js'
+import Account from '../Account.js'
+import ManagePlan from '../ManagePlan.js'
+import Payments from '../Payments.js'
+import Integrations from '../Integrations.js'
 
-export default function Home() {
+export default function Settings() {
   const linkTo = useLinkTo();
   const [refreshing, setRefreshing] = useState(true);
   const [styles, setStyles] = useState(homeLight);
@@ -35,11 +36,12 @@ export default function Home() {
         setColors(colorsDark)
       }
     }
+
   }, [])
 
   return (<View style={{height:'100%'}}>
     <View style={drawerStyles.drawerTop}>
-      <Text style={drawerStyles.drawerTopTitle}>Home</Text>
+      <Text style={drawerStyles.drawerTopTitle}>Settings</Text>
     </View>
     <Drawer.Navigator
       drawerType='permanent'
@@ -56,7 +58,6 @@ export default function Home() {
         style: {
         },
         contentContainerStyle: {
-
         },
         labelStyle: {
 
@@ -68,9 +69,63 @@ export default function Home() {
         }
       }}
     >
-      <Drawer.Screen name="Overview" component={Overview}
+      <Drawer.Screen name="Account" component={Account}
         options={{
-          title:'Overview - CoachSync',
+          title:'Account Settings - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='person'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Account</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="ManagePlan" component={ManagePlan}
+        options={{
+          title:'Manage Plan - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='rocket'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Manage Plan</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="Payments" component={Payments}
+        options={{
+          title:'Payments Settings - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='wallet'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Payments</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="Integrations" component={Integrations}
+        options={{
+          title:'Integrations - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
               name='apps'
@@ -82,43 +137,7 @@ export default function Home() {
           ),
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Overview</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="AllClients" component={AllClients}
-        options={{
-          title:'Clients - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='people'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Clients</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="InviteClients" component={InviteClients}
-        options={{
-          title:'Invite Clients - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='add'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Invite Clients</Text>)
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Integrations</Text>)
           }
         }}
       />

@@ -39,6 +39,14 @@ const linking = {
               Concepts: 'concepts',
               AddProgram: 'new-program'
             }
+          },
+          Settings: {
+            screens: {
+              Account: 'account',
+              ManagePlan: 'manage-plan',
+              Payments: 'payments',
+              Integrations: 'integrations'
+            }
           }
         }
       }
