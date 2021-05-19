@@ -16,7 +16,6 @@ import { Popup, Dropdown, Tab } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 import { Slider } from 'react-native-elements';
 import { ResponsivePie, } from '@nivo/pie'
-import { ResponsiveBullet } from '@nivo/bullet'
 import { ResponsiveBar } from '@nivo/bar'
 import CurrencyInput from 'react-currency-input-field';
 import StripeImage from '../assets/stripe-purple.png'
@@ -46,6 +45,10 @@ export default function Prompts() {
   // Payment main stage controls.
   const [deletePaymentIndex, setDeletePaymentIndex] = useState(-1)
   const [showPaymentOptions, setShowPaymentOptions] = useState(-1)
+
+  // Contract main stage controls.
+  const [deleteContractIndex, setDeleteContractIndex] = useState(-1)
+  const [showContractOptions, setShowContractOptions] = useState(-1)
 
   // Text Prompts stage controls.
   const [showAddingTextPrompt, setAddingTextPrompt] = useState(false)
@@ -139,13 +142,11 @@ export default function Prompts() {
 
   const refreshSurveys = async (id, token) => {
     var refresh = await getSurveys(id, token)
-    console.log(refresh)
     setSurveys(refresh)
   }
 
   const refreshPayments = async (id, token) => {
     var refresh = await getPayments(id, token)
-    console.log('payments:',refresh)
     setPayments(refresh)
   }
 
@@ -440,35 +441,29 @@ export default function Prompts() {
             top += cur
             cnt++
           }
-          console.log('top:',top,'cnt:',cnt)
           var average = parseFloat((top/cnt).toFixed(2))
-          var data = [{
-            "id": "Average Response",
-            "ranges": [
-              minRange,
-              maxRange
-            ],
-            "markers": [
-              average
-            ],
-            "measures": [
-              average
-            ]
-          }]
+          var genWidth = parseInt((average/maxRange)*100)
+          genWidth = genWidth + '%'
+          var sliderInnerWidth = {width:genWidth}
+          console.log(sliderInnerWidth)
+
           return (<View style={styles.surveyDataRow} key={index + '-'} style={{width:'100%',height:150}}>
             <Text style={styles.surveyQuestion}>{q.Question}</Text>
-            <ResponsiveBullet
-              data={data}
-              margin={{ top: 20, right: 40, bottom: 70, left: 40 }}
-              titleAlign="start"
-              titleOffsetX={0}
-              titleOffsetY={-40}
-              measureSize={0.7}
-              markerSize={0.7}
-              markerColors={[colors.primaryHighlight]}
-              rangeColors={[colors.secondaryBackground]}
-              measureColors={[colors.primaryHighlight]}
-            />
+            <View style={styles.sliderOuter}>
+              <View style={[styles.sliderInner,sliderInnerWidth]}>
+                <Text style={styles.sliderInnerText}>Average: {average}</Text>
+              </View>
+            </View>
+            <View style={{flexDirection:'row',justifyContent:'space-between',margin:10}}>
+              <View>
+                <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'left',margin:0}]}>{minRange}</Text>
+                <Text style={[styles.responseClientText,{textAlign:'left',margin:0}]}>{q.SliderLeft}</Text>
+              </View>
+              <View>
+                <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'right'}]}>{maxRange}</Text>
+                <Text style={[styles.responseClientText,{textAlign:'right'}]}>{q.SliderRight}</Text>
+              </View>
+            </View>
           </View>)
         } else if (q.Type == 2 || q.Type == 3) {
           var data = []
@@ -482,7 +477,6 @@ export default function Prompts() {
               }
               color = colorsArr[(i % 5)]
             }
-            console.log(colorsArr)
             var total = 0
             for (var j = 0; j < viewSurveyResponses.length; j++) {
               var thisPersonsResponses = viewSurveyResponses[j].Responses[index].Response.split(',')
@@ -741,7 +735,6 @@ export default function Prompts() {
   }
 
   const selectTask = (index, type) => {
-    console.log('seltask',index,type)
     setCurrentSurveyItem(index)
   }
 
@@ -927,11 +920,9 @@ export default function Prompts() {
     // Set prompt data.
     setSurveyTitle(s.Title)
     setSurveyText(s.Text)
-    console.log('sitems:',s.Items)
     setSurveyItems(s.Items)
     setActivityIndicator(true)
     setTimeout(() => {
-      console.log('items:',surveyItems)
       setActivityIndicator(false)
       setSurveyItemMain(true)
       setAddingSurveyPrompt(true)
@@ -948,6 +939,18 @@ export default function Prompts() {
   }
 
   // Payment controls.
+  const viewPaymentTrigger = async (i) => {
+    setMain(false)
+    setViewPayment(prompts[i])
+    var responses = await getPaymentResponses(prompts[i].Id, coach.Id, coach.Token)
+    setViewPromptResponses(responses)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowViewPayment(true)
+    },500)
+  }
+
   const addPayment = () => {
     setMain(false)
     setActivityIndicator(true)
@@ -967,11 +970,9 @@ export default function Prompts() {
     // Set prompt data.
     setSurveyTitle(s.Title)
     setSurveyText(s.Text)
-    console.log('sitems:',s.Items)
     setSurveyItems(s.Items)
     setActivityIndicator(true)
     setTimeout(() => {
-      console.log('items:',surveyItems)
       setActivityIndicator(false)
       setSurveyItemMain(true)
       setAddingSurveyPrompt(true)
@@ -1017,11 +1018,9 @@ export default function Prompts() {
     // Set prompt data.
     setSurveyTitle(s.Title)
     setSurveyText(s.Text)
-    console.log('sitems:',s.Items)
     setSurveyItems(s.Items)
     setActivityIndicator(true)
     setTimeout(() => {
-      console.log('items:',surveyItems)
       setActivityIndicator(false)
       setSurveyItemMain(true)
       setAddingSurveyPrompt(true)
@@ -1210,7 +1209,7 @@ export default function Prompts() {
                           (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowSurveyOptions(index)}>
                             <Text style={styles.taskButtonText}>Edit</Text>
                           </TouchableOpacity>
-                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPaymentTrigger(index)}>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
                             <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
                           </TouchableOpacity>
                         </View></>)}

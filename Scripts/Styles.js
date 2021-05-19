@@ -1492,6 +1492,24 @@ export const promptsLight = StyleSheet.create({
   },
   surveyDataRow: {
     marginBottom:10
+  },
+  sliderOuter: {
+    flex:1,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    overflow:'hidden'
+  },
+  sliderInner: {
+    height:'100%',
+    padding:10,
+    justifyContent:'center',
+    backgroundColor:colorsLight.secondaryHighlight
+  },
+  sliderInnerText: {
+    fontFamily:'Poppins',
+    textAlign:'right',
+    fontSize:16,
+    color:'#fff'
   }
 });
 

@@ -179,6 +179,63 @@ export async function check() {
 
 */
 
+
+export async function stripeCheckUser(id, token, stripeAccountId) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, StripeAccountId:stripeAccountId}
+
+  console.log('Checking Stripe account...')
+  const res = await fetch(url + '/stripe-check-user', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.chargesEnabled) {
+    console.log('Charges are enabled!')
+    ret = true
+  } else {
+    console.log('Charges are not enabled.')
+  }
+
+  return ret
+
+}
+
+export async function stripeOnboardUser(id, token, stripeAccountId) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, StripeAccountId:stripeAccountId}
+
+  console.log('Getting onboarding link...')
+  const res = await fetch(url + '/stripe-onboard-user', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.url != false) {
+    console.log('Url found:', payload.url)
+    ret = payload.url
+  } else {
+    console.log('Account link failed.')
+  }
+
+  return ret
+
+}
+
 export async function createPDFConcept(coachToken, coachId, title, file) {
 
   var ret = false

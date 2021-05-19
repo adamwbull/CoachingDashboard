@@ -58,7 +58,8 @@ export default function BrandDesign() {
       setCoach(sCoach)
       setPrimaryColor(sCoach.PrimaryHighlight)
       setSecondaryColor(sCoach.SecondaryHighlight)
-      if (sCoach.BrandLogo.length == 0) {
+      console.log(sCoach.BrandLogo)
+      if (sCoach.BrandLogo == null || sCoach.BrandLogo.length == 0) {
         setCustomLogo(DefaultLogo)
       } else {
         setCustomLogo(sCoach.BrandLogo)
