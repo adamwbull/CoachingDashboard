@@ -2825,12 +2825,79 @@ export const inviteClientsLight = StyleSheet.create({
     marginRight:10,
     fontFamily:'PoppinsSemiBold'
   },
+  bodySubtitle: {
+    color:colorsLight.darkGray,
+    fontSize:20,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
   bodyDesc: {
     color:colorsLight.darkGray,
     fontSize:14,
     lineHeight:14,
     fontFamily:'Poppins'
   },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20
+  },
+  inputTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  bodyRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    paddingTop:20
+  },
+  bodyInputContainer: {
+    flex:1,
+    justifyContent:'center',
+    paddingRight:20
+  },
+  saveText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:10
+  },
+  saveContainer: {
+    flex:1,
+  },
+  saveContainerRow: {
+    flexDirection:'row',
+    alignItems:'flex-end'
+  },
+  saveContainerSpacer: {
+    flex:3
+  },
+  coachID: {
+    color:colorsLight.mainBackground,
+    backgroundColor:colorsLight.mainTextColor,
+    padding:10,
+    borderRadius:10,
+    fontSize:24,
+    fontFamily:'PoppinsSemiBold'
+  }
 })
 
 export const paymentsLight = StyleSheet.create({

@@ -179,6 +179,33 @@ export async function check() {
 
 */
 
+export async function refreshOnboardingId(id, token) {
+
+  var ret = false
+  var newId = Math.floor(100000 + Math.random() * 900000);
+  var arr = {Id:id, Token:token, OnboardingId:newId}
+
+  console.log('Refreshing OnboardingId...')
+  const res = await fetch(url + '/user/coach/refresh-onboarding-id', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('OnboardingId refreshed.')
+    ret = newId
+  }
+
+  return ret
+
+}
+
 
 export async function stripeCheckUser(id, token, stripeAccountId) {
 
