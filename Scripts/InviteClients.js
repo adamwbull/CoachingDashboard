@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Animated, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { inviteClientsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { inviteClientsDark, colorsDark, innerDrawerDark } from '../Scripts/StylesDark.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -24,6 +24,9 @@ export default function InviteClients() {
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
+  const [colorIDAnim, setColorIDAnim] = useState(new Animated.Value(0))
+  const [colorDownloadAnim, setColorDownloadAnim] = useState(new Animated.Value(0))
+  const [colorOnboardingAnim, setColorOnboardingAnim] = useState(new Animated.Value(0))
 
   // Main variables.
   const [coach, setCoach] = useState({})
@@ -60,6 +63,23 @@ export default function InviteClients() {
     }
   }
 
+  // Animations and copy functions.
+  var colorID = this.state.colorIDAnim.interpolate({
+    inputRange: [1, 0],
+    outputRange: [btnColors.success, '#ffffff']
+  });
+
+  var colorDownload = this.state.colorDownloadAnim.interpolate({
+    inputRange: [1, 0],
+    outputRange: [btnColors.success, '#ffffff']
+  });
+
+  var colorOnboarding = this.state.colorOnboardingAnim.interpolate({
+    inputRange: [1, 0],
+    outputRange: [btnColors.success, '#ffffff']
+  });
+
+
   const refreshIdPrompt = () => {
     confirmAlert({
       title: 'Refresh Coach ID?',
@@ -95,12 +115,12 @@ export default function InviteClients() {
             <Text style={styles.bodyDesc}>Provide this code to clients along with a link to download the application, or use the hyperlink to onboard them on the web.</Text>
             <View style={[styles.bodyRow,{alignItems:'flex-end'}]}>
               <View>
-                <Text style={[styles.bodySubtitle,{margin:0}]}>Current ID:</Text>
+                <Text style={[styles.bodySubtitle,{margin:0}]}>Current ID</Text>
                 <TouchableOpacity><Text style={styles.coachID}>{coach.OnboardingId}</Text></TouchableOpacity>
-              </View>
-              <View style={{justifyContent:'flex-end'}}>
-                <Text style={[styles.bodySubtitle,{margin:0}]}></Text>
                 <TouchableOpacity onPress={refreshIdPrompt}><Text style={[styles.coachID,{backgroundColor:colors.mainBackground,color:btnColors.primary,fontSize:20,padding:12}]}>Change ID</Text></TouchableOpacity>
+              </View>
+              <View>
+
               </View>
             </View>
             <View style={[styles.bodyRow]}>
