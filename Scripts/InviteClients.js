@@ -14,6 +14,7 @@ import ConnectStripe from '../assets/connect-stripe.png'
 import { refreshOnboardingId } from './API.js'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { useSpring, animated } from 'react-spring';
 
 export default function InviteClients() {
   const linkTo = useLinkTo()
@@ -24,9 +25,9 @@ export default function InviteClients() {
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
-  const [colorIDAnim, setColorIDAnim] = useState(new Animated.Value(0))
-  const [colorDownloadAnim, setColorDownloadAnim] = useState(new Animated.Value(0))
-  const [colorOnboardingAnim, setColorOnboardingAnim] = useState(new Animated.Value(0))
+  const [colorIDAnim, setColorIDAnim] = useState(false)
+  const [colorDownloadAnim, setColorDownloadAnim] = useState(0)
+  const [colorOnboardingAnim, setColorOnboardingAnim] = useState(0)
 
   // Main variables.
   const [coach, setCoach] = useState({})
@@ -64,20 +65,52 @@ export default function InviteClients() {
   }
 
   // Animations and copy functions.
-  var colorID = this.state.colorIDAnim.interpolate({
-    inputRange: [1, 0],
-    outputRange: [btnColors.success, '#ffffff']
-  });
+  const AnimatedText = animated(Text);
 
-  var colorDownload = this.state.colorDownloadAnim.interpolate({
-    inputRange: [1, 0],
-    outputRange: [btnColors.success, '#ffffff']
-  });
+  const fadeStylesID = useSpring({
+    from: { opacity: 0 },
+    to: {
+      opacity: colorIDAnim ? 1 : 0
+    }
+  })
 
-  var colorOnboarding = this.state.colorOnboardingAnim.interpolate({
-    inputRange: [1, 0],
-    outputRange: [btnColors.success, '#ffffff']
-  });
+  const copyID = () => {
+    setColorIDAnim(true)
+    setTimeout(() => {
+      navigator.clipboard.writeText(coach.OnboardingId)
+      setColorIDAnim(false)
+    }, 600)
+  }
+
+  const fadeStylesDownload = useSpring({
+    from: { opacity: 0 },
+    to: {
+      opacity: colorDownloadAnim ? 1 : 0
+    }
+  })
+
+  const copyDownload = () => {
+    setColorDownloadAnim(true)
+    setTimeout(() => {
+      navigator.clipboard.writeText('https://coachsync.me/get-app')
+      setColorDownloadAnim(false)
+    }, 600)
+  }
+
+  const fadeStylesOnboarding = useSpring({
+    from: { opacity: 0 },
+    to: {
+      opacity: colorOnboardingAnim ? 1 : 0
+    }
+  })
+
+  const copyOnboarding = () => {
+    setColorOnboardingAnim(true)
+    setTimeout(() => {
+      navigator.clipboard.writeText('https://coachsync.me/onboarding/' + coach.OnboardingId)
+      setColorOnboardingAnim(false)
+    }, 600)
+  }
 
 
   const refreshIdPrompt = () => {
@@ -111,28 +144,39 @@ export default function InviteClients() {
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showMain && (<View style={styles.bodyContainer}>
-            <Text style={[styles.bodySubtitle,{paddingBottom:10}]}>Coach ID</Text>
-            <Text style={styles.bodyDesc}>Provide this code to clients along with a link to download the application, or use the hyperlink to onboard them on the web.</Text>
-            <View style={[styles.bodyRow,{alignItems:'flex-end'}]}>
+            <Text style={[styles.bodySubtitle,{margin:0}]}>Current ID</Text>
+            <Text style={[styles.bodyDesc,{paddingBottom:10}]}>Provide this code to clients along with a link to download the application, or use the hyperlink to onboard them on the web.</Text>
+            <View style={[styles.bodyRow]}>
               <View>
-                <Text style={[styles.bodySubtitle,{margin:0}]}>Current ID</Text>
-                <TouchableOpacity><Text style={styles.coachID}>{coach.OnboardingId}</Text></TouchableOpacity>
+                <TouchableOpacity onPress={copyID}><Text style={styles.coachID}>{coach.OnboardingId}</Text></TouchableOpacity>
                 <TouchableOpacity onPress={refreshIdPrompt}><Text style={[styles.coachID,{backgroundColor:colors.mainBackground,color:btnColors.primary,fontSize:20,padding:12}]}>Change ID</Text></TouchableOpacity>
               </View>
-              <View>
-
+              <View style={{flex:1,marginTop:15,marginLeft:10}}>
+                <Text style={[styles.bodySubtitle,{color:btnColors.success}]}>
+                  <AnimatedText style={fadeStylesID}>Copied!</AnimatedText>
+                </Text>
               </View>
             </View>
             <View style={[styles.bodyRow]}>
               <View>
-                <Text style={[styles.bodySubtitle,{margin:0}]}>App Download Link</Text>
-                <TouchableOpacity><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/get-app</Text></TouchableOpacity>
+                <Text style={[styles.bodySubtitle,{margin:0,padding:0}]}>App Download Link</Text>
+                <TouchableOpacity onPress={copyDownload}><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/get-app</Text></TouchableOpacity>
+              </View>
+              <View style={{flex:1,marginTop:38,marginLeft:10}}>
+                <Text style={[styles.bodySubtitle,{color:btnColors.success}]}>
+                  <AnimatedText style={fadeStylesDownload}>Copied!</AnimatedText>
+                </Text>
               </View>
             </View>
             <View style={[styles.bodyRow]}>
               <View>
                 <Text style={[styles.bodySubtitle,{margin:0}]}>Onboarding Link</Text>
-                <TouchableOpacity><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/onboarding/{coach.OnboardingId}</Text></TouchableOpacity>
+                <TouchableOpacity onPress={copyOnboarding}><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/onboarding/{coach.OnboardingId}</Text></TouchableOpacity>
+              </View>
+              <View style={{flex:1,marginTop:38,marginLeft:10}}>
+                <Text style={[styles.bodySubtitle,{color:btnColors.success}]}>
+                  <AnimatedText style={fadeStylesOnboarding}>Copied!</AnimatedText>
+                </Text>
               </View>
             </View>
           </View>)}

@@ -298,7 +298,7 @@ export default function BrandDesign() {
             <View style={[styles.brandColoringRow,{alignItems:'flex-end'}]}>
               <View style={{flex:1}}>
                 <Text style={styles.testAccLabel}>Current Header Logo</Text>
-                <Image source={customLogo} style={{width:200,height:100,margin:'auto'}} />
+                <Image source={customLogo} style={{width:200,height:100,margin:'auto',tintColor:coach.SecondaryHighlight}} />
                 <Text style={styles.logoBelow}>recommended size{"\n"}200px by 100px</Text>
               </View>
               <View style={{flex:2}}></View>

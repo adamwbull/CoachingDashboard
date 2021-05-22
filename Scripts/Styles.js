@@ -2860,8 +2860,7 @@ export const inviteClientsLight = StyleSheet.create({
   },
   bodyRow: {
     flexDirection:'row',
-    alignItems:'center',
-    paddingTop:20
+    alignItems:'flex-start',
   },
   bodyInputContainer: {
     flex:1,
@@ -2896,7 +2895,133 @@ export const inviteClientsLight = StyleSheet.create({
     padding:10,
     borderRadius:10,
     fontSize:24,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center'
+  }
+})
+
+export const integrationsLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
     fontFamily:'PoppinsSemiBold'
+  },
+  bodySubtitle: {
+    color:colorsLight.darkGray,
+    fontSize:20,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20
+  },
+  inputTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  saveColoringText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveColoringButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  saveColoringContainer: {
+    width:'25%',
+    marginLeft:'75%'
+  },
+  bodyRow: {
+    flexDirection:'row',
+    alignItems:'flex-start',
+  },
+  bodyInputContainer: {
+    flex:1,
+    justifyContent:'center',
+    paddingRight:20
+  },
+  saveText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:10
+  },
+  saveContainer: {
+    flex:1,
+  },
+  saveContainerRow: {
+    flexDirection:'row',
+    alignItems:'flex-end'
+  },
+  saveContainerSpacer: {
+    flex:3
+  },
+  coachID: {
+    color:colorsLight.mainBackground,
+    backgroundColor:colorsLight.mainTextColor,
+    padding:10,
+    borderRadius:10,
+    fontSize:24,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center'
   }
 })
 
