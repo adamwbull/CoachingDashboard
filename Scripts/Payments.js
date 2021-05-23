@@ -10,7 +10,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, Chip } from 'react-native-elements'
 import ConnectStripe from '../assets/connect-stripe.png'
-import { monthNames, sqlToJsDate, getPayments } from './API.js'
+import { monthNames, sqlToJsDate, getPaymentCharges } from './API.js'
 
 export default function Payments() {
   const linkTo = useLinkTo()
@@ -29,13 +29,13 @@ export default function Payments() {
   const [monthlyStarting, setMonthlyStarting] = useState({})
   const date = new Date()
   // Payment related.
-  const [payments, setPayments] = useState([{id:1,Currency:'USD',Amount:3330,IsPaid:1}])
+  const [payments, setPayments] = useState(false)
   const [monthlyTotal, setMonthlyTotal] = useState(0)
   const [total, setTotal] = useState(0)
 
   // Main functions.
   const refreshPayments = async (id, token) => {
-    var refresh = await getPayments(id, token)
+    var refresh = await getPaymentCharges(id, token)
     // Get total and monthly earnings.
     var t = 0
     var m = 0

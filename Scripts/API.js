@@ -183,6 +183,29 @@ export async function check() {
 
 */
 
+export async function getPaymentCharges(id, token) {
+
+  var ret = false
+
+  console.log('Refreshing payment charges...')
+  const res = await fetch(url + '/payment-charges/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Found payment charges!')
+    ret = payload
+  } else {
+    console.log('No payment charges found.')
+    ret = []
+  }
+
+  return ret
+
+}
+
 export async function refreshOnboardingId(id, token) {
 
   var ret = false
