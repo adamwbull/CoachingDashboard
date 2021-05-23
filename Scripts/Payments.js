@@ -8,9 +8,9 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
-import { Icon, Button } from 'react-native-elements'
+import { Icon, Button, Chip } from 'react-native-elements'
 import ConnectStripe from '../assets/connect-stripe.png'
-import { monthNames, sqlToJsDate } from './API.js'
+import { monthNames, sqlToJsDate, getPayments } from './API.js'
 
 export default function Payments() {
   const linkTo = useLinkTo()
@@ -28,14 +28,33 @@ export default function Payments() {
   const [coachCreated, setCoachCreated] = useState({})
   const [monthlyStarting, setMonthlyStarting] = useState({})
   const date = new Date()
+  // Payment related.
+  const [payments, setPayments] = useState([{id:1,Currency:'USD',Amount:3330,IsPaid:1}])
+  const [monthlyTotal, setMonthlyTotal] = useState(0)
+  const [total, setTotal] = useState(0)
 
   // Main functions.
+  const refreshPayments = async (id, token) => {
+    var refresh = await getPayments(id, token)
+    // Get total and monthly earnings.
+    var t = 0
+    var m = 0
+    var beginningOfMonth = new Date(date.getMonth() + ' 1, ' + date.getFullYear())
+    refresh.forEach((item, index) => {
+      var d = sqlToJsDate(item.Created)
+      t += item.Amount
+      if (d > beginningOfMonth) {
+        t += item.Amount
+      }
+    })
+  }
 
   useEffect(() => {
-    console.log('Welcome to integrations.')
+    console.log('Welcome to payments.')
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
+      refreshPayments(sCoach.Id, sCoach.Token)
       var d = sqlToJsDate(sCoach.Created)
       setCoachCreated(d)
       if (d.getDay() > 1) {
@@ -76,13 +95,13 @@ export default function Payments() {
             <View style={styles.bodyRow}>
               <View style={[styles.bodyContainer,{flex:1,marginRight:10}]}>
                 <Text style={styles.bodySubtitle}>Monthly Earnings</Text>
-                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>$0</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${monthlyTotal}</Text>
                 <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since {monthlyStarting}</Text>
               </View>
               <View style={[styles.bodyContainer,{flex:1,marginLeft:10}]}>
                 <Text style={styles.bodySubtitle}>Total Earnings</Text>
-                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>$0</Text>
-                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since {monthNames[coachCreated.getMonth()] + ' ' + coachCreated.getDay() + ', ' + coachCreated.getFullYear()}</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${total}</Text>
+                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since joining on {monthNames[coachCreated.getMonth()] + ' ' + coachCreated.getDay() + ', ' + coachCreated.getFullYear()}</Text>
               </View>
             </View>
             <View style={styles.bodyRow}>
@@ -98,7 +117,7 @@ export default function Payments() {
                     />
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.paymentControlsTouchAmount}>
-                    <Text style={styles.paymentsControlsText}>Amount</Text>
+                    <Text style={[styles.paymentsControlsText,{paddingRight:0}]}>Amount</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.paymentControlsTouchAmountCurrency}>
                     <Text style={styles.paymentsControlsText}></Text>
@@ -124,6 +143,90 @@ export default function Payments() {
                     />
                   </TouchableOpacity>
                 </View>
+                {payments.length > 0 && (<>
+                  {payments.map((payment, index) => {
+                    return (<View key={index} style={styles.paymentRow}>
+                      <TouchableOpacity style={styles.paymentRowTouchIcon}>
+                        <Icon
+                          name='square-outline'
+                          type='ionicon'
+                          size={20}
+                          color={colors.mainTextColor}
+                        />
+                      </TouchableOpacity>
+                      <View style={[styles.paymentRowTouchAmount]}>
+                        <Text style={[styles.paymentRowText,{paddingRight:0,textAlign:'right',fontFamily:'PoppinsSemiBold'}]}>${(payment.Amount/100).toFixed(2)}</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchAmountCurrency}>
+                        <Text style={styles.paymentRowText}>{payment.Currency}</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchAmountStatus}>
+                        {payment.IsPaid == 0 && (<><Chip
+                          title='Pending'
+                          type='outline'
+                          icon={{
+                            name:'checkmark-outline',
+                            type:'ionicon',
+                            size:16,
+                            color:'#fff'
+                          }}
+                          disabledStyle={{backgroundColor:btnColors.caution,borderColor:btnColors.caution,color:btnColors.caution,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                          disabledTitleStyle={{color:'#fff'}}
+                          disabled={true}
+                        /></>) ||
+                          (<>{payment.IsPaid == 1 && (<>
+                            <Chip
+                              title='Paid'
+                              type='outline'
+                              icon={{
+                                name:'checkmark-outline',
+                                type:'ionicon',
+                                size:16,
+                                color:'#fff'
+                              }}
+                              disabledStyle={{backgroundColor:btnColors.success,borderColor:btnColors.success,color:btnColors.success,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                              disabledTitleStyle={{color:'#fff'}}
+                              disabled={true}
+                            />
+                          </>) || (<>
+                            <Chip
+                              title='Refunded'
+                              type='outline'
+                              icon={{
+                                name:'checkmark-outline',
+                                type:'ionicon',
+                                size:16,
+                                color:'#fff'
+                              }}
+                              disabledStyle={{backgroundColor:btnColors.danger,borderColor:btnColors.danger,color:btnColors.danger,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                              disabledTitleStyle={{color:'#fff'}}
+                              disabled={true}
+                            />
+                          </>)}
+                        </>)}
+                      </View>
+                      <View style={styles.paymentRowTouchDescription}>
+                        <Text style={styles.paymentRowText}>Description</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchClient}>
+                        <Text style={styles.paymentRowText}>Client</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchDate}>
+                        <Text style={styles.paymentRowText}>Date</Text>
+                      </View>
+                      <TouchableOpacity style={styles.paymentRowTouchIcon}>
+                        <Icon
+                          name='ellipsis-horizontal-outline'
+                          type='ionicon'
+                          size={22}
+                          color={colors.mainTextColor}
+                        />
+                      </TouchableOpacity>
+                    </View>)
+                  })}
+                </>) || (<>
+                  <Text style={styles.noPayments}>Nothing yet! Create Payments to assign on the <Link to='/prompts' style={{color:btnColors.primary}}>Prompts Page</Link>.</Text>
+                </>)}
               </View>
             </View>
           </>)}

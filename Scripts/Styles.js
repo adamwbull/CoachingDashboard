@@ -3129,33 +3129,37 @@ export const paymentsLight = StyleSheet.create({
   },
   paymentsControlsText: {
     padding:10,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.secondaryTextColor,
+    width:'100%'
   },
   paymentControlsTouchIcon: {
-    flex:2,
     height:40,
+    width:40,
     alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
   paymentControlsTouchAmount: {
-    flex:5,
-    height:40,
-    alignItems:'center',
-    justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
-  },
-  paymentControlsTouchCurrency: {
-    flex:3,
-    height:40,
-    alignItems:'center',
-    justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
-  },
-  paymentControlsTouchStatus: {
     flex:8,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountStatus: {
+    flex:12,
     height:40,
     alignItems:'center',
     justifyContent:'center',
@@ -3179,13 +3183,88 @@ export const paymentsLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentControlsTouchDate: {
-    flex:10,
+    flex:25,
     height:40,
     alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
+  paymentRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentRowText: {
+    padding:10,
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    width:'100%'
+  },
+  paymentRowTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmount: {
+    flex:8,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountStatus: {
+    flex:12,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDescription: {
+    flex:45,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchClient: {
+    flex:22,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDate: {
+    flex:25,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  noPayments: {
+    width:'100%',
+    padding:10,
+    textAlign:'center',
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  }
 })
 
 export const stripeLight = StyleSheet.create({
