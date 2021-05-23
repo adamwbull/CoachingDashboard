@@ -15,6 +15,7 @@ const Drawer = createDrawerNavigator()
 
 // Items.
 import Overview from '../Overview.js'
+import Payments from '../Payments.js'
 import AllClients from '../AllClients.js'
 import InviteClients from '../InviteClients.js'
 
@@ -119,6 +120,24 @@ export default function Home() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Invite Clients</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="Payments" component={Payments}
+        options={{
+          title:'Payments - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='wallet'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Payments</Text>)
           }
         }}
       />

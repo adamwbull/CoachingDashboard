@@ -20,9 +20,9 @@ const linking = {
           Home: {
             screens: {
               Overview: 'home',
-              Stats: 'stats',
               AllClients: 'clients',
-              InviteClients: 'invite-clients'
+              InviteClients: 'invite-clients',
+              Payments: 'payments'
             }
           },
           MobileApp: {
@@ -44,7 +44,7 @@ const linking = {
             screens: {
               Account: 'account',
               ManagePlan: 'manage-plan',
-              Payments: 'payments',
+              Stripe: 'stripe',
               Integrations: 'integrations'
             }
           }

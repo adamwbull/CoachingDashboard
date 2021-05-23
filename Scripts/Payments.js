@@ -10,57 +10,48 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button } from 'react-native-elements'
 import ConnectStripe from '../assets/connect-stripe.png'
-import { stripeCheckUser, stripeOnboardUser } from './API.js'
+import { monthNames, sqlToJsDate } from './API.js'
 
 export default function Payments() {
   const linkTo = useLinkTo()
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(paymentsLight)
+  const [colors, setColors] = useState(colorsLight)
 
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
+  const [showMain, setMain] = useState(false)
+  const [showUpgradeNeeded, setUpgradeNeeded] = useState(false)
 
   // Main stage variables.
   const [coach, setCoach] = useState({})
-
-  // Stripe info controls.
-  const [showStripeInfo, setStripeInfo] = useState(false)
-  const [showConnectStripe, setConnectStripe] = useState(false)
+  const [coachCreated, setCoachCreated] = useState({})
+  const [monthlyStarting, setMonthlyStarting] = useState({})
+  const date = new Date()
 
   // Main functions.
-  const triggerStripeCheckUser = async (id, token, stripeAccountId) => {
-    var chargesEnabled = await stripeCheckUser(id, token, stripeAccountId)
-    if (chargesEnabled) {
-      setConnectStripe(false)
-    } else {
-      setConnectStripe(true)
-    }
-  }
 
   useEffect(() => {
     console.log('Welcome to integrations.')
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
-      triggerStripeCheckUser(sCoach.Id, sCoach.Token, sCoach.StripeAccountId)
+      var d = sqlToJsDate(sCoach.Created)
+      setCoachCreated(d)
+      if (d.getDay() > 1) {
+        setMonthlyStarting(monthNames[d.getMonth()] + ' ' + d.getDay() + ', ' + d.getFullYear())
+      } else {
+        setMonthlyStarting(monthNames[date.getMonth()] + ' 1, ' + date.getFullYear())
+      }
       setTimeout(() => {
         setActivityIndicator(false)
-        setStripeInfo(true)
+        if (sCoach.Plan == 0) {
+          setUpgradeNeeded(true)
+        }
+        setMain(true)
       }, 500)
     }
   },[])
-
-  // Stripe functions.
-  const connectStripe = async () => {
-    console.log('Connecting Stripe...')
-    var link = await stripeOnboardUser(coach.Id, coach.Token, coach.StripeAccountId)
-    if (link != false) {
-      var win = window.open(link, '_blank');
-      if (win != null) {
-        win.focus();
-      }
-    }
-  }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
@@ -70,21 +61,72 @@ export default function Payments() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Payments</Text>
-              <Text style={styles.bodyDesc}>Manage how you receive payments from Clients. {showConnectStripe && (<Text>You may need to click the button below again to continue verification.</Text>)}</Text>
+              <Text style={styles.bodyDesc}>Manage how you receive payments from Clients.</Text>
             </View>
           </View>
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
-          {showStripeInfo && (<View style={styles.bodyContainer}>
-            <Text style={styles.bodySubtitle}>Stripe Info</Text>
-            <Text style={styles.bodyDesc}>Set up Stripe to enable Client payment collection.</Text>
-            <View style={styles.bodyRow}>
-              {showConnectStripe && (<TouchableOpacity onPress={connectStripe}>
-                <Image source={ConnectStripe} style={{width:150,height:32}} />
-              </TouchableOpacity>) || (<Text style={styles.bodyDesc}>Stripe connected!</Text>)}
-            </View>
+          {showUpgradeNeeded && (<View style={styles.bodyContainer}>
+            <Text style={styles.bodySubtitle}>Some Features Disabled...</Text>
+            <Text style={styles.bodyDesc}>You will not be able to create, collect, or assign any payments on the Free Plan. Visit <Link to='/manage-plan' style={{color:btnColors.primary}}>Manage Plan</Link> to upgrade.</Text>
           </View>)}
+
+          {showMain && (<>
+            <View style={styles.bodyRow}>
+              <View style={[styles.bodyContainer,{flex:1,marginRight:10}]}>
+                <Text style={styles.bodySubtitle}>Monthly Earnings</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>$0</Text>
+                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since {monthlyStarting}</Text>
+              </View>
+              <View style={[styles.bodyContainer,{flex:1,marginLeft:10}]}>
+                <Text style={styles.bodySubtitle}>Total Earnings</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>$0</Text>
+                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since {monthNames[coachCreated.getMonth()] + ' ' + coachCreated.getDay() + ', ' + coachCreated.getFullYear()}</Text>
+              </View>
+            </View>
+            <View style={styles.bodyRow}>
+              <View style={[styles.bodyContainer,{flex:1}]}>
+                <Text style={styles.bodySubtitle}>Recent Payments</Text>
+                <View style={styles.paymentsControls}>
+                  <TouchableOpacity style={styles.paymentControlsTouchIcon}>
+                    <Icon
+                      name='square-outline'
+                      type='ionicon'
+                      size={20}
+                      color={colors.mainTextColor}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                    <Text style={styles.paymentsControlsText}>Amount</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchAmountCurrency}>
+                    <Text style={styles.paymentsControlsText}></Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchAmountStatus}>
+                    <Text style={styles.paymentsControlsText}></Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchDescription}>
+                    <Text style={styles.paymentsControlsText}>Description</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchClient}>
+                    <Text style={styles.paymentsControlsText}>Client</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                    <Text style={styles.paymentsControlsText}>Date</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.paymentControlsTouchIcon}>
+                    <Icon
+                      name='ellipsis-horizontal-outline'
+                      type='ionicon'
+                      size={0}
+                      color={colors.mainTextColor}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </>)}
 
         </View>
       </View>

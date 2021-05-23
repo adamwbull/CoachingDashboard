@@ -8,7 +8,11 @@ export const url = 'https://api.coachsync.me'
 export const uploadUrl = 'https://db.coachsync.me'
 export const key = 'c75c8309094b9bcc21fbcabeb17e0f7a1a4c4f547f041376bfdb71826bcc84db'
 
-// Helper Functions
+// Helper functions
+export const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 export function currentDate() {
   var date = new Date()
   var pad = function(num) { return ('00'+num).slice(-2) }

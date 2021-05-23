@@ -3098,6 +3098,169 @@ export const paymentsLight = StyleSheet.create({
   bodyRow: {
     flexDirection:'row',
     alignItems:'center',
+  },
+  bodyInputContainer: {
+    flex:1,
+    justifyContent:'center',
+    paddingRight:20
+  },
+  saveText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  saveContainer: {
+    flex:1,
+  },
+  saveContainerRow: {
+    flexDirection:'row',
+    alignItems:'flex-end'
+  },
+  saveContainerSpacer: {
+    flex:3
+  },
+  paymentsControls: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentsControlsText: {
+    padding:10,
+  },
+  paymentControlsTouchIcon: {
+    flex:2,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmount: {
+    flex:5,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchCurrency: {
+    flex:3,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchStatus: {
+    flex:8,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDescription: {
+    flex:45,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchClient: {
+    flex:22,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDate: {
+    flex:10,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+})
+
+export const stripeLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodySubtitle: {
+    color:colorsLight.darkGray,
+    fontSize:20,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20
+  },
+  inputTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  bodyRow: {
+    flexDirection:'row',
+    alignItems:'center',
     paddingTop:20
   },
   bodyInputContainer: {
