@@ -3022,6 +3022,16 @@ export const integrationsLight = StyleSheet.create({
     fontSize:24,
     fontFamily:'PoppinsSemiBold',
     textAlign:'center'
+  },
+  stripeConnected: {
+    fontSize:16,
+    padding:5,
+    borderRadius:10,
+    marginTop:10,
+    borderWidth:1,
+    borderColor:btnColors.success,
+    color:btnColors.success,
+    fontFamily:'Poppins'
   }
 })
 
@@ -3267,7 +3277,7 @@ export const paymentsLight = StyleSheet.create({
   }
 })
 
-export const stripeLight = StyleSheet.create({
+export const accountLight = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -3322,6 +3332,16 @@ export const stripeLight = StyleSheet.create({
     padding:20,
     marginBottom:20
   },
+  currentEmail: {
+    fontSize:20,
+    padding:10,
+    borderRadius:10,
+    color:colorsLight.mainBackground,
+    backgroundColor:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    width:'25%',
+    textAlign:'center'
+  },
   inputTitle: {
     color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold',
@@ -3340,7 +3360,7 @@ export const stripeLight = StyleSheet.create({
   bodyRow: {
     flexDirection:'row',
     alignItems:'center',
-    paddingTop:20
+    justifyContent:'center'
   },
   bodyInputContainer: {
     flex:1,
@@ -3365,6 +3385,25 @@ export const stripeLight = StyleSheet.create({
   },
   saveContainerSpacer: {
     flex:3
+  },
+  passwordPromptError: {
+    textAlign:'center',
+    fontSize:16,
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+  },
+  changeEmailSent: {
+    flex:3,
+    marginLeft:20,
+    color:btnColors.success,
+    fontSize:18,
+    fontFamily:'Poppins'
+  },
+  inputHeader: {
+    fontSize:16,
+    padding:5,
+    color:colorsLight.secondaryTextColor,
+    fontFamily:'PoppinsSemiBold',
   }
 })
 

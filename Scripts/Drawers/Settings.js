@@ -16,7 +16,6 @@ const Drawer = createDrawerNavigator()
 // Items.
 import Account from '../Account.js'
 import ManagePlan from '../ManagePlan.js'
-import Stripe from '../Stripe.js'
 import Integrations from '../Integrations.js'
 
 export default function Settings() {
@@ -71,7 +70,7 @@ export default function Settings() {
     >
       <Drawer.Screen name="Account" component={Account}
         options={{
-          title:'Account Settings - CoachSync',
+          title:'Account - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
               name='person'
@@ -102,24 +101,6 @@ export default function Settings() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Manage Plan</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="Stripe" component={Stripe}
-        options={{
-          title:'Stripe Settings - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='wallet'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Stripe Info</Text>)
           }
         }}
       />

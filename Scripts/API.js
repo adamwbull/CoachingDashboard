@@ -183,6 +183,35 @@ export async function check() {
 
 */
 
+export async function updateEmail(id, token, email, name) {
+
+  var ret = false
+  var arr = {Id:id, Token:token, Email:email, FirstName:name}
+
+  console.log('Requesting email update...')
+  const res = await fetch(url + '/system-email/change-email', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success == true) {
+    console.log('Request passed!')
+    ret = true
+  } else {
+    console.log('Request failed.')
+  }
+
+  return ret
+
+}
+
+
 export async function getPaymentCharges(id, token) {
 
   var ret = false

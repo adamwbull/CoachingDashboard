@@ -9,6 +9,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button } from 'react-native-elements'
+import { stripeCheckUser } from './API.js'
 
 export default function Integrations() {
   const linkTo = useLinkTo()
@@ -25,19 +26,38 @@ export default function Integrations() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
 
+  // Stripe info controls.
+  const [showPlanWarning, setPlanWarning] = useState(false)
+  const [showStripeInfo, setStripeInfo] = useState(false)
+  const [showConnectStripe, setConnectStripe] = useState(false)
+
+  // Main functions.
+  const triggerStripeCheckUser = async (id, token, stripeAccountId) => {
+    var chargesEnabled = await stripeCheckUser(id, token, stripeAccountId)
+    if (chargesEnabled) {
+      setConnectStripe(false)
+    } else {
+      setConnectStripe(true)
+    }
+  }
+
   useEffect(() => {
     console.log('Welcome to integrations.')
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
+      triggerStripeCheckUser(sCoach.Id, sCoach.Token, sCoach.StripeAccountId)
       setTimeout(() => {
         setActivityIndicator(false)
         setMain(true)
+        setStripeInfo(true)
+        if (sCoach.Plan == 0) {
+          setPlanWarning(true)
+        }
       }, 500)
     }
   },[])
 
-  // Main functions.
   const saveCalendlyLink = () => {
     console.log(calendlyLink)
   }
@@ -48,6 +68,18 @@ export default function Integrations() {
       setSaveCalendlyDisabled(false)
     } else {
       setSaveCalendlyDisabled(true)
+    }
+  }
+
+  // Stripe functions.
+  const connectStripe = async () => {
+    console.log('Connecting Stripe...')
+    var link = await stripeOnboardUser(coach.Id, coach.Token, coach.StripeAccountId)
+    if (link != false) {
+      var win = window.open(link, '_blank');
+      if (win != null) {
+        win.focus();
+      }
     }
   }
 
@@ -64,6 +96,20 @@ export default function Integrations() {
           </View>
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
+
+          {showPlanWarning && (<></>)}
+
+          {showStripeInfo && (<View style={styles.bodyContainer}>
+            <View style={[styles.bodyRow,{justifyContent:'space-between'}]}>
+              <View>
+                <Text style={styles.bodySubtitle}>Stripe Info</Text>
+                <Text style={styles.bodyDesc}>Connect your Stripe account to enable Client payment collection.</Text>
+              </View>
+              {showConnectStripe && (<TouchableOpacity onPress={connectStripe}>
+                <Image source={ConnectStripe} style={{width:150,height:32}} />
+              </TouchableOpacity>) || (<Text style={styles.stripeConnected}>Stripe connected!</Text>)}
+            </View>
+          </View>)}
 
           {showMain && (<>
             <View style={styles.bodyContainer}>

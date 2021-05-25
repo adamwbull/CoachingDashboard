@@ -44,7 +44,6 @@ const linking = {
             screens: {
               Account: 'account',
               ManagePlan: 'manage-plan',
-              Stripe: 'stripe',
               Integrations: 'integrations'
             }
           }
