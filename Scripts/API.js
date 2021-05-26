@@ -183,6 +183,36 @@ export async function check() {
 
 */
 
+
+export async function updateCoachInfo(id, token, firstName, lastName, pronouns, addressLine1, addressLine2, city, state, country, zip) {
+
+  var ret = false
+  var arr = {Id:id, Token:token, FirstName:firstName, LastName:lastName, Pronouns:pronouns, AddressLine1:addressLine1, AddressLine2:addressLine2, City:city, State:state, Country:country, Zip:zip}
+
+  console.log('Updating coach info...')
+  const res = await fetch(url + '/user/coach/update-info', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+
+  })
+
+  const payload = await res.json()
+
+  if (payload[0].affectedRows > 0 && payload[1].affectedRows > 0) {
+    console.log('Coach info updated!')
+    ret = true
+  } else {
+    console.log('Coach info not updated!')
+  }
+
+  return ret
+
+}
+
 export async function updateEmail(id, token, email, name) {
 
   var ret = false
