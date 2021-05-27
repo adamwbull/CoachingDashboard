@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { TouchableOpacity, ScrollView, StyleSheet, Text, View, Image } from 'react-native'
 import { integrationsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { integrationsDark, colorsDark, innerDrawerDark } from '../Scripts/StylesDark.js'
 import { useLinkTo, Link } from '@react-navigation/native'
@@ -10,6 +10,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button } from 'react-native-elements'
 import { stripeCheckUser } from './API.js'
+import ConnectStripe from '../assets/connect-stripe.png'
 
 export default function Integrations() {
   const linkTo = useLinkTo()
@@ -105,7 +106,7 @@ export default function Integrations() {
                 <Text style={styles.bodySubtitle}>Stripe Info</Text>
                 <Text style={styles.bodyDesc}>Connect your Stripe account to enable Client payment collection.</Text>
               </View>
-              {showConnectStripe && (<TouchableOpacity onPress={connectStripe}>
+              {showConnectStripe && (<TouchableOpacity onPress={connectStripe} style={{justifyContent:'center',flex:1,alignItems:'flex-end',marginTop:7}}>
                 <Image source={ConnectStripe} style={{width:150,height:32}} />
               </TouchableOpacity>) || (<Text style={styles.stripeConnected}>Stripe connected!</Text>)}
             </View>

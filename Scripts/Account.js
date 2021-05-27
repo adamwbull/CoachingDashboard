@@ -9,7 +9,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
-import { loginCheck, updateEmail } from './API.js'
+import { loginCheck, updateEmail, updateCoachInfo } from './API.js'
 
 export default function Account() {
   const linkTo = useLinkTo()
@@ -26,6 +26,8 @@ export default function Account() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showPasswordPrompt, setPasswordPrompt] = useState(false)
   const [showMain, setMain] = useState(false)
+  const [changeEmailDisabled, setChangeEmailDisabled] = useState(false)
+  const [infoSavedText, setInfoSavedText] = useState('')
 
   // User data.
   const [firstName, setFirstName] = useState('')
@@ -46,6 +48,13 @@ export default function Account() {
       setCoach(sCoach)
       setFirstName(sCoach.FirstName)
       setLastName(sCoach.LastName)
+      setAddressLine1(sCoach.AddressLine1)
+      setAddressLine2(sCoach.AddressLine2)
+      setCity(sCoach.City)
+      setState(sCoach.State)
+      setCountry(sCoach.Country)
+      setZIP(sCoach.ZIP)
+      setPronouns(sCoach.Pronouns)
       setTimeout(() => {
         setActivityIndicator(false)
         setMain(true) // Should be setPasswordPrompt
@@ -77,6 +86,7 @@ export default function Account() {
     } else {
       setChangeEmailSent('There was a problem sending the email. Please try again.')
     }
+    setChangeEmailDisabled(true)
   }
 
   const saveZIP = (t) => {
@@ -87,6 +97,24 @@ export default function Account() {
 
   const saveInfo = async () => {
     var sent = await updateCoachInfo(coach.Id, coach.Token, firstName, lastName, pronouns, addressLine1, addressLine2, city, state, country, zip);
+    var c = JSON.parse(JSON.stringify(coach))
+    c.FIrstName = firstName
+    c.LastName = lastName
+    c.Pronouns = pronouns
+    c.AddressLine1 = addressLine1
+    c.AddressLine2 = addressLine2
+    c.City = city
+    c.State = state
+    c.Country = country
+    c.ZIP = zip
+    set('Coach',c,ttl)
+    setCoach(c)
+    if (sent) {
+      setInfoSavedText('Information updated!')
+      setTimeout(() => {
+        setInfoSavedText('')
+      }, 1000)
+    }
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -132,6 +160,7 @@ export default function Account() {
                   buttonStyle={[styles.saveButton,{backgroundColor:coach.PrimaryHighlight}]}
                   containerStyle={[styles.saveButtonContainer,{flex:1,marginLeft:20}]}
                   onPress={sendChangeEmail}
+                  disabled={changeEmailDisabled}
                 />
                 <Text style={styles.changeEmailSent}>{changeEmailSent}</Text>
               </View>
@@ -221,7 +250,10 @@ export default function Account() {
                 </View>
               </View>
               <View style={styles.bodyRow}>
-                <View style={{flex:5}}></View>
+                <View style={{flex:3}}></View>
+                <View style={{flex:2}}>
+                  <Text style={[styles.changeEmailSent,{textAlign:'right'}]}>{infoSavedText}</Text>
+                </View>
                 <Button
                   title='Save Info'
                   buttonStyle={[styles.saveButton,{backgroundColor:coach.PrimaryHighlight}]}
