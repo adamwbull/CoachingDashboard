@@ -183,6 +183,25 @@ export async function check() {
 
 */
 
+export async function getActiveCoachDiscount(t, a) {
+
+  var ret = false
+
+  console.log('Getting active discount...')
+  const res = await fetch(url + '/discount/coach/' + a + '/' + t, {
+    method:'GET',
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Discount found.')
+    ret = payload[0]
+  }
+
+  return ret
+
+}
 
 export async function updateCoachInfo(id, token, firstName, lastName, pronouns, addressLine1, addressLine2, city, state, country, zip) {
 

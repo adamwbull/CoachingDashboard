@@ -10,6 +10,7 @@ import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { loginCheck, updateEmail, updateCoachInfo } from './API.js'
+import { useSpring, animated } from 'react-spring';
 
 export default function Account() {
   const linkTo = useLinkTo()
@@ -28,6 +29,7 @@ export default function Account() {
   const [showMain, setMain] = useState(false)
   const [changeEmailDisabled, setChangeEmailDisabled] = useState(false)
   const [infoSavedText, setInfoSavedText] = useState('')
+  const [fadeSaveInfoAnim, setFadeSaveInfoAnim] = useState(false)
 
   // User data.
   const [firstName, setFirstName] = useState('')
@@ -95,7 +97,17 @@ export default function Account() {
     }
   }
 
+  const AnimatedText = animated(Text);
+
+  const fadeSaveInfo = useSpring({
+    from: { opacity: 0 },
+    to: {
+      opacity: fadeSaveInfoAnim ? 1 : 0
+    }
+  })
+
   const saveInfo = async () => {
+    setFadeSaveInfoAnim(true)
     var sent = await updateCoachInfo(coach.Id, coach.Token, firstName, lastName, pronouns, addressLine1, addressLine2, city, state, country, zip);
     var c = JSON.parse(JSON.stringify(coach))
     c.FIrstName = firstName
@@ -112,7 +124,7 @@ export default function Account() {
     if (sent) {
       setInfoSavedText('Information updated!')
       setTimeout(() => {
-        setInfoSavedText('')
+        setFadeSaveInfoAnim(false)
       }, 1000)
     }
   }
@@ -251,8 +263,10 @@ export default function Account() {
               </View>
               <View style={styles.bodyRow}>
                 <View style={{flex:3}}></View>
-                <View style={{flex:2}}>
-                  <Text style={[styles.changeEmailSent,{textAlign:'right'}]}>{infoSavedText}</Text>
+                <View style={{flex:2,justifyContent:'center',marginTop:20}}>
+                  <Text style={[styles.changeEmailSent,{textAlign:'right',justifyContent:'center',marginRight:10}]}>
+                    <AnimatedText style={fadeSaveInfo}>{infoSavedText}</AnimatedText>
+                  </Text>
                 </View>
                 <Button
                   title='Save Info'

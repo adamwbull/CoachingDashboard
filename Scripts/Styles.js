@@ -16,6 +16,7 @@ export const btnColors = {
   danger:'#e74c3c',
   success:'#2ecc71',
   info:'#41C3E0',
+  lightBackground: '#FAFAFA',
 }
 
 export const boxColors = {
@@ -3274,6 +3275,165 @@ export const paymentsLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
+  }
+})
+
+export const managePlanLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodySubtitle: {
+    color:colorsLight.darkGray,
+    fontSize:20,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20
+  },
+  currentEmail: {
+    fontSize:20,
+    padding:10,
+    borderRadius:10,
+    color:colorsLight.mainBackground,
+    backgroundColor:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    width:'25%',
+    textAlign:'center'
+  },
+  inputTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  bodyRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyInputContainer: {
+    flex:1,
+    justifyContent:'center',
+    paddingRight:20
+  },
+  saveText: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  saveButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  saveContainer: {
+    flex:1,
+  },
+  saveContainerRow: {
+    flexDirection:'row',
+    alignItems:'flex-end'
+  },
+  saveContainerSpacer: {
+    flex:3
+  },
+  passwordPromptError: {
+    textAlign:'center',
+    fontSize:16,
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+  },
+  changeEmailSent: {
+    flex:3,
+    marginLeft:20,
+    color:btnColors.success,
+    fontSize:18,
+    fontFamily:'Poppins'
+  },
+  inputHeader: {
+    fontSize:16,
+    padding:5,
+    color:colorsLight.secondaryTextColor,
+    fontFamily:'PoppinsSemiBold',
+  },
+  managePaymentsButton: {
+    padding:10,
+    borderWidth:1,
+    borderColor:btnColors.primary,
+    borderRadius:10,
+    backgroundColor:btnColors.lightBackground,
+    color:btnColors.primary,
+  },
+  managePaymentsButtonContainer: {
+    width:'40%',
+    marginLeft:5,
+    marginTop:10
+  },
+  barSelected: {
+    padding:10,
+    marginRight:10,
+    backgroundColor:btnColors.primary,
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:16,
+    borderRadius:10,
+  },
+  barUnselected: {
+    padding:10,
+    marginRight:10,
+    color:btnColors.primary,
+    fontFamily:'Poppins',
+    fontSize:16
   }
 })
 
