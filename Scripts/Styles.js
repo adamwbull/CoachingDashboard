@@ -3415,7 +3415,7 @@ export const managePlanLight = StyleSheet.create({
     color:btnColors.primary,
   },
   managePaymentsButtonContainer: {
-    width:'40%',
+    width:'50%',
     marginLeft:5,
     marginTop:10
   },
@@ -3434,6 +3434,26 @@ export const managePlanLight = StyleSheet.create({
     color:btnColors.primary,
     fontFamily:'Poppins',
     fontSize:16
+  },
+  planCurrency: {
+    fontSize:34,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    padding:5,
+    marginTop:-8
+  },
+  planAmount: {
+    fontSize:50,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    marginTop:-10
+  },
+  planDuration: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.secondaryTextColor,
+    paddingTop:10,
+    paddingLeft:10
   }
 })
 

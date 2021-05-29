@@ -30,7 +30,7 @@ export default function ManagePlan() {
   const [activePlan, setActivePlan] = useState({})
 
   // Main functions.
-  const refreshPlans = async (t, a) => {
+  const refreshPlans = async (t, a, plan) => {
     var refresh = JSON.parse(JSON.stringify(await getPlans(t)))
     if (refresh != false) {
       if (a != 0) {
@@ -42,13 +42,15 @@ export default function ManagePlan() {
       }
       console.log('plans: ', refresh)
       setPlans(refresh)
+      console.log('active plan:',refresh[plan])
+      setActivePlan(refresh[plan])
     }
   }
   useEffect(() => {
     console.log('Welcome to manage plan.')
     const sCoach = get('Coach')
     if (sCoach != null) {
-      refreshPlans(sCoach.Token, sCoach.ActiveDiscountId)
+      refreshPlans(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan)
       setCoach(sCoach)
       if (sCoach.Plan == 2) {
         setPlanTitle('Professional')
@@ -111,11 +113,17 @@ export default function ManagePlan() {
 
           {showMain && (<>
             <View style={{flexDirection:'row'}}>
-              <View style={[styles.bodyContainer,{flex:3,flexDirection:'row',justifyContent:'space-between'}]}>
-                <Text style={styles.bodySubtitle}><Text style={[{paddingLeft:8,paddingRight:8,paddingTop:5,paddingBottom:5,color:'#fff',borderRadius:10},planTitleStyle]}>{planTitle}</Text> Plan</Text>
+              <View style={[styles.bodyContainer,{flex:3,flexDirection:'column',justifyContent:'space-between'}]}>
+                <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                  <Text style={styles.bodySubtitle}><Text style={[{paddingLeft:8,paddingRight:8,paddingTop:5,paddingBottom:5,color:'#fff',borderRadius:10},planTitleStyle]}>{planTitle}</Text> Plan</Text>
+                  <View style={{flexDirection:'row'}}>
+                    <Text style={styles.planCurrency}>$</Text>
+                    <Text style={styles.planAmount}>{activePlan.BasePrice}</Text>
+                    <Text style={styles.planDuration}>{(coach.PaymentPeriod == 0) ? '/month' : '/year'}</Text>
+                  </View>
+                </View>
                 <View style={{flexDirection:'row'}}>
-                  <Text></Text>
-                  <Text style={styles.planDuration}>{(coach.PaymentPeriod == 0) ? '/month' : '/year'}</Text>
+
                 </View>
               </View>
               <View style={[styles.bodyContainer,{flex:2,marginLeft:20}]}>
