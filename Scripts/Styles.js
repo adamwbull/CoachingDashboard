@@ -3323,8 +3323,8 @@ export const managePlanLight = StyleSheet.create({
   },
   bodyDesc: {
     color:colorsLight.darkGray,
-    fontSize:14,
-    lineHeight:14,
+    fontSize:16,
+    lineHeight:18,
     fontFamily:'Poppins'
   },
   bodyContainer: {
@@ -3436,14 +3436,14 @@ export const managePlanLight = StyleSheet.create({
     fontSize:16
   },
   planCurrency: {
-    fontSize:34,
+    fontSize:24,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
     padding:5,
     marginTop:-8
   },
   planAmount: {
-    fontSize:50,
+    fontSize:40,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
     marginTop:-10
@@ -3452,8 +3452,19 @@ export const managePlanLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.secondaryTextColor,
-    paddingTop:10,
+    paddingTop:2,
     paddingLeft:10
+  },
+  upgradePlanButton: {
+    padding:10,
+    borderWidth:1,
+    borderColor:btnColors.primary,
+    borderRadius:10,
+    backgroundColor:btnColors.primary,
+  },
+  upgradePlanButtonContainer: {
+    width:'30%',
+    marginTop:8
   }
 })
 

@@ -26,13 +26,13 @@ import {
 
 const delay = ms => new Promise(res => setTimeout(res, ms))
 
-const SubscribeForm = ({onFinished, planId, annual, priceAmount}) => {
+const SubscribeForm = ({memo, onFinished, planId, annual, priceAmount}) => {
 
   // Get the lookup key for the price from the previous page redirect.
   const linkTo = useLinkTo()
   const [name, setName] = useState('');
   const [messages, setMessages] = useState('');
-  const [subscription, setSubscription] = useState();
+  const [subscription, setSubscription] = useState({status:'inactive'});
   const [refreshing, setRefreshing] = useState(false);
 
   // Styling.
@@ -104,6 +104,7 @@ const SubscribeForm = ({onFinished, planId, annual, priceAmount}) => {
     setRefreshing(true)
     var coach = get('Coach')
     var arr = {
+      memo,
       planId,
       annual,
       paymentMethodId: paymentMethod.id,
@@ -663,7 +664,7 @@ export default function SignUp() {
                 <Text style={messageBox.text}>{cardError}</Text>
               </View>) || (<View></View>)}
             {paymentIndex == 0 && (<Elements stripe={stripePromise}>
-              <SubscribeForm onFinished={handleFinish} planId={chosenPlan.Type} annual={annual} priceAmount={priceAmount} />
+              <SubscribeForm memo={priceMemo} onFinished={handleFinish} planId={chosenPlan.Type} annual={annual} priceAmount={priceAmount} />
             </Elements>)}
           </View>
         </View>

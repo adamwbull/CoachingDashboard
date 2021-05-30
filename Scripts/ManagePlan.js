@@ -8,7 +8,7 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
-import { Icon, Button } from 'react-native-elements'
+import { Icon, Button, ButtonGroup } from 'react-native-elements'
 import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount } from './API.js'
 
 export default function ManagePlan() {
@@ -28,9 +28,14 @@ export default function ManagePlan() {
   const [planTitleStyle, setPlanTitleStyle] = useState({})
   const [plans, setPlans] = useState([])
   const [activePlan, setActivePlan] = useState({})
+  const [curAnnual, setCurAnnual] = useState(1)
+
+  // Plans variables.
+  const [planAnnual, setPlanAnnual] = useState(1)
+  const [planPeriodIndex, setPlanPeriodIndex] = useState(0)
 
   // Main functions.
-  const refreshPlans = async (t, a, plan) => {
+  const refreshPlans = async (t, a, plan, d) => {
     var refresh = JSON.parse(JSON.stringify(await getPlans(t)))
     if (refresh != false) {
       if (a != 0) {
@@ -40,18 +45,24 @@ export default function ManagePlan() {
           refresh[i].BasePrice = (refresh[i].BasePrice*(1-(discount.Percent/100))).toFixed(2)
         }
       }
-      console.log('plans: ', refresh)
       setPlans(refresh)
-      console.log('active plan:',refresh[plan])
+      console.log('plans:',refresh)
       setActivePlan(refresh[plan])
     }
   }
+
   useEffect(() => {
     console.log('Welcome to manage plan.')
     const sCoach = get('Coach')
     if (sCoach != null) {
-      refreshPlans(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan)
+      console.log(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan, sCoach.PaymentPeriod)
+      refreshPlans(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan, sCoach.PaymentPeriod)
       setCoach(sCoach)
+      setCurAnnual(sCoach.PaymentPeriod)
+      setPlanAnnual(sCoach.PaymentPeriod)
+      if (sCoach.PaymentPeriod == 12) {
+        setPlanPeriodIndex(1)
+      }
       if (sCoach.Plan == 2) {
         setPlanTitle('Professional')
         setPlanTitleStyle({backgroundColor:btnColors.danger})
@@ -88,6 +99,33 @@ export default function ManagePlan() {
 
   }
 
+  // General plan functions.
+  const selectPlanPeriod = (i) => {
+    if (i == 0) {
+      setPlanAnnual(1)
+      setPlanPeriodIndex(0)
+    } else {
+      setPlanAnnual(12)
+      setPlanPeriodIndex(1)
+    }
+  }
+
+  // Upgrade plan functions.
+  const downgradeToFree = () => {
+  }
+
+  const downgradeToStandard = () => {
+  }
+
+  const upgradeToStandard = () => {
+  }
+
+  const downgradeToProfessional = () => {
+  }
+
+  const upgradeToProfessional = () => {
+  }
+
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -118,12 +156,28 @@ export default function ManagePlan() {
                   <Text style={styles.bodySubtitle}><Text style={[{paddingLeft:8,paddingRight:8,paddingTop:5,paddingBottom:5,color:'#fff',borderRadius:10},planTitleStyle]}>{planTitle}</Text> Plan</Text>
                   <View style={{flexDirection:'row'}}>
                     <Text style={styles.planCurrency}>$</Text>
-                    <Text style={styles.planAmount}>{activePlan.BasePrice}</Text>
-                    <Text style={styles.planDuration}>{(coach.PaymentPeriod == 0) ? '/month' : '/year'}</Text>
+                    <Text style={styles.planAmount}>{(coach.PaymentPeriod*activePlan.BasePrice).toFixed(2)}</Text>
+                    <Text style={styles.planDuration}>{(coach.PaymentPeriod == 1) ? '/month' : '/year'}</Text>
                   </View>
                 </View>
-                <View style={{flexDirection:'row'}}>
-
+                <View style={{flexDirection:'row',justifyContent:'flex-end'}}>
+                  <Button
+                    title='Upgrade Plan'
+                    buttonStyle={styles.upgradePlanButton}
+                    containerStyle={styles.upgradePlanButtonContainer}
+                    titleStyle={{color:'#fff'}}
+                    onPress={navToPlans}
+                    icon={
+                      <Icon
+                        name='arrow-forward-circle-outline'
+                        type='ionicon'
+                        size={20}
+                        color={'#fff'}
+                        style={{marginLeft:5}}
+                      />
+                    }
+                    iconRight
+                  />
                 </View>
               </View>
               <View style={[styles.bodyContainer,{flex:2,marginLeft:20}]}>
@@ -140,7 +194,46 @@ export default function ManagePlan() {
             </View>
           </>)}
 
-          {showPlans && (<></>)}
+          {showPlans && (<>
+            <View style={styles.bodyContainer}>
+              <ButtonGroup
+                onPress={selectPlanPeriod}
+                buttons={['Monthly Plans','Annual Plans']}
+                selectedIndex={planPeriodIndex}
+                containerStyle={{width:400,height:40}}
+              />
+              {plans.map((plan, index) => {
+
+                var planTitleColor = {color:btnColors.primary}
+
+                if (plan.Type == 1) {
+                  planTitleColor = {color:btnColors.success}
+                } else if (plan.Type == 2) {
+                  planTitleColor = {color:btnColors.danger}
+                }
+
+                var info = plan.Info.split(',')
+
+                var currentPlan = (plan.Type == coach.Plan)
+
+                return (<View key={index} style={{marginLeft:10}}>
+                  <Text style={[styles.bodyTitle]}><Text style={planTitleColor}>{plan.Title}</Text> Plan</Text>
+                  <View>
+                    <View>
+                      {info.map((infoItem, infoIndex) => {
+                        return (<Text key={infoIndex + '_'} style={styles.bodyDesc}>
+                          - {infoItem}
+                        </Text>)
+                      })}
+                    </View>
+                    <View style={{flexDirection:'row'}}>
+                      {}
+                    </View>
+                  </View>
+                </View>)
+              })}
+            </View>
+          </>)}
 
         </View>
       </View>
