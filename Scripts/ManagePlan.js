@@ -33,6 +33,7 @@ export default function ManagePlan() {
   // Plans variables.
   const [planAnnual, setPlanAnnual] = useState(1)
   const [planPeriodIndex, setPlanPeriodIndex] = useState(0)
+  const [activeDiscount, setActiveDiscount] = useState({})
 
   // Main functions.
   const refreshPlans = async (t, a, plan, d) => {
@@ -41,6 +42,8 @@ export default function ManagePlan() {
       if (a != 0) {
         // If discount exists, apply it to the base price.
         var discount = await getActiveCoachDiscount(t, a)
+        console.log('discount:',discount)
+        setActiveDiscount(discount)
         for (var i = 0; i < refresh.length; i++) {
           refresh[i].BasePrice = (refresh[i].BasePrice*(1-(discount.Percent/100))).toFixed(2)
         }
@@ -111,6 +114,14 @@ export default function ManagePlan() {
   }
 
   // Upgrade plan functions.
+  const upgradeToPlan = (plan) => {
+    if (plan == 1) {
+
+    } else if (plan == 2) {
+
+    }
+  }
+
   const downgradeToFree = () => {
   }
 
@@ -196,42 +207,91 @@ export default function ManagePlan() {
 
           {showPlans && (<>
             <View style={styles.bodyContainer}>
-              <ButtonGroup
-                onPress={selectPlanPeriod}
-                buttons={['Monthly Plans','Annual Plans']}
-                selectedIndex={planPeriodIndex}
-                containerStyle={{width:400,height:40}}
-              />
-              {plans.map((plan, index) => {
+              <View style={{alignItems:'center'}}>
+                <ButtonGroup
+                  onPress={selectPlanPeriod}
+                  buttons={['Monthly Plans','Annual Plans']}
+                  selectedIndex={planPeriodIndex}
+                  containerStyle={{width:400,height:40,marginBottom:20}}
+                />
+              </View>
+              <View style={{flexDirection:'row',marginTop:20}}>
+                {plans.map((plan, index) => {
 
-                var planTitleColor = {color:btnColors.primary}
+                  var planTitleColor = {color:btnColors.primary}
 
-                if (plan.Type == 1) {
-                  planTitleColor = {color:btnColors.success}
-                } else if (plan.Type == 2) {
-                  planTitleColor = {color:btnColors.danger}
-                }
+                  if (plan.Type == 1) {
+                    planTitleColor = {color:btnColors.success}
+                  } else if (plan.Type == 2) {
+                    planTitleColor = {color:btnColors.danger}
+                  }
 
-                var info = plan.Info.split(',')
+                  var info = plan.Info.split(',')
 
-                var currentPlan = (plan.Type == coach.Plan)
+                  var currentPlan = (plan.Type == coach.Plan)
 
-                return (<View key={index} style={{marginLeft:10}}>
-                  <Text style={[styles.bodyTitle]}><Text style={planTitleColor}>{plan.Title}</Text> Plan</Text>
-                  <View>
+                  var periodText = ' /month'
+
+                  if (planPeriodIndex == 1) {
+                    periodText = ' /year'
+                  }
+
+                  var isDiscounted = false
+                  var activeDiscountPrice = 0
+
+                  console.log('activeDisc:',activeDiscount)
+
+                  if (activeDiscount.Percent != undefined) {
+                    isDiscounted = true
+                    activeDiscountPrice = (parseFloat(plan.BasePrice)*(100/(100-activeDiscount.Percent))*planAnnual).toFixed(2)
+                  }
+
+                  return (<View key={index} style={{flex:1,marginBottom:20}}>
+                    <Text style={[styles.planTitle]}><Text style={planTitleColor}>{plan.Title}</Text> Plan</Text>
                     <View>
-                      {info.map((infoItem, infoIndex) => {
-                        return (<Text key={infoIndex + '_'} style={styles.bodyDesc}>
-                          - {infoItem}
-                        </Text>)
-                      })}
+                      <View>
+                        {info.map((infoItem, infoIndex) => {
+                          return (<Text key={infoIndex + '_'} style={styles.planDesc}>
+                            - {infoItem}
+                          </Text>)
+                        })}
+                      </View>
+                      <View style={{flexDirection:'column',marginTop:10,alignItems:'center',justifyContent:'center'}}>
+                        {isDiscounted && (<View>
+                          <Text style={styles.originalPrice}>${activeDiscountPrice}</Text>
+                          <Text style={styles.discountTitle}>{activeDiscount.Description}:</Text>
+                        </View>)}
+                        <Text style={styles.planTitleAmount}>
+                          ${(parseFloat(plan.BasePrice)*planAnnual).toFixed(2) + periodText}
+                        </Text>
+                      </View>
+                      <View style={{flexDirection:'row',marginTop:10,alignItems:'center',justifyContent:'center'}}>
+                        {currentPlan && (<>
+                          <Text style={styles.planCurrent}>Current Plan</Text>
+                        </>)}
+                        {currentPlan == false && coach.Plan < plan.Type && (<>
+                          <Button
+                            title='Upgrade'
+                            buttonStyle={styles.upgradeToPlanButton}
+                            containerStyle={styles.upgradeToPlanButtonContainer}
+                            titleStyle={{color:'#fff'}}
+                            onPress={upgradeToPlan(plan.Type)}
+                          />
+                        </>)}
+                        {coach.Plan > plan.Type && (<>
+                          <Button
+                            title='Downgrade'
+                            buttonStyle={styles.downgradeToPlanButton}
+                            containerStyle={styles.downgradeToPlanButtonContainer}
+                            titleStyle={{color:'#fff'}}
+                            onPress={upgradeToPlan(plan.Type)}
+                          />
+                        </>)}
+                      </View>
                     </View>
-                    <View style={{flexDirection:'row'}}>
-                      {}
-                    </View>
-                  </View>
-                </View>)
-              })}
+                  </View>)
+                })}
+              </View>
             </View>
           </>)}
 

@@ -3465,6 +3465,68 @@ export const managePlanLight = StyleSheet.create({
   upgradePlanButtonContainer: {
     width:'30%',
     marginTop:8
+  },
+  upgradeToPlanButton: {
+    padding:5,
+    borderWidth:1,
+    borderColor:btnColors.success,
+    borderRadius:10,
+    backgroundColor:btnColors.success,
+  },
+  upgradeToPlanButtonContainer: {
+  },
+  downgradeToPlanButton: {
+    padding:5,
+    borderWidth:1,
+    borderColor:btnColors.danger,
+    borderRadius:10,
+    backgroundColor:btnColors.danger,
+  },
+  downgradeToPlanButtonContainer: {
+  },
+  planTitleAmount: {
+    fontSize:18,
+    marginRight:10,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  planTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center'
+  },
+  planDesc: {
+    color:colorsLight.darkGray,
+    fontSize:16,
+    lineHeight:18,
+    fontFamily:'Poppins',
+    textAlign:'center'
+  },
+  planCurrent: {
+    backgroundColor:colorsLight.mainTextColor,
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainBackground,
+    padding:5,
+    borderWidth:1,
+    borderColor:colorsLight.mainBackground,
+    borderRadius:10,
+  },
+  originalPrice: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    textDecorationLine:'line-through'
+  },
+  originalTitle: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    marginBottom:10
   }
 })
 
