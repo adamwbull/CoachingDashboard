@@ -3527,7 +3527,72 @@ export const managePlanLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     textAlign:'center',
     marginBottom:10
-  }
+  },
+  // Alert Button Styling
+  alertContainer: {
+    width:500,
+    alignItems:'center',
+    padding:20,
+    backgroundColor:colorsLight.header,
+    borderRadius:10,
+    borderWidth:1,
+    borderColor:colorsLight.mainTextColor
+  },
+  alertTitle: {
+    fontSize:22,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    marginBottom:20,
+  },
+  alertDesc: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    marginBottom:20,
+  },
+  amountLineContainer: {
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    width:'100%',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    padding:3,
+  },
+  amountLine: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.secondaryTextColor,
+  },
+  amountLineFinalContainer: {
+    padding:3,
+    width:'100%',
+    marginBottom:20,
+    flexDirection:'row',
+    justifyContent:'space-between',
+  },
+  amountLineBold: {
+    fontFamily:'PoppinsSemiBold',
+  },
+  alertButtonRow: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    flex:1,
+    width:'100%'
+  },
+  alertConfirm: {
+    backgroundColor:btnColors.success,
+    borderRadius:10,
+    padding:10
+  },
+  alertConfirmContainer: {
+  },
+  alertCancel: {
+    backgroundColor:btnColors.danger,
+    borderRadius:10,
+    padding:10
+  },
+  alertCancelContainer: {
+  },
 })
 
 export const accountLight = StyleSheet.create({

@@ -1,6 +1,7 @@
-import { StatusBar } from 'expo-status-bar'
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -9,12 +10,15 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount } from './API.js'
+import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration } from './API.js'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 export default function ManagePlan() {
   const linkTo = useLinkTo()
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(managePlanLight)
+  const [colors, setColors] = useState(colorsLight)
 
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
@@ -122,7 +126,88 @@ export default function ManagePlan() {
     }
   }
 
+  const switchPayPeriod = async () => {
+    var periodText = "monthly"
+    var periodTextCapitalized = "Monthly"
+    var periodText2 = "yearly"
+
+    if (coach.PaymentPeriod == 1) {
+      periodText = "yearly"
+      periodTextCapitalized = "Yearly"
+      periodText2 = "monthly"
+    }
+
+    const proration = await getUpcomingSwitchPeriodProration(coach.Id, coach.Token, coach.PaymentPeriod, coach.Plan, coach.StripeSubscriptionId, coach.StripeCustomerId)
+
+    var credit = proration.credit;
+    var cost = proration.cost;
+    var final = ((credit + cost)/100).toFixed(2);
+
+    var finalText = "Credit to Account"
+    var finalPayText = ""
+    var finalColoring = {color:btnColors.success}
+    if (final > 0) {
+      finalColoring = "Due"
+      finalPayText = "Pay & "
+      finalColoring = {color:btnColors.danger}
+    }
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<View style={styles.alertContainer}>
+          <Text style={styles.alertTitle}>Switch to {periodTextCapitalized} payments?</Text>
+          <View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Credit from current {periodText2} plan:</Text>
+            <Text style={styles.amountLine}>${credit}</Text>
+          </View>
+          <View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Amount due switching to {periodTextCapitalized} Plan:</Text>
+            <Text style={styles.amountLine}>${cost}</Text>
+          </View>
+          <View style={styles.amountLineFinalContainer}>
+            <Text style={styles.amountLine}>Total {finalText}:</Text>
+            <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
+          </View>
+          <View style={styles.alertButtonRow}>
+            <Button
+              title='Cancel'
+              buttonStyle={styles.alertCancel}
+              containerStyle={styles.alertCancelContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={() => onClose()}
+            />
+            <Button
+              title={finalPayText + 'Switch to ' + periodTextCapitalized + ' Plan'}
+              buttonStyle={styles.alertConfirm}
+              containerStyle={styles.alertConfirmContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={() => {
+                // Switch payment.
+                onClose();
+              }}
+            />
+          </View>
+        </View>)
+      }
+    })
+  }
+
   const downgradeToFree = () => {
+    confirmAlert({
+      title: 'Downgrade to ?',
+      message: `Are you sure you want to downgrade?`,
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: async () => {
+            console.log('Downgrading to ')
+          }
+        },
+        {
+          label: 'Cancel',
+        }
+      ]
+    });
   }
 
   const downgradeToStandard = () => {
@@ -231,15 +316,14 @@ export default function ManagePlan() {
                   var currentPlan = (plan.Type == coach.Plan)
 
                   var periodText = ' /month'
-
+                  var periodNum = 1
                   if (planPeriodIndex == 1) {
                     periodText = ' /year'
+                    periodNum = 12
                   }
 
                   var isDiscounted = false
                   var activeDiscountPrice = 0
-
-                  console.log('activeDisc:',activeDiscount)
 
                   if (activeDiscount.Percent != undefined) {
                     isDiscounted = true
@@ -266,8 +350,17 @@ export default function ManagePlan() {
                         </Text>
                       </View>
                       <View style={{flexDirection:'row',marginTop:10,alignItems:'center',justifyContent:'center'}}>
-                        {currentPlan && (<>
+                        {currentPlan && coach.PaymentPeriod == periodNum && (<>
                           <Text style={styles.planCurrent}>Current Plan</Text>
+                        </>)}
+                        {currentPlan && coach.PaymentPeriod != periodNum && (<>
+                          <Button
+                            title='Switch Pay Period'
+                            buttonStyle={styles.upgradeToPlanButton}
+                            containerStyle={styles.upgradeToPlanButtonContainer}
+                            titleStyle={{color:'#fff'}}
+                            onPress={switchPayPeriod}
+                          />
                         </>)}
                         {currentPlan == false && coach.Plan < plan.Type && (<>
                           <Button
@@ -290,6 +383,7 @@ export default function ManagePlan() {
                       </View>
                     </View>
                   </View>)
+
                 })}
               </View>
             </View>

@@ -51,7 +51,9 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0"
+    "@babel/core": "^7.9.0",
+    "eslint": "^7.27.0",
+    "eslint-plugin-react": "^7.24.0"
   },
   "private": true
 }

@@ -2,7 +2,6 @@ import React from 'react'
 import * as Crypto from 'expo-crypto'
 const { DateTime } = require("luxon")
 import { View, Text, StyleSheet } from 'react-native'
-import { Progress } from 'semantic-ui-react'
 
 export const url = 'https://api.coachsync.me'
 export const uploadUrl = 'https://db.coachsync.me'
@@ -182,6 +181,32 @@ export async function check() {
 }
 
 */
+
+export async function getUpcomingSwitchPeriodProration(id, token, period, plan, sub, cus) {
+
+  var ret = false
+  var arr = {Id:id, Token:token, PaymentPeriod:period, Plan:plan, Subscription:sub, Customer:cus}
+
+  console.log('Getting upcoming proration...')
+  const res = await fetch(url + '/stripe/proration/switch-period', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Proration found!')
+    ret = payload[0]
+  }
+
+  return ret
+
+}
 
 export async function getActiveCoachDiscount(t, a) {
 
