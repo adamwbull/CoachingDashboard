@@ -38,6 +38,7 @@ export default function ManagePlan() {
   const [planAnnual, setPlanAnnual] = useState(1)
   const [planPeriodIndex, setPlanPeriodIndex] = useState(0)
   const [activeDiscount, setActiveDiscount] = useState({})
+  const [plansButtonIndicators, setPlansButtonIndicators] = useState([false, false, false])
 
   // Main functions.
   const refreshPlans = async (t, a, plan, d) => {
@@ -119,14 +120,85 @@ export default function ManagePlan() {
 
   // Upgrade plan functions.
   const upgradeToPlan = (plan) => {
-    if (plan == 1) {
 
+    if (plan == 1) {
     } else if (plan == 2) {
+    }
+
+  }
+
+  const downgradeToPlan = (plan) => {
+
+    var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+    indicators[plan] = true
+    setPlansButtonIndicators(indicators)
+
+    var p = JSON.parse(JSON.stringify(plans[plan]))
+
+    if (plan == 0) {
+      
+    } else if (plan == 1) {
 
     }
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<View style={styles.alertContainer}>
+          <Text style={styles.alertTitle}>Downgrade to {p.Title}?</Text>
+          <View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Credit from current {periodText2} plan:</Text>
+            <Text style={styles.amountLine}>${credit}</Text>
+          </View>
+          <View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Amount due switching to {periodTextCapitalized} Plan:</Text>
+            <Text style={styles.amountLine}>${cost}</Text>
+          </View>
+          <View style={styles.amountLineFinalContainer}>
+            <Text style={styles.amountLine}>Total {finalText}:</Text>
+            <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
+          </View>
+          <View style={styles.alertButtonRow}>
+            <Button
+              title='Cancel'
+              buttonStyle={styles.alertCancel}
+              containerStyle={styles.alertCancelContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={() => {
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
+              }}
+            />
+            <Button
+              title={finalPayText + 'Downgrade to ' + periodTextCapitalized + ' Plan'}
+              buttonStyle={styles.alertConfirm}
+              containerStyle={styles.alertConfirmContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={() => {
+                // Switch payment.
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
+              }}
+            />
+          </View>
+        </View>)
+      }
+    })
+
+    
+    
   }
 
   const switchPayPeriod = async () => {
+
+    var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+    console.log(plansButtonIndicators)
+    indicators[coach.Plan] = true
+    setPlansButtonIndicators(indicators)
+    
     var periodText = "monthly"
     var periodTextCapitalized = "Monthly"
     var periodText2 = "yearly"
@@ -175,7 +247,12 @@ export default function ManagePlan() {
               buttonStyle={styles.alertCancel}
               containerStyle={styles.alertCancelContainer}
               titleStyle={{color:'#fff'}}
-              onPress={() => onClose()}
+              onPress={() => {
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[coach.Plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
+              }}
             />
             <Button
               title={finalPayText + 'Switch to ' + periodTextCapitalized + ' Plan'}
@@ -184,43 +261,16 @@ export default function ManagePlan() {
               titleStyle={{color:'#fff'}}
               onPress={() => {
                 // Switch payment.
-                onClose();
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[coach.Plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
               }}
             />
           </View>
         </View>)
       }
     })
-  }
-
-  const downgradeToFree = () => {
-    confirmAlert({
-      title: 'Downgrade to ?',
-      message: `Are you sure you want to downgrade?`,
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: async () => {
-            console.log('Downgrading to ')
-          }
-        },
-        {
-          label: 'Cancel',
-        }
-      ]
-    });
-  }
-
-  const downgradeToStandard = () => {
-  }
-
-  const upgradeToStandard = () => {
-  }
-
-  const downgradeToProfessional = () => {
-  }
-
-  const upgradeToProfessional = () => {
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -350,37 +400,43 @@ export default function ManagePlan() {
                           ${(parseFloat(plan.BasePrice)*planAnnual).toFixed(2) + periodText}
                         </Text>
                       </View>
-                      <View style={{flexDirection:'row',marginTop:10,alignItems:'center',justifyContent:'center'}}>
-                        {currentPlan && coach.PaymentPeriod == periodNum && (<>
+                      <View style={{flexDirection:'column',marginTop:10,alignItems:'center',justifyContent:'center'}}>
+                        {plansButtonIndicators[index] == false && currentPlan && coach.PaymentPeriod == periodNum && (<>
                           <Text style={styles.planCurrent}>Current Plan</Text>
                         </>)}
-                        {currentPlan && coach.PaymentPeriod != periodNum && (<>
+                        {plansButtonIndicators[index] == false && currentPlan && coach.PaymentPeriod != periodNum && (<>
                           <Button
                             title='Switch Pay Period'
                             buttonStyle={styles.upgradeToPlanButton}
                             containerStyle={styles.upgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
                             onPress={switchPayPeriod}
+                            disabled={plansButtonIndicators[index]}
                           />
                         </>)}
-                        {currentPlan == false && coach.Plan < plan.Type && (<>
+                        {plansButtonIndicators[index] == false && currentPlan == false && coach.Plan < plan.Type && (<>
                           <Button
                             title='Upgrade'
                             buttonStyle={styles.upgradeToPlanButton}
                             containerStyle={styles.upgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
                             onPress={upgradeToPlan(plan.Type)}
+                            disabled={plansButtonIndicators[index]}
                           />
                         </>)}
-                        {coach.Plan > plan.Type && (<>
+                        {plansButtonIndicators[index] == false && coach.Plan > plan.Type && (<>
                           <Button
                             title='Downgrade'
                             buttonStyle={styles.downgradeToPlanButton}
                             containerStyle={styles.downgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
-                            onPress={upgradeToPlan(plan.Type)}
+                            onPress={downgradeToPlan(plan.Type)}
+                            disabled={plansButtonIndicators[index]}
                           />
                         </>)}
+                        {plansButtonIndicators[index] && (<View style={{}}>
+                          <ActivityIndicatorView />
+                        </View>)}
                       </View>
                     </View>
                   </View>)
