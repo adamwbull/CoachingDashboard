@@ -139,18 +139,19 @@ export default function ManagePlan() {
 
     const proration = await getUpcomingSwitchPeriodProration(coach.Id, coach.Token, coach.PaymentPeriod, coach.Plan, coach.StripeSubscriptionId, coach.StripeCustomerId)
 
-    var credit = proration.credit;
-    var cost = proration.cost;
-    var final = ((credit + cost)/100).toFixed(2);
-
+    var credit = Math.abs(proration.credit/100).toFixed(2)
+    var cost = (proration.cost/100).toFixed(2);
+    var final = (credit - cost).toFixed(2);
+    
     var finalText = "Credit to Account"
     var finalPayText = ""
     var finalColoring = {color:btnColors.success}
-    if (final > 0) {
-      finalColoring = "Due"
+    if (final < 0) {
+      finalText = "Due"
       finalPayText = "Pay & "
       finalColoring = {color:btnColors.danger}
     }
+    final = Math.abs(final)
 
     confirmAlert({
       customUI: ({ onClose }) => {

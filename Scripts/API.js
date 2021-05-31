@@ -1,3 +1,4 @@
+/* eslint-env node */
 import React from 'react'
 import * as Crypto from 'expo-crypto'
 const { DateTime } = require("luxon")
@@ -102,7 +103,7 @@ export function parseTime(date) {
 }
 
 export function containsSpecialCharacters(str){
-    var regex = /[ !@#$%^&*()_+\-=\[\]{}':"\\|,.<>\/?]/g
+    var regex = /[ !@#$%^&*()_+\-=[\]{}':"\\|,.<>/?]/g
 	return regex.test(str)
 }
 
