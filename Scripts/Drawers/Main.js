@@ -1,3 +1,5 @@
+/* eslint-disable react/display-name */
+/* eslint-disable react/prop-types */
 import { StatusBar } from 'expo-status-bar'
 import React, { useState, useEffect } from 'react'
 import { TouchableOpacity, Animated, StyleSheet, Text, View } from 'react-native'

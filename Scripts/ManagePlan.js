@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { useEffect, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, View, Linking } from 'react-native'
 import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -10,7 +10,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration } from './API.js'
+import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration } from './API.js'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
@@ -127,7 +127,7 @@ export default function ManagePlan() {
 
   }
 
-  const downgradeToPlan = (plan) => {
+  const downgradeToPlan = async (plan) => {
 
     var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
     indicators[plan] = true
@@ -135,28 +135,64 @@ export default function ManagePlan() {
 
     var p = JSON.parse(JSON.stringify(plans[plan]))
 
+    var oldPlan = activePlan.Title
+    var newPlan = "Standard"
+
     if (plan == 0) {
-      
+      newPlan = "Free"
     } else if (plan == 1) {
 
     }
 
+    var targetPeriod = 1
+    var periodText = "Monthly"
+    if (planPeriodIndex == 1) {
+      targetPeriod = 12
+      periodText = "Yearly"
+    }
+
+    const proration = await getUpcomingChangePlanProration(coach.Id, coach.Token, plan, targetPeriod, coach.StripeSubscriptionId, coach.StripeCustomerId)
+
+    var credit = Math.abs(proration.credit/100).toFixed(2)
+    var cost = (proration.cost/100).toFixed(2);
+    var final = (credit - cost).toFixed(2);
+
+    var finalText = "Credit to Account"
+    var finalPayText = ""
+    var finalColoring = {color:btnColors.success}
+    if (final < 0) {
+      finalText = "Due"
+      finalPayText = "Pay & "
+      finalColoring = {color:btnColors.danger}
+    }
+    final = Math.abs(final).toFixed(2)
+
     confirmAlert({
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
-          <Text style={styles.alertTitle}>Downgrade to {p.Title}?</Text>
+          <Text style={styles.alertTitle}>Downgrade to {p.Title} {periodText}?</Text>
           <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Credit from current {periodText2} plan:</Text>
+            <Text style={styles.amountLine}>Credit from current {oldPlan} Plan:</Text>
             <Text style={styles.amountLine}>${credit}</Text>
           </View>
           <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Amount due switching to {periodTextCapitalized} Plan:</Text>
-            <Text style={styles.amountLine}>${cost}</Text>
+            <Text style={styles.amountLine}>Amount due switching to {newPlan} Plan:</Text>
+            <Text style={[styles.amountLine,{color:btnColors.danger}]}>-${cost}</Text>
           </View>
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
           </View>
+          {finalText == "Credit to Account" && (<View style={styles.alertHelpRow}>
+            <Icon
+              name='help-circle-outline'
+              type='ionicon'
+              size={25}
+              color={colors.mainTextColor}
+              style={{}}
+              onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+            />
+          </View>)}
           <View style={styles.alertButtonRow}>
             <Button
               title='Cancel'
@@ -171,7 +207,7 @@ export default function ManagePlan() {
               }}
             />
             <Button
-              title={finalPayText + 'Downgrade to ' + periodTextCapitalized + ' Plan'}
+              title={finalPayText + 'Downgrade to ' + newPlan + ' Plan'}
               buttonStyle={styles.alertConfirm}
               containerStyle={styles.alertConfirmContainer}
               titleStyle={{color:'#fff'}}
@@ -185,7 +221,9 @@ export default function ManagePlan() {
             />
           </View>
         </View>)
-      }
+      },
+      closeOnEscape: false,
+      closeOnClickOutside: false
     })
 
     
@@ -201,12 +239,12 @@ export default function ManagePlan() {
     
     var periodText = "monthly"
     var periodTextCapitalized = "Monthly"
-    var periodText2 = "yearly"
+    var periodText2 = "Yearly"
 
     if (coach.PaymentPeriod == 1) {
       periodText = "yearly"
       periodTextCapitalized = "Yearly"
-      periodText2 = "monthly"
+      periodText2 = "Monthly"
     }
 
     const proration = await getUpcomingSwitchPeriodProration(coach.Id, coach.Token, coach.PaymentPeriod, coach.Plan, coach.StripeSubscriptionId, coach.StripeCustomerId)
@@ -223,7 +261,7 @@ export default function ManagePlan() {
       finalPayText = "Pay & "
       finalColoring = {color:btnColors.danger}
     }
-    final = Math.abs(final)
+    final = Math.abs(final).toFixed(2)
 
     confirmAlert({
       customUI: ({ onClose }) => {
@@ -235,12 +273,22 @@ export default function ManagePlan() {
           </View>
           <View style={styles.amountLineContainer}>
             <Text style={styles.amountLine}>Amount due switching to {periodTextCapitalized} Plan:</Text>
-            <Text style={styles.amountLine}>${cost}</Text>
+            <Text style={[styles.amountLine,{color:btnColors.danger}]}>-${cost}</Text>
           </View>
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
           </View>
+          {finalText == "Credit to Account" && (<View style={styles.alertHelpRow}>
+            <Icon
+              name='help-circle-outline'
+              type='ionicon'
+              size={25}
+              color={colors.mainTextColor}
+              style={{}}
+              onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+            />
+          </View>)}
           <View style={styles.alertButtonRow}>
             <Button
               title='Cancel'
@@ -269,7 +317,9 @@ export default function ManagePlan() {
             />
           </View>
         </View>)
-      }
+      },
+      closeOnEscape: false,
+      closeOnClickOutside: false
     })
   }
 
@@ -420,7 +470,7 @@ export default function ManagePlan() {
                             buttonStyle={styles.upgradeToPlanButton}
                             containerStyle={styles.upgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
-                            onPress={upgradeToPlan(plan.Type)}
+                            onPress={() => upgradeToPlan(plan.Type)}
                             disabled={plansButtonIndicators[index]}
                           />
                         </>)}
@@ -430,7 +480,7 @@ export default function ManagePlan() {
                             buttonStyle={styles.downgradeToPlanButton}
                             containerStyle={styles.downgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
-                            onPress={downgradeToPlan(plan.Type)}
+                            onPress={() => downgradeToPlan(plan.Type)}
                             disabled={plansButtonIndicators[index]}
                           />
                         </>)}

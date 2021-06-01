@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useCallback } from 'react'
 import { TouchableOpacity, ScrollView, Linking, Animated, Image, StyleSheet, Text, View } from 'react-native'
@@ -597,7 +598,7 @@ export default function SignUp() {
           <Icon name='people' size={60} type='ionicon' color={priceStyle}/>
           </View>
           <Text style={signUp.congratsTitle}>Congrats {firstName}!</Text>
-          <Text style={signUp.congratsText}>You've subscribed to the <Text style={[signUp.congratsTextBold,{color:priceStyle}]}>{priceName}</Text>.{"\n"}A new coaching journey awaits!</Text>
+          <Text style={signUp.congratsText}>You&apos;ve subscribed to the <Text style={[signUp.congratsTextBold,{color:priceStyle}]}>{priceName}</Text>.{"\n"}A new coaching journey awaits!</Text>
           <Button
           title='Get Started'
           buttonStyle={signUp.congratsButton}
@@ -648,7 +649,7 @@ export default function SignUp() {
             </View>
           </View>
           <View style={signUp.paymentMain}>
-            <View style={signUp.paymentOptions}>
+            {false && (<View style={signUp.paymentOptions}>
               <ButtonGroup
                 onPress={selectPaymentOption}
                 buttons={['Credit Card','PayPal']}
@@ -658,7 +659,10 @@ export default function SignUp() {
                 selectedButtonStyle={{backgroundColor:colorsLight.secondaryHighlight}}
                 style={{margin:0,padding:0}}
               />
-            </View>
+            </View>)}
+            <Text style={{fontSize:14,textAlign:'center',fontFamily:'Poppins',color:colorsLight.mainTextColor}}>
+              By subscribing you agree to our <a href="https://coachsync.me/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="https://coachsync.me/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+            </Text>
             {cardError && (<View style={messageBox.errorBox}>
                 <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
                 <Text style={messageBox.text}>{cardError}</Text>
@@ -745,7 +749,7 @@ export default function SignUp() {
       {showRegisterForm && (<View style={{flexShrink:1}}>
         <View style={signUp.form}>
           <Text style={signUp.title}>Register Account</Text>
-          <Text style={signUp.pricingIntro}>You're moments away from bringing your coaching practice to the next level!</Text>
+          <Text style={signUp.pricingIntro}>You&apos;re moments away from bringing your coaching practice to the next level!</Text>
           {errorText && (<View style={messageBox.errorBox}>
               <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
               <Text style={messageBox.text}>{errorText}</Text>

@@ -3566,12 +3566,19 @@ export const managePlanLight = StyleSheet.create({
   amountLineFinalContainer: {
     padding:3,
     width:'100%',
-    marginBottom:20,
     flexDirection:'row',
     justifyContent:'space-between',
   },
   amountLineBold: {
     fontFamily:'PoppinsSemiBold',
+  },
+  alertHelpRow: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    flex:1,
+    width:'100%',
+    marginTop:-5,
+    marginBottom:20
   },
   alertButtonRow: {
     flexDirection:'row',
