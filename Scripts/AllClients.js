@@ -12,7 +12,7 @@ import { Icon, Button, ButtonGroup } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 
-import { parseSimpleDateText, sqlToJsDate } from './API.js'
+import { parseSimpleDateText, sqlToJsDate, getClients } from './API.js'
 
 export default function AllClients() {
 

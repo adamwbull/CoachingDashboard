@@ -183,6 +183,29 @@ export async function check() {
 
 */
 
+export async function getClients(id, token) {
+
+  var ret = false
+
+  console.log('Getting client list...')
+  const res = await fetch(url + '/user/coach/clients/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Clients found!')
+    ret = true
+  } else {
+    console.log('No clients found.')
+  }
+
+  return ret
+
+}
+
+
 export async function getUpcomingChangePlanProration(id, token, targetPlan, targetPeriod, sub, cus) {
 
   var ret = false

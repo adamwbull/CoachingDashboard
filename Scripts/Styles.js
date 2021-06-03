@@ -2781,11 +2781,28 @@ export const allClientsLight = StyleSheet.create({
     marginRight:10,
     fontFamily:'PoppinsSemiBold'
   },
+  bodySubtitle: {
+    color:colorsLight.darkGray,
+    fontSize:20,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
   bodyDesc: {
     color:colorsLight.darkGray,
     fontSize:14,
     lineHeight:14,
     fontFamily:'Poppins'
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20
+  },
+  inputTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
   },
 })
 
@@ -3733,6 +3750,51 @@ export const accountLight = StyleSheet.create({
 })
 
 export const socialFeedLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+})
+
+export const basic = StyleSheet.create({
   container: {
     flex: 1,
   },
