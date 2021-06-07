@@ -62,8 +62,6 @@ export default function AllClients() {
   }
 
   // Client data variables.
-  // Damn final projects.
-
 
   useEffect(() => {
     console.log('Welcome to all clients.')
