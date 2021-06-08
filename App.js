@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, createContext, useContext } from 'react'
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer, useLinkTo } from '@react-navigation/native'
@@ -8,9 +8,11 @@ import { useFonts } from 'expo-font'
 import { colorsLight } from './Scripts/Styles.js'
 import { colorsDark } from './Scripts/StylesDark.js'
 import { set, get, getTTL, ttl } from './Scripts/Storage.js'
+import { refreshCoach } from './Scripts/API.js'
+import { Provider } from './Scripts/Context.js'
 
 const linking = {
-  prefixes: ['https://mychat.com', 'mychat://'],
+  prefixes: ['https://dashboard.coachsync.me', 'coachsync://'],
   config: {
     screens: {
       Welcome: 'welcome',
@@ -66,13 +68,14 @@ const Stack = createStackNavigator()
 export default function App() {
   const linkTo = useLinkTo()
 
+  const [coach, setCoach] = useState(get('Coach'))
+
   const [loaded] = useFonts({
     Poppins: require('./assets/fonts/Poppins.ttf'),
     PoppinsSemiBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsBold: require('./assets/fonts/Poppins-Bold.ttf'),
   })
   const [colors, setColors] = useState(colorsLight)
-
 
   const MyTheme = {
     colors: {
@@ -83,16 +86,22 @@ export default function App() {
     }
   };
 
+  const getCoach = async (id, token) => {
+    const c = await refreshCoach(id, token)
+    set('Coach',c,ttl)
+  }
+
   useEffect(() => {
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      if (sCoach.Theme == 1) {
-        setColors(colorsDark)
-      }
+    const c = get('Coach')
+    if (c != null) {
+      getCoach(c.Id, c.Token)
+    } else {
+      linkTo('/welcome')
+      setFromWelcome(true)
     }
   }, [])
 
-  return (
+  return (<Provider value={coach}>
     <NavigationContainer linking={linking} theme={MyTheme}>
       <Stack.Navigator headerMode='none'>
         <Stack.Screen name="Welcome" component={Welcome} options={{title:'Log In - CoachSync'}} />
@@ -100,5 +109,5 @@ export default function App() {
         <Stack.Screen name="Main" component={Main} />
       </Stack.Navigator>
     </NavigationContainer>
-  )
+  </Provider>)
 }

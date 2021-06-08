@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { ScrollView, Text, View, Linking } from 'react-native'
 import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
@@ -14,8 +14,13 @@ import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, get
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 
+import userContext from './Context.js'
+
 export default function ManagePlan() {
+
   const linkTo = useLinkTo()
+  const user = useContext(userContext)
+
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(managePlanLight)
   const [colors, setColors] = useState(colorsLight)
@@ -27,7 +32,7 @@ export default function ManagePlan() {
   const [showPlans, setShowPlans] = useState(false)
 
   // Main variables.
-  const [coach, setCoach] = useState({})
+  const [coach, setCoach] = useState(user)
   const [planTitle, setPlanTitle] = useState('')
   const [planTitleStyle, setPlanTitleStyle] = useState({})
   const [plans, setPlans] = useState([])
@@ -61,20 +66,19 @@ export default function ManagePlan() {
 
   useEffect(() => {
     console.log('Welcome to manage plan.')
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      console.log(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan, sCoach.PaymentPeriod)
-      refreshPlans(sCoach.Token, sCoach.ActiveDiscountId, sCoach.Plan, sCoach.PaymentPeriod)
-      setCoach(sCoach)
-      setCurAnnual(sCoach.PaymentPeriod)
-      setPlanAnnual(sCoach.PaymentPeriod)
-      if (sCoach.PaymentPeriod == 12) {
+    if (coach != null) {
+      console.log(coach.Token, coach.ActiveDiscountId, coach.Plan, coach.PaymentPeriod)
+      refreshPlans(coach.Token, coach.ActiveDiscountId, coach.Plan, coach.PaymentPeriod)
+      setCoach(coach)
+      setCurAnnual(coach.PaymentPeriod)
+      setPlanAnnual(coach.PaymentPeriod)
+      if (coach.PaymentPeriod == 12) {
         setPlanPeriodIndex(1)
       }
-      if (sCoach.Plan == 2) {
+      if (coach.Plan == 2) {
         setPlanTitle('Professional')
         setPlanTitleStyle({backgroundColor:btnColors.danger})
-      } else if (sCoach.Plan == 1) {
+      } else if (coach.Plan == 1) {
         setPlanTitle('Standard')
         setPlanTitleStyle({backgroundColor:btnColors.success})
       } else {

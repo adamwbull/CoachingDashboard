@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
 import { StatusBar } from 'expo-status-bar'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, createContext, useContext } from 'react'
 import { TouchableOpacity, Animated, StyleSheet, Text, View } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer, useLinkTo, Link } from '@react-navigation/native'
@@ -19,14 +19,19 @@ import MobileApp from './MobileApp.js'
 import Programs from './Programs.js'
 import Settings from './Settings.js'
 
+import userContext from '../Context.js'
+
 // Create Sidebar.
 const Drawer = createDrawerNavigator()
 
 export default function Main() {
+
+  const user = useContext(userContext)
+
   const [styles, setStyles] = useState(drawerLight)
   const [colors, setColors] = useState(colorsLight)
   const [opacity, setOpacity] = useState(new Animated.Value(0))
-  const [coach, setCoach] = useState({test:'test'})
+  const [coach, setCoach] = useState(user)
   const [headerPlan, setHeaderPlan] = useState({})
   const [planTitle, setPlanTitle] = useState('')
   const [userName, setUserName] = useState('')
@@ -36,31 +41,23 @@ export default function Main() {
 
   const linkTo = useLinkTo()
 
-  const refreshStoredCoach = async (id, token) => {
-    var refresh = await refreshCoach(id, token)
-    console.log('Main.js: Coach Response -',refresh)
-    set('Coach',refresh,ttl)
-  }
-
   useEffect(() => {
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      setCoach(sCoach)
+    console.log('Context-Stored Coach:',coach)
+    if (coach != null) {
       setTimeout(() => {
-        refreshStoredCoach(sCoach.Id, sCoach.Token)
-        if (sCoach.Theme == 1) {
+        if (coach.Theme == 1) {
           setStyles(drawerDark)
           setColors(colorsDark)
         }
-        var name = sCoach.FirstName + ' ' + sCoach.LastName.charAt(0) + '.'
+        var name = coach.FirstName + ' ' + coach.LastName.charAt(0) + '.'
         setUserName(name)
-        if (sCoach.Plan == 0) {
+        if (coach.Plan == 0) {
           setPlanTitle('Free Plan')
           setHeaderPlan({color:btnColors.primary})
-        } else if (sCoach.Plan == 1) {
+        } else if (coach.Plan == 1) {
           setPlanTitle('Standard Plan')
           setHeaderPlan({color:btnColors.success})
-        } else if (sCoach.Plan == 2) {
+        } else if (coach.Plan == 2) {
           setPlanTitle('Professional Plan')
           setHeaderPlan({color:btnColors.danger})
         }
@@ -100,7 +97,8 @@ export default function Main() {
     linkTo('/welcome')
   }
 
-  return (<ReactFullscreen>
+  return (
+  <ReactFullscreen>
     {({ ref, onRequest, onExit }) => (
     <View style={{flex:1}} ref={ref}>
     <View style={styles.header}>
@@ -191,6 +189,7 @@ export default function Main() {
       </View>
     </View>
     <Drawer.Navigator
+      initialState={coach}
       drawerType='permanent'
       drawerStyle={styles.drawer}
       drawerContentOptions={{
@@ -213,7 +212,7 @@ export default function Main() {
         }
       }}
     >
-      <Drawer.Screen name="Home" component={Home}
+      <Drawer.Screen name="Home" component={Home} 
         options={{
           title:'Home - CoachSync',
           drawerIcon: ({focused, size}) => (
@@ -281,5 +280,6 @@ export default function Main() {
         <Text style={styles.dropdownBoxLogout}>Logout</Text>
       </TouchableOpacity>
     </View>)}
-  </View>)}</ReactFullscreen>)
+  </View>)}
+  </ReactFullscreen>)
 }

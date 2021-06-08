@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -86,7 +88,7 @@ export default function Settings() {
           }
         }}
       />
-      <Drawer.Screen name="ManagePlan" component={ManagePlan}
+      <Drawer.Screen name="ManagePlan" component={ManagePlan} 
         options={{
           title:'Manage Plan - CoachSync',
           drawerIcon: ({focused, size}) => (
