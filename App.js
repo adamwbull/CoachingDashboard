@@ -86,18 +86,15 @@ export default function App() {
     }
   };
 
-  const getCoach = async (id, token) => {
-    const c = await refreshCoach(id, token)
-    set('Coach',c,ttl)
-  }
-
   useEffect(() => {
-    const c = get('Coach')
-    if (c != null) {
-      getCoach(c.Id, c.Token)
+    console.log('App.js: Context-Stored Coach -',coach)
+    if (coach != null) {
+      refreshCoach(coach.Id, coach.Token).then((res) => {
+        setCoach(res)
+        set('Coach',res,ttl)
+      })
     } else {
       linkTo('/welcome')
-      setFromWelcome(true)
     }
   }, [])
 

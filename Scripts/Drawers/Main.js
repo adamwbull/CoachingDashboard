@@ -42,7 +42,6 @@ export default function Main() {
   const linkTo = useLinkTo()
 
   useEffect(() => {
-    console.log('Context-Stored Coach:',coach)
     if (coach != null) {
       setTimeout(() => {
         if (coach.Theme == 1) {
