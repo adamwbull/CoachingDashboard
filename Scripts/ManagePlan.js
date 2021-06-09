@@ -10,7 +10,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration } from './API.js'
+import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 
@@ -33,6 +33,7 @@ export default function ManagePlan() {
 
   // Main variables.
   const [coach, setCoach] = useState(user)
+  const [accountCredit, setAccountCredit] = useState(0)
   const [planTitle, setPlanTitle] = useState('')
   const [planTitleStyle, setPlanTitleStyle] = useState({})
   const [plans, setPlans] = useState([])
@@ -159,7 +160,7 @@ export default function ManagePlan() {
 
     var credit = Math.abs(proration.credit/100).toFixed(2)
     var cost = (proration.cost/100).toFixed(2);
-    var final = (credit - cost).toFixed(2);
+    var final = (accountCredit + credit - cost).toFixed(2);
 
     var finalText = "Credit to Account"
     var finalPayText = ""
@@ -215,8 +216,15 @@ export default function ManagePlan() {
               buttonStyle={styles.alertConfirm}
               containerStyle={styles.alertConfirmContainer}
               titleStyle={{color:'#fff'}}
-              onPress={() => {
-                // Switch payment.
+              onPress={async () => {
+                // Update subscription
+                var updated = await switchSubscription(coach.Token, coach.Id, plan, targetPeriod, coach.StripeSubscriptionId)
+                // Update user.
+                var c = JSON.parse(JSON.stringify(coach))
+                c.Plan = updated.Plan
+                c.PlanExpire = updated.PlanExpire
+                setCoach(c)
+                set('Coach',c,ttl)
                 var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
                 indicators[plan] = false
                 setPlansButtonIndicators(indicators)
@@ -229,8 +237,6 @@ export default function ManagePlan() {
       closeOnEscape: false,
       closeOnClickOutside: false
     })
-
-    
     
   }
 

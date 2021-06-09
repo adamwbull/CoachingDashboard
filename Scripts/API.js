@@ -183,6 +183,34 @@ export async function check() {
 
 */
 
+export async function switchSubscription(token, id, plan, period, sub) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, TargetPlan:plan, TargetPeriod:period, Subscription:sub}
+
+  console.log('Switching subscription...')
+  const res = await fetch(url + '/stripe/switch-subscription', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.Plan != undefined) {
+    console.log('Subscription updated!')
+    ret = payload
+  } else {
+    console.log('Subscription switch failed.')
+  }
+
+  return ret
+
+}
+
 export async function getClients(id, token) {
 
   var ret = false
