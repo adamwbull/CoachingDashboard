@@ -37,7 +37,6 @@ export default function Settings() {
         setColors(colorsDark)
       }
     }
-
   }, [])
 
   return (<View style={{height:'100%'}}>

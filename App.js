@@ -93,8 +93,6 @@ export default function App() {
         setCoach(res)
         set('Coach',res,ttl)
       })
-    } else {
-      linkTo('/welcome')
     }
   }, [])
 

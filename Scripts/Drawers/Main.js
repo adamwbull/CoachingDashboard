@@ -38,10 +38,12 @@ export default function Main() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [fromWelcome, setFromWelcome] = useState(false)
+  const [showMain, setMain] = useState(false)
 
   const linkTo = useLinkTo()
 
   useEffect(() => {
+    console.log("Made it here")
     if (coach != null) {
       setTimeout(() => {
         if (coach.Theme == 1) {
@@ -60,6 +62,7 @@ export default function Main() {
           setPlanTitle('Professional Plan')
           setHeaderPlan({color:btnColors.danger})
         }
+        setMain(true)
       })
     } else {
       linkTo('/welcome')
@@ -96,8 +99,7 @@ export default function Main() {
     linkTo('/welcome')
   }
 
-  return (
-  <ReactFullscreen>
+  return (<>{showMain && (<ReactFullscreen>
     {({ ref, onRequest, onExit }) => (
     <View style={{flex:1}} ref={ref}>
     <View style={styles.header}>
@@ -188,7 +190,6 @@ export default function Main() {
       </View>
     </View>
     <Drawer.Navigator
-      initialState={coach}
       drawerType='permanent'
       drawerStyle={styles.drawer}
       drawerContentOptions={{
@@ -280,5 +281,5 @@ export default function Main() {
       </TouchableOpacity>
     </View>)}
   </View>)}
-  </ReactFullscreen>)
+  </ReactFullscreen>)}</>)
 }

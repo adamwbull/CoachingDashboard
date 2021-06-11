@@ -68,7 +68,6 @@ export default function ManagePlan() {
   useEffect(() => {
     console.log('Welcome to manage plan.')
     if (coach != null) {
-      console.log(coach.Token, coach.ActiveDiscountId, coach.Plan, coach.PaymentPeriod)
       refreshPlans(coach.Token, coach.ActiveDiscountId, coach.Plan, coach.PaymentPeriod)
       setCoach(coach)
       setCurAnnual(coach.PaymentPeriod)
@@ -91,6 +90,8 @@ export default function ManagePlan() {
         setBar(true)
         setMain(true)
       }, 500)
+    } else {
+      linkTo('/welcome')
     }
   }, [])
 
