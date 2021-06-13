@@ -3621,9 +3621,10 @@ export const managePlanLight = StyleSheet.create({
     flex:4,
     marginRight:20
   },
-  paymentsNextInvoieTop: {
+  paymentsNextInvoiceTop: {
     flexDirection:'row',
-    justifyContent:'center'
+    justifyContent:'center',
+    marginBottom:10
   },
   paymentsMethod: {
     flex:2,
@@ -3672,6 +3673,41 @@ export const managePlanLight = StyleSheet.create({
     fontSize:20,
     color:colorsLight.mainTextColor,
     flex:1
+  },
+  paymentsNextInvoiceFinal: {
+    flexDirection:'row',
+    justifyContent:'flex-end',
+    alignItems:'center',
+    paddingTop:20,
+    paddingBottom:5
+  },
+  paymentsNextInvoiceAmount: {
+    marginRight:10,
+  },
+  paymentsNextInvoiceDueDate: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.secondaryTextColor
+  },
+  paymentsNextInvoiceAmountDueDateTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    lineHeight:16,
+    color:colorsLight.mainTextColor
+  },
+  paymentsNextInvoiceCurrency: {
+    fontFamily:'Poppins',
+    fontSize:22,
+    marginTop:6,
+    color:colorsLight.mainTextColor
+  },
+  paymentsNextInvoiceAmountNum: {
+    fontFamily:'Poppins',
+    fontSize:40,
+    color:colorsLight.mainTextColor
+  },
+  paymentsNextInvoiceAmountRow: {
+    flexDirection:'row'
   }
 })
 

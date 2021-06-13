@@ -58,6 +58,9 @@ export default function ManagePlan() {
   const [pastInvoices, setPastInvoices] = useState([])
   const [paymentMethod, setPaymentMethod] = useState({})
   const [paymentMethodImage, setPaymentMethodImage] = useState(null)
+  const [nextInvoiceFinal, setNextInvoiceFinal] = useState(0)
+  const [nextInvoiceFinalText, setNextInvoiceFinalText] = useState('Credit to Account')
+  const [nextInvoiceFinalColoring, setNextInvoiceFinalColoring] = useState({color:btnColors.success})
 
   // Main functions.
   const refreshPlans = async (t, a, plan, d) => {
@@ -146,6 +149,20 @@ export default function ManagePlan() {
     var invoices = await invoiceData(id, token, cus, sub)
     console.log('invoices:',invoices)
     setNextInvoice(invoices[0])
+    // Calculate nextInvoiceFinal, nextInvoiceFinalText
+    var final = 0
+    for (var i = 0; i < invoices[0].lines.data.length; i++) {
+      final += invoices[0].lines.data[i].amount
+    }
+
+    if (final > 0) {
+      setNextInvoiceFinalText('Due')
+      setNextInvoiceFinalColoring({color:btnColors.success})
+    }
+
+    final = Math.abs(final/100).toFixed(2)
+    setNextInvoiceFinal(final)
+
     setPastInvoices(invoices[1])
     setPaymentMethod(invoices[2])
     var brand = invoices[2].data[0].card.brand
@@ -732,10 +749,12 @@ export default function ManagePlan() {
           {showPayments && (<>
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
               <View style={styles.paymentsNextInvoice}>
-                <View style={styles.paymentsNextInvoieTop}>
+                <View style={styles.paymentsNextInvoiceTop}>
                   <View style={{flex:1}}>
                     <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder,marginBottom:10}]}>Plan Details</Text>
-                    <Text style={styles.bodyDesc}>You are subscribed to the <Text style={{fontFamily:'PoppinsSemiBold'}}>{planTitle}</Text> Plan with <Text style={{fontFamily:'PoppinsSemiBold'}}>{billingText}</Text>.</Text>
+                    <Text style={styles.bodyDesc}>
+                    You are subscribed to the <Text style={{fontFamily:'PoppinsSemiBold'}}>{planTitle} Plan</Text> with <Text style={{fontFamily:'PoppinsSemiBold'}}>{billingText}</Text>.
+                    </Text>
                   </View>
                   <View style={{width:20}}></View>
                   <Button
@@ -755,6 +774,45 @@ export default function ManagePlan() {
                       }
                       iconRight
                     />
+                </View>
+                <View style={styles.paymentsNextInvoiceDetails}>
+                  {nextInvoice.lines.data.map((line, index) => {
+                    var coloring = {}
+                    var negSign = ""
+                    if (line.amount < 0) {
+                      coloring = {color:btnColors.success}
+                      negSign = "-"
+                    }
+                    var amt = Math.abs(line.amount)
+                    return (<View key={line.id} style={[styles.amountLineContainer,{padding:10}]}>
+                        <Text style={styles.amountLine}>{line.description}</Text>
+                        <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
+                    </View>)
+                  })}
+                  {nextInvoice.starting_balance < -1 && (<View style={[styles.amountLineContainer,{padding:10}]}>
+                    <Text style={styles.amountLine}>Existing credit balance</Text>
+                    <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(nextInvoice.starting_balance/100).toFixed(2)}</Text>
+                  </View>)}
+                  <View style={styles.paymentsNextInvoiceFinal}>
+                    <View style={styles.paymentsNextInvoiceAmount}>
+                      <Text style={styles.paymentsNextInvoiceAmountDueDateTitle}>Total</Text>
+                      <Text style={styles.paymentsNextInvoiceDueDate}>Due {parseSimpleDateText(sqlToJsDate(coach.PlanExpire))}</Text>
+                   </View>
+                   <View style={styles.paymentsNextInvoiceAmountRow}>
+                    <Text style={[styles.paymentsNextInvoiceCurrency]}>$</Text>
+                    <Text style={[styles.paymentsNextInvoiceAmountNum]}>{nextInvoiceFinal}</Text>
+                   </View>
+                  </View>
+                  {nextInvoiceFinalText == "Credit to Account" && (<View style={styles.alertHelpRow}>
+                    <Icon
+                      name='help-circle-outline'
+                      type='ionicon'
+                      size={25}
+                      color={colors.mainTextColor}
+                      style={{}}
+                      onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+                    />
+                  </View>)}
                 </View>
               </View>
               <View style={styles.paymentsMethod}>
