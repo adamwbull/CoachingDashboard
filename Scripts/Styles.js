@@ -3708,7 +3708,141 @@ export const managePlanLight = StyleSheet.create({
   },
   paymentsNextInvoiceAmountRow: {
     flexDirection:'row'
-  }
+  },
+  paymentsControls: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentsControlsText: {
+    padding:10,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.secondaryTextColor,
+    width:'100%'
+  },
+  paymentControlsTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmount: {
+    flex:8,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountStatus: {
+    flex:12,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDescription: {
+    flex:45,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchClient: {
+    flex:22,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDate: {
+    flex:25,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentRowText: {
+    padding:10,
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    width:'100%'
+  },
+  paymentRowTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmount: {
+    flex:8,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountStatus: {
+    flex:12,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDescription: {
+    flex:45,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchClient: {
+    flex:22,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDate: {
+    flex:25,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
 })
 
 export const accountLight = StyleSheet.create({
@@ -3838,7 +3972,7 @@ export const accountLight = StyleSheet.create({
     padding:5,
     color:colorsLight.secondaryTextColor,
     fontFamily:'PoppinsSemiBold',
-  }
+  },
 })
 
 export const socialFeedLight = StyleSheet.create({

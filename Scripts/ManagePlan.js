@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { useEffect, useState, useContext } from 'react'
-import { ScrollView, Text, View, Linking, Image } from 'react-native'
+import { TouchableOpacity, ScrollView, Text, View, Linking, Image } from 'react-native'
 import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -9,7 +9,7 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
-import { Icon, Button, ButtonGroup } from 'react-native-elements'
+import { Icon, Button, ButtonGroup, Chip } from 'react-native-elements'
 import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
@@ -55,7 +55,7 @@ export default function ManagePlan() {
 
   // Payments variables.
   const [nextInvoice, setNextInvoice] = useState({})
-  const [pastInvoices, setPastInvoices] = useState([])
+  const [pastInvoices, setPastInvoices] = useState({})
   const [paymentMethod, setPaymentMethod] = useState({})
   const [paymentMethodImage, setPaymentMethodImage] = useState(null)
   const [nextInvoiceFinal, setNextInvoiceFinal] = useState(0)
@@ -834,8 +834,123 @@ export default function ManagePlan() {
               </View>
             </View>
             <View style={styles.bodyContainer}>
+              <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder,marginBottom:10}]}>All Invoices</Text>
+              <View style={styles.paymentsControls}>
+                <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                  <Text style={[styles.paymentsControlsText,{paddingRight:0}]}>Amount</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsTouchAmountStatus}>
+                  <Text style={styles.paymentsControlsText}></Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsTouchDescription}>
+                  <Text style={styles.paymentsControlsText}>Description</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsTouchClient}>
+                  <Text style={styles.paymentsControlsText}>Client</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                  <Text style={styles.paymentsControlsText}>Created</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsTouchIcon}>
+                  <Icon
+                    name='ellipsis-horizontal-outline'
+                    type='ionicon'
+                    size={0}
+                    color={colors.mainTextColor}
+                  />
+                </TouchableOpacity>
+              </View>
               <View style={styles.paymentsPreviousInvoices}>
-
+                {pastInvoices.data.map((line, index) => {
+                  // amount/Amount, Invoice Number/number, Chip/status Due/period_end, Created/created, View/hosted_invoice_url
+                  return (<View key={line.id} style={styles.paymentRow}>
+                      <View style={[styles.paymentRowTouchAmount]}>
+                        <Text style={[styles.paymentRowText,{paddingRight:0,textAlign:'right',fontFamily:'PoppinsSemiBold'}]}>
+                          ${(line.amount/100).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.paymentRowTouchAmountStatus}>
+                        {line.status == 'open' && (<><Chip
+                          title='Pending'
+                          type='outline'
+                          icon={{
+                            name:'checkmark-outline',
+                            type:'ionicon',
+                            size:16,
+                            color:'#fff'
+                          }}
+                          disabledStyle={{backgroundColor:btnColors.primary,borderColor:btnColors.primary,color:btnColors.primary,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                          disabledTitleStyle={{color:'#fff'}}
+                          disabled={true}
+                        /></>) ||
+                          (<>{line.status == 'paid' && (<>
+                            <Chip
+                              title='Paid'
+                              type='outline'
+                              icon={{
+                                name:'checkmark-outline',
+                                type:'ionicon',
+                                size:16,
+                                color:'#fff'
+                              }}
+                              disabledStyle={{backgroundColor:btnColors.success,borderColor:btnColors.success,color:btnColors.success,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                              disabledTitleStyle={{color:'#fff'}}
+                              disabled={true}
+                            />
+                          </>) || (<>
+                            {line.status == 'draft' && 
+                            (<>
+                              <Chip
+                                title='Draft'
+                                type='outline'
+                                icon={{
+                                  name:'checkmark-outline',
+                                  type:'ionicon',
+                                  size:16,
+                                  color:'#fff'
+                                }}
+                                disabledStyle={{backgroundColor:colors.header,borderColor:colors.header,color:colors.header,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                disabledTitleStyle={{color:'#fff'}}
+                                disabled={true}
+                              />
+                            </>) || 
+                            (<>
+                              <Chip
+                                title='Open'
+                                type='outline'
+                                icon={{
+                                  name:'checkmark-outline',
+                                  type:'ionicon',
+                                  size:16,
+                                  color:'#fff'
+                                }}
+                                disabledStyle={{backgroundColor:btnColors.primary,borderColor:btnColors.primary,color:btnColors.primary,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                disabledTitleStyle={{color:'#fff'}}
+                                disabled={true}
+                              />
+                            </>)}
+                          </>)}
+                        </>)}
+                      </View>
+                      <View style={styles.paymentRowTouchDescription}>
+                        <Text style={styles.paymentRowText}>Description</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchClient}>
+                        <Text style={styles.paymentRowText}>Client</Text>
+                      </View>
+                      <View style={styles.paymentRowTouchDate}>
+                        <Text style={styles.paymentRowText}>Date</Text>
+                      </View>
+                      <TouchableOpacity style={styles.paymentRowTouchIcon}>
+                        <Icon
+                          name='ellipsis-horizontal-outline'
+                          type='ionicon'
+                          size={22}
+                          color={colors.mainTextColor}
+                        />
+                      </TouchableOpacity>
+                    </View>)
+                })}
               </View>
             </View>
           </>)}
