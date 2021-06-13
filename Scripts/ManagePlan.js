@@ -10,7 +10,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription } from './API.js'
+import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 
@@ -30,10 +30,11 @@ export default function ManagePlan() {
   const [showBar, setBar] = useState(false)
   const [showMain, setMain] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
+  const [showPayments, setShowPayments] = useState(false)
+  const [firstPaymentsNav, setFirstPaymentsNav] = useState(true)
 
   // Main variables.
   const [coach, setCoach] = useState(user)
-  const [accountCredit, setAccountCredit] = useState(0)
   const [planTitle, setPlanTitle] = useState('')
   const [planTitleStyle, setPlanTitleStyle] = useState({})
   const [plans, setPlans] = useState([])
@@ -46,6 +47,10 @@ export default function ManagePlan() {
   const [activeDiscount, setActiveDiscount] = useState({})
   const [plansButtonIndicators, setPlansButtonIndicators] = useState([false, false, false])
 
+  // Payments variables.
+  const [nextInvoice, setNextInvoice] = useState({})
+  const [pastInvoices, setPastInvoices] = useState([])
+
   // Main functions.
   const refreshPlans = async (t, a, plan, d) => {
     var refresh = JSON.parse(JSON.stringify(await getPlans(t)))
@@ -53,16 +58,21 @@ export default function ManagePlan() {
       if (a != 0) {
         // If discount exists, apply it to the base price.
         var discount = await getActiveCoachDiscount(t, a)
-        console.log('discount:',discount)
         setActiveDiscount(discount)
         for (var i = 0; i < refresh.length; i++) {
           refresh[i].BasePrice = (refresh[i].BasePrice*(1-(discount.Percent/100))).toFixed(2)
         }
       }
       setPlans(refresh)
-      console.log('plans:',refresh)
       setActivePlan(refresh[plan])
     }
+  }
+
+  const getInvoiceData = async (id, token, cus, sub) => {
+    var invoices = await invoiceData(id, token, cus, sub)
+    console.log('invoices:',invoices)
+    setNextInvoice(invoices[0])
+    setPastInvoices(invoices[1])
   }
 
   useEffect(() => {
@@ -89,7 +99,7 @@ export default function ManagePlan() {
         setActivityIndicator(false)
         setBar(true)
         setMain(true)
-      }, 500)
+      }, 800)
     } else {
       linkTo('/welcome')
     }
@@ -98,21 +108,40 @@ export default function ManagePlan() {
   // Navigation functions.
   const navToMain = () => {
     setShowPlans(false)
-
+    setShowPayments(false)
     setMain(true)
   }
 
   const navToPlans = () => {
     setMain(false)
-
+    setShowPayments(false)
     setShowPlans(true)
   }
 
-  // Manage payments functions.
-  const managePayments = () => {
+  const navToPayments = () => {
+    setMain(false)
+    if (firstPaymentsNav) {
+      setFirstPaymentsNav(false)
 
+      // Get data for this area.
+      getInvoiceData(coach.Id, coach.Token, coach.StripeCustomerId, coach.StripeSubscriptionId)
+
+      setShowPlans(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        setActivityIndicator(false)
+        setShowPayments(true)
+      }, 500)
+    } else {
+      setShowPlans(false)
+    setShowPayments(true)
+    }
+    
   }
 
+
+  // Manage payments functions.
+  
   // General plan functions.
   const selectPlanPeriod = (i) => {
     if (i == 0) {
@@ -125,11 +154,135 @@ export default function ManagePlan() {
   }
 
   // Upgrade plan functions.
-  const upgradeToPlan = (plan) => {
+  const upgradeToPlan = async (plan) => {
+
+    var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+    indicators[plan] = true
+    setPlansButtonIndicators(indicators)
+
+    var p = JSON.parse(JSON.stringify(plans[plan]))
+
+    var oldPlan = activePlan.Title
+    var newPlan = "Professional"
 
     if (plan == 1) {
-    } else if (plan == 2) {
+      newPlan = "Standard"
     }
+
+    var targetPeriod = 1
+    var periodText = "Monthly"
+    if (planPeriodIndex == 1) {
+      targetPeriod = 12
+      periodText = "Yearly"
+    }
+
+    const proration = await getUpcomingChangePlanProration(coach.Id, coach.Token, plan, targetPeriod, coach.StripeSubscriptionId, coach.StripeCustomerId)
+
+    var invoice = proration[1]
+
+    var final = 0;
+
+    // Calculate final.
+    for (var i = 0; i < invoice.lines.data.length; i++) {
+      var cur = invoice.lines.data[i]
+      if (cur.proration) {
+        final += cur.amount
+      }
+    }
+
+    final += invoice.starting_balance
+
+    var finalPayText = ""
+    var finalText = "Credit to Account"
+    var finalColoring = {color:btnColors.success}
+
+    if (final > 0) {
+      finalPayText = "Pay & "
+      finalText = "Due"
+      finalColoring = {color:btnColors.danger}
+    }
+    final = Math.abs(final/100).toFixed(2)
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<View style={styles.alertContainer}>
+          <Text style={styles.alertTitle}>Upgrade to {p.Title} {periodText}?</Text>
+          {invoice.lines.data.map((line, index) => {
+            var coloring = {}
+            var negSign = ""
+            if (line.amount < 0) {
+              coloring = {color:btnColors.success}
+              negSign = "-"
+            }
+            var amt = Math.abs(line.amount)
+            if (line.proration) {
+              return (<View key={line.id} style={styles.amountLineContainer}>
+                <Text style={styles.amountLine}>{line.description}</Text>
+                <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
+             </View>)
+            } else {
+              return (<View key={line.id}>
+             </View>)
+            }
+          })}
+          {invoice.starting_balance != 0 && (<View style={styles.amountLineContainer}>
+                <Text style={styles.amountLine}>Existing credit balance</Text>
+                <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(invoice.starting_balance/100).toFixed(2)}</Text>
+              </View>)}
+          <View style={styles.amountLineFinalContainer}>
+            <Text style={styles.amountLine}>Total {finalText}:</Text>
+            <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
+          </View>
+          {finalText == "Credit to Account" && (<View style={styles.alertHelpRow}>
+            <Icon
+              name='help-circle-outline'
+              type='ionicon'
+              size={25}
+              color={colors.mainTextColor}
+              style={{}}
+              onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+            />
+          </View>)}
+          <View style={styles.alertButtonRow}>
+            <Button
+              title='Cancel'
+              buttonStyle={styles.alertCancel}
+              containerStyle={styles.alertCancelContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={() => {
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
+              }}
+            />
+            <Button
+              title={finalPayText + 'Upgrade to ' + newPlan + ' Plan'}
+              buttonStyle={styles.alertConfirm}
+              containerStyle={styles.alertConfirmContainer}
+              titleStyle={{color:'#fff'}}
+              onPress={async () => {
+                // Update subscription
+                var updated = await switchSubscription(coach.Token, coach.Id, plan, targetPeriod, coach.StripeSubscriptionId)
+                // Update user.
+                var c = JSON.parse(JSON.stringify(coach))
+                c.Plan = updated.Plan
+                c.PlanExpire = updated.PlanExpire
+                setCoach(c)
+                set('Coach',c,ttl)
+                var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
+                indicators[plan] = false
+                setPlansButtonIndicators(indicators)
+                onClose()
+                location.reload()
+              }}
+            />
+          </View>
+        </View>)
+      },
+      closeOnEscape: false,
+      closeOnClickOutside: false
+    })
 
   }
 
@@ -159,32 +312,50 @@ export default function ManagePlan() {
 
     const proration = await getUpcomingChangePlanProration(coach.Id, coach.Token, plan, targetPeriod, coach.StripeSubscriptionId, coach.StripeCustomerId)
 
-    var credit = Math.abs(proration.credit/100).toFixed(2)
-    var cost = (proration.cost/100).toFixed(2);
-    var final = (accountCredit + credit - cost).toFixed(2);
+    var invoice = proration[1]
 
-    var finalText = "Credit to Account"
+    var final = 0;
+
+    // Calculate final.
+    for (var i = 0; i < invoice.lines.data.length; i++) {
+      var cur = invoice.lines.data[i]
+      if (cur.proration) {
+        final += cur.amount
+      }
+    }
+
     var finalPayText = ""
+    var finalText = "Credit to Account"
     var finalColoring = {color:btnColors.success}
-    if (final < 0) {
-      finalText = "Due"
+    if (final > 0) {
       finalPayText = "Pay & "
+      finalText = "Due"
       finalColoring = {color:btnColors.danger}
     }
-    final = Math.abs(final).toFixed(2)
+    final = Math.abs(final/100).toFixed(2)
 
     confirmAlert({
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
           <Text style={styles.alertTitle}>Downgrade to {p.Title} {periodText}?</Text>
-          <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Credit from current {oldPlan} Plan:</Text>
-            <Text style={styles.amountLine}>${credit}</Text>
-          </View>
-          <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Amount due switching to {newPlan} Plan:</Text>
-            <Text style={[styles.amountLine,{color:btnColors.danger}]}>-${cost}</Text>
-          </View>
+          {invoice.lines.data.map((line, index) => {
+            var coloring = {}
+            var negSign = ""
+            if (line.amount < 0) {
+              coloring = {color:btnColors.success}
+              negSign = "-"
+            }
+            var amt = Math.abs(line.amount)
+            if (line.proration) {
+              return (<View key={line.id} style={styles.amountLineContainer}>
+                <Text style={styles.amountLine}>{line.description}</Text>
+                <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
+             </View>)
+            } else {
+              return (<View key={line.id}>
+             </View>)
+            }
+          })}
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
@@ -230,6 +401,7 @@ export default function ManagePlan() {
                 indicators[plan] = false
                 setPlansButtonIndicators(indicators)
                 onClose()
+                location.reload()
               }}
             />
           </View>
@@ -244,7 +416,6 @@ export default function ManagePlan() {
   const switchPayPeriod = async () => {
 
     var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
-    console.log(plansButtonIndicators)
     indicators[coach.Plan] = true
     setPlansButtonIndicators(indicators)
     
@@ -252,40 +423,60 @@ export default function ManagePlan() {
     var periodTextCapitalized = "Monthly"
     var periodText2 = "Yearly"
 
+    var targetPeriod = 1
     if (coach.PaymentPeriod == 1) {
+      targetPeriod = 12
       periodText = "yearly"
       periodTextCapitalized = "Yearly"
       periodText2 = "Monthly"
     }
 
-    const proration = await getUpcomingSwitchPeriodProration(coach.Id, coach.Token, coach.PaymentPeriod, coach.Plan, coach.StripeSubscriptionId, coach.StripeCustomerId)
+    const proration = await getUpcomingChangePlanProration(coach.Id, coach.Token, coach.Plan, targetPeriod, coach.StripeSubscriptionId, coach.StripeCustomerId)
 
-    var credit = Math.abs(proration.credit/100).toFixed(2)
-    var cost = (proration.cost/100).toFixed(2);
-    var final = (credit - cost).toFixed(2);
+    var invoice = proration[1]
+
+    var final = 0;
+
+    // Calculate final.
+    for (var i = 0; i < invoice.lines.data.length; i++) {
+      var cur = invoice.lines.data[i]
+      if (cur.proration) {
+        final += cur.amount
+      }
+    }
     
     var finalText = "Credit to Account"
     var finalPayText = ""
     var finalColoring = {color:btnColors.success}
-    if (final < 0) {
+    if (final > 0) {
       finalText = "Due"
       finalPayText = "Pay & "
       finalColoring = {color:btnColors.danger}
     }
-    final = Math.abs(final).toFixed(2)
+    final = Math.abs(final/100).toFixed(2)
 
     confirmAlert({
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
-          <Text style={styles.alertTitle}>Switch to {periodTextCapitalized} payments?</Text>
-          <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Credit from current {periodText2} plan:</Text>
-            <Text style={styles.amountLine}>${credit}</Text>
-          </View>
-          <View style={styles.amountLineContainer}>
-            <Text style={styles.amountLine}>Amount due switching to {periodTextCapitalized} Plan:</Text>
-            <Text style={[styles.amountLine,{color:btnColors.danger}]}>-${cost}</Text>
-          </View>
+          <Text style={styles.alertTitle}>Switch to {periodTextCapitalized} Plan?</Text>
+          {invoice.lines.data.map((line, index) => {
+            var coloring = {}
+            var negSign = ""
+            if (line.amount < 0) {
+              coloring = {color:btnColors.success}
+              negSign = "-"
+            }
+            var amt = Math.abs(line.amount)
+            if (line.proration) {
+              return (<View key={line.id} style={styles.amountLineContainer}>
+                <Text style={styles.amountLine}>{line.description}</Text>
+                <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
+             </View>)
+            } else {
+              return (<View key={line.id}>
+             </View>)
+            }
+          })}
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
@@ -318,12 +509,20 @@ export default function ManagePlan() {
               buttonStyle={styles.alertConfirm}
               containerStyle={styles.alertConfirmContainer}
               titleStyle={{color:'#fff'}}
-              onPress={() => {
-                // Switch payment.
+              onPress={async () => {
+                // Update subscription
+                var updated = await switchSubscription(coach.Token, coach.Id, coach.Plan, targetPeriod, coach.StripeSubscriptionId)
+                // Update user.
+                var c = JSON.parse(JSON.stringify(coach))
+                c.Plan = updated.Plan
+                c.PlanExpire = updated.PlanExpire
+                setCoach(c)
+                set('Coach',c,ttl)
                 var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
                 indicators[coach.Plan] = false
                 setPlansButtonIndicators(indicators)
                 onClose()
+                location.reload()
               }}
             />
           </View>
@@ -350,6 +549,8 @@ export default function ManagePlan() {
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
               {showMain && (<Text style={styles.barSelected}>Overview</Text>)
                         || (<Text onPress={navToMain} style={styles.barUnselected}>Overview</Text>)}
+              {showPayments && (<Text style={styles.barSelected}>Payments</Text>)
+                        || (<Text onPress={navToPayments} style={styles.barUnselected}>Payments</Text>)}
               {showPlans && (<Text style={styles.barSelected}>Plans</Text>)
                         || (<Text onPress={navToPlans} style={styles.barUnselected}>Plans</Text>)}
             </View>
@@ -396,7 +597,7 @@ export default function ManagePlan() {
                   buttonStyle={styles.managePaymentsButton}
                   containerStyle={styles.managePaymentsButtonContainer}
                   titleStyle={{color:btnColors.primary}}
-                  onPress={managePayments}
+                  onPress={navToPayments}
                 />
               </View>
             </View>
@@ -503,6 +704,22 @@ export default function ManagePlan() {
                   </View>)
 
                 })}
+              </View>
+            </View>
+          </>)}
+
+          {showPayments && (<>
+            <View style={styles.bodyContainer}>
+              <View style={styles.paymentsNextInvoice}>
+
+              </View>
+              <View style={styles.paymentsMethod}>
+
+              </View>
+            </View>
+            <View style={styles.bodyContainer}>
+              <View style={styles.paymentsPreviousInvoices}>
+
               </View>
             </View>
           </>)}

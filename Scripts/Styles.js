@@ -3595,13 +3595,13 @@ export const managePlanLight = StyleSheet.create({
     flex:1,
     width:'100%',
     marginTop:-5,
-    marginBottom:20
   },
   alertButtonRow: {
     flexDirection:'row',
     justifyContent:'space-between',
     flex:1,
-    width:'100%'
+    width:'100%',
+    marginTop:20
   },
   alertConfirm: {
     backgroundColor:btnColors.success,

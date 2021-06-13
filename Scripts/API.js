@@ -26,6 +26,10 @@ export function currentDate() {
 }
 
 export function sqlToJsDate(sqlDate) {
+  if (sqlDate.split('.').length == 1) {
+    sqlDate = sqlDate.replace(' ', 'T') + '.000Z'
+  }
+
   var t = sqlDate.split(/[-:T.Z]/)
   return new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5], t[6]))
 }
@@ -78,16 +82,16 @@ export function getTimeSince(milliseconds) {
 }
 
 export function parseSimpleDateText(date) {
+  if (!Object.prototype.toString.call(date) === "[object Date]") {
+    date = Date.parse(date)
+  }
 
-    if (!Object.prototype.toString.call(date) === "[object Date]") {
-      date = Date.parse(date)
-    }
-
-    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const dateText = months[date.getMonth()] +
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const dateText = months[date.getMonth()] +
                           " " + date.getDate() +
                           ", " + date.getFullYear()
-    return dateText
+  
+  return dateText
 }
 
 export function parseTime(date) {
@@ -183,6 +187,33 @@ export async function check() {
 
 */
 
+export async function invoiceData(id, token, cus, sub) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, StripeCustomerId:cus, StripeSubscriptionId:sub}
+
+  console.log('Getting invoice data...')
+  const res = await fetch(url + '/stripe/invoice-data', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Invoices found!')
+    ret = payload
+  }
+
+  return ret
+
+}
+
+
 export async function switchSubscription(token, id, plan, period, sub) {
 
   var ret = false
@@ -233,12 +264,11 @@ export async function getClients(id, token) {
 
 }
 
-
 export async function getUpcomingChangePlanProration(id, token, targetPlan, targetPeriod, sub, cus) {
 
   var ret = false
   var arr = {Id:id, Token:token, TargetPlan:targetPlan, TargetPeriod:targetPeriod, Subscription:sub, Customer:cus}
-
+  console.log('prorations args:',arr)
   console.log('Getting upcoming proration...')
   const res = await fetch(url + '/stripe/proration/change-plan', {
     method:'POST',
@@ -253,7 +283,7 @@ export async function getUpcomingChangePlanProration(id, token, targetPlan, targ
 
   if (payload.length > 0) {
     console.log('Proration found!')
-    ret = payload[0]
+    ret = payload
   }
 
   return ret
@@ -264,7 +294,7 @@ export async function getUpcomingSwitchPeriodProration(id, token, period, plan, 
 
   var ret = false
   var arr = {Id:id, Token:token, PaymentPeriod:period, Plan:plan, Subscription:sub, Customer:cus}
-
+  console.log('prorations args:',arr)
   console.log('Getting upcoming proration...')
   const res = await fetch(url + '/stripe/proration/switch-period', {
     method:'POST',
