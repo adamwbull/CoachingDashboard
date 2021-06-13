@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { useEffect, useState, useContext } from 'react'
-import { ScrollView, Text, View, Linking } from 'react-native'
+import { ScrollView, Text, View, Linking, Image } from 'react-native'
 import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -13,6 +13,10 @@ import { Icon, Button, ButtonGroup } from 'react-native-elements'
 import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
+import AmEx from '../assets/cards/amex.png'
+import Discover from '../assets/cards/discover.png'
+import MasterCard from '../assets/cards/mastercard.png'
+import Visa from '../assets/cards/visa.png'
 
 import userContext from './Context.js'
 
@@ -31,12 +35,14 @@ export default function ManagePlan() {
   const [showMain, setMain] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
   const [showPayments, setShowPayments] = useState(false)
+  const [paymentsNav, setPaymentsNav] = useState(true)
   const [firstPaymentsNav, setFirstPaymentsNav] = useState(true)
 
   // Main variables.
   const [coach, setCoach] = useState(user)
   const [planTitle, setPlanTitle] = useState('')
   const [planTitleStyle, setPlanTitleStyle] = useState({})
+  const [billingText, setBillingText] = useState('monthly billing')
   const [plans, setPlans] = useState([])
   const [activePlan, setActivePlan] = useState({})
   const [curAnnual, setCurAnnual] = useState(1)
@@ -50,6 +56,8 @@ export default function ManagePlan() {
   // Payments variables.
   const [nextInvoice, setNextInvoice] = useState({})
   const [pastInvoices, setPastInvoices] = useState([])
+  const [paymentMethod, setPaymentMethod] = useState({})
+  const [paymentMethodImage, setPaymentMethodImage] = useState(null)
 
   // Main functions.
   const refreshPlans = async (t, a, plan, d) => {
@@ -68,13 +76,6 @@ export default function ManagePlan() {
     }
   }
 
-  const getInvoiceData = async (id, token, cus, sub) => {
-    var invoices = await invoiceData(id, token, cus, sub)
-    console.log('invoices:',invoices)
-    setNextInvoice(invoices[0])
-    setPastInvoices(invoices[1])
-  }
-
   useEffect(() => {
     console.log('Welcome to manage plan.')
     if (coach != null) {
@@ -84,6 +85,7 @@ export default function ManagePlan() {
       setPlanAnnual(coach.PaymentPeriod)
       if (coach.PaymentPeriod == 12) {
         setPlanPeriodIndex(1)
+        setBillingText('annual billing')
       }
       if (coach.Plan == 2) {
         setPlanTitle('Professional')
@@ -107,12 +109,14 @@ export default function ManagePlan() {
 
   // Navigation functions.
   const navToMain = () => {
+    setPaymentsNav(true)
     setShowPlans(false)
     setShowPayments(false)
     setMain(true)
   }
 
   const navToPlans = () => {
+    setPaymentsNav(true)
     setMain(false)
     setShowPayments(false)
     setShowPlans(true)
@@ -120,27 +124,44 @@ export default function ManagePlan() {
 
   const navToPayments = () => {
     setMain(false)
+    setPaymentsNav(false)
     if (firstPaymentsNav) {
       setFirstPaymentsNav(false)
 
       // Get data for this area.
       getInvoiceData(coach.Id, coach.Token, coach.StripeCustomerId, coach.StripeSubscriptionId)
 
-      setShowPlans(false)
-      setActivityIndicator(true)
-      setTimeout(() => {
-        setActivityIndicator(false)
-        setShowPayments(true)
-      }, 500)
     } else {
       setShowPlans(false)
-    setShowPayments(true)
+      setShowPayments(true)
     }
     
   }
 
-
   // Manage payments functions.
+  const getInvoiceData = async (id, token, cus, sub) => {
+    setShowPlans(false)
+    setActivityIndicator(true)
+
+    var invoices = await invoiceData(id, token, cus, sub)
+    console.log('invoices:',invoices)
+    setNextInvoice(invoices[0])
+    setPastInvoices(invoices[1])
+    setPaymentMethod(invoices[2])
+    var brand = invoices[2].data[0].card.brand
+    if (brand == 'visa') {
+      setPaymentMethodImage(Visa)
+    } else if (brand == 'mastercard') {
+      setPaymentMethodImage(MasterCard)
+    } else if (brand == 'discover') {
+      setPaymentMethodImage(Discover)
+    } else if (brand == 'amex') {
+      setPaymentMethodImage(AmEx)
+    }
+    setActivityIndicator(false)
+    console.log('paymentMethod:',paymentMethod)
+    setShowPayments(true)
+  }
   
   // General plan functions.
   const selectPlanPeriod = (i) => {
@@ -549,7 +570,7 @@ export default function ManagePlan() {
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
               {showMain && (<Text style={styles.barSelected}>Overview</Text>)
                         || (<Text onPress={navToMain} style={styles.barUnselected}>Overview</Text>)}
-              {showPayments && (<Text style={styles.barSelected}>Payments</Text>)
+              {(showPayments || paymentsNav == false) && (<Text style={styles.barSelected}>Payments</Text>)
                         || (<Text onPress={navToPayments} style={styles.barUnselected}>Payments</Text>)}
               {showPlans && (<Text style={styles.barSelected}>Plans</Text>)
                         || (<Text onPress={navToPlans} style={styles.barUnselected}>Plans</Text>)}
@@ -571,7 +592,7 @@ export default function ManagePlan() {
                 </View>
                 <View style={{flexDirection:'row',justifyContent:'flex-end'}}>
                   <Button
-                    title='Upgrade Plan'
+                    title='Manage Plan'
                     buttonStyle={styles.upgradePlanButton}
                     containerStyle={styles.upgradePlanButtonContainer}
                     titleStyle={{color:'#fff'}}
@@ -709,12 +730,49 @@ export default function ManagePlan() {
           </>)}
 
           {showPayments && (<>
-            <View style={styles.bodyContainer}>
+            <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
               <View style={styles.paymentsNextInvoice}>
-
+                <View style={styles.paymentsNextInvoieTop}>
+                  <View style={{flex:1}}>
+                    <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder,marginBottom:10}]}>Plan Details</Text>
+                    <Text style={styles.bodyDesc}>You are subscribed to the <Text style={{fontFamily:'PoppinsSemiBold'}}>{planTitle}</Text> Plan with <Text style={{fontFamily:'PoppinsSemiBold'}}>{billingText}</Text>.</Text>
+                  </View>
+                  <View style={{width:20}}></View>
+                  <Button
+                      title='Manage Plan'
+                      buttonStyle={styles.upgradePlanButton}
+                      containerStyle={[styles.upgradePlanButtonContainer,{width:'20%'}]}
+                      titleStyle={{color:'#fff'}}
+                      onPress={navToPlans}
+                      icon={
+                        <Icon
+                          name='arrow-forward-circle-outline'
+                          type='ionicon'
+                          size={20}
+                          color={'#fff'}
+                          style={{marginLeft:5}}
+                        />
+                      }
+                      iconRight
+                    />
+                </View>
               </View>
               <View style={styles.paymentsMethod}>
-
+                <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder}]}>Payment Method</Text>
+                <View style={[styles.cardRow,{marginBottom:10,marginTop:10}]}>
+                  <Text style={styles.cardName}>{paymentMethod.data[0].billing_details.name}</Text>
+                </View>
+                <View style={styles.cardNumbers}>
+                  <Text style={styles.cardNumberGroup}>xxxx</Text>
+                  <Text style={styles.cardNumberGroup}>xxxx</Text>
+                  <Text style={styles.cardNumberGroup}>xxxx</Text>
+                  <Text style={styles.cardNumberGroup}>{paymentMethod.data[0].card.last4}</Text>
+                </View>
+                <View style={styles.cardRow}>
+                  <Text style={styles.cardExpTitle}>Good Thru</Text>
+                  <Text style={styles.cardExp}>{paymentMethod.data[0].card.exp_month}/{paymentMethod.data[0].card.exp_year}</Text>
+                  <Image source={paymentMethodImage} style={{height:60,width:60}} />
+                </View>
               </View>
             </View>
             <View style={styles.bodyContainer}>

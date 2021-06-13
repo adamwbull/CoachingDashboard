@@ -74,6 +74,7 @@ export default function App() {
     Poppins: require('./assets/fonts/Poppins.ttf'),
     PoppinsSemiBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsBold: require('./assets/fonts/Poppins-Bold.ttf'),
+    OCRA: require('./assets/fonts/OCRA.ttf')
   })
   const [colors, setColors] = useState(colorsLight)
 

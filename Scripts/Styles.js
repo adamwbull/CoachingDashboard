@@ -3617,6 +3617,62 @@ export const managePlanLight = StyleSheet.create({
   },
   alertCancelContainer: {
   },
+  paymentsNextInvoice: {
+    flex:4,
+    marginRight:20
+  },
+  paymentsNextInvoieTop: {
+    flexDirection:'row',
+    justifyContent:'center'
+  },
+  paymentsMethod: {
+    flex:2,
+    paddingLeft:20,
+    borderLeftWidth:1,
+    borderLeftColor:colorsLight.headerBorder
+  },
+  cardName: {
+    fontFamily:'OCRA',
+    fontSize:18
+  },
+  cardNumbers: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  cardNumberGroup: {
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    textAlign:'center',
+    letterSpacing:10,
+    fontFamily:'OCRA',
+    fontSize:18,
+    color:colorsLight.mainTextColor
+  },
+  cardRow: {
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  cardholderTitle: {
+    fontFamily:"PoppinsSemiBold",
+    fontSize:14,
+    color:colorsLight.secondaryTextColor,
+    marginRight:10,
+    marginTop:-3
+  },
+  cardExpTitle: {
+    fontFamily:"PoppinsSemiBold",
+    fontSize:14,
+    color:colorsLight.secondaryTextColor,
+    width:60,
+    lineHeight:14
+  },
+  cardExp: {
+    fontFamily:'OCRA',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    flex:1
+  }
 })
 
 export const accountLight = StyleSheet.create({

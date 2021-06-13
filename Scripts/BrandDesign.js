@@ -213,7 +213,7 @@ export default function BrandDesign() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Brand Design</Text>
-              <Text style={styles.bodyDesc}>Customize your Client's in-app experience.</Text>
+              <Text style={styles.bodyDesc}>Customize your Client&apos;s in-app experience.</Text>
             </View>
           </View>
 
