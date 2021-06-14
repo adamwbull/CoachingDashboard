@@ -103,7 +103,7 @@ export default function AllClients() {
             <Text></Text>
           </View>)}
 
-          {showClients /*&& (<View style={styles.bodyContainer}>
+          {showClients && (<View style={styles.bodyContainer}>
             <Text style={styles.bodySubtitle}>All Clients</Text>
             <View style={styles.clientOptions}>
             </View>
@@ -131,7 +131,7 @@ export default function AllClients() {
               </View>)
             })}
             </View>
-          </View>)*/}
+          </View>)}
 
           {showClientData && (<View style={styles.bodyContainer}>
             <View style={styles.clientInfoRow}>

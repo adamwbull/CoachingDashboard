@@ -269,7 +269,7 @@ export async function switchSubscription(token, id, plan, period, sub) {
 
 export async function getClients(id, token) {
 
-  var ret = false
+  var ret = []
 
   console.log('Getting client list...')
   const res = await fetch(url + '/user/coach/clients/' + id + '/' + token, {
@@ -280,7 +280,7 @@ export async function getClients(id, token) {
 
   if (payload.length > 0) {
     console.log('Clients found!')
-    ret = true
+    ret = payload
   } else {
     console.log('No clients found.')
   }

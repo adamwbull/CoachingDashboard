@@ -157,27 +157,29 @@ export default function InviteClients() {
                 </Text>
               </View>
             </View>
-            <View style={[styles.bodyRow]}>
+            <View style={{flexDirection:'row'}}>
+              <View style={{marginRight:20}}>
               <View>
                 <Text style={[styles.bodySubtitle,{margin:0,padding:0}]}>App Download Link</Text>
                 <TouchableOpacity onPress={copyDownload}><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/get-app</Text></TouchableOpacity>
               </View>
-              <View style={{flex:1,marginTop:38,marginLeft:10}}>
-                <Text style={[styles.bodySubtitle,{color:btnColors.success}]}>
+              <View>
+                <Text style={[styles.bodySubtitle,{color:btnColors.success,textAlign:'center'}]}>
                   <AnimatedText style={fadeStylesDownload}>Copied!</AnimatedText>
                 </Text>
               </View>
             </View>
-            <View style={[styles.bodyRow]}>
+            <View style={{}}>
               <View>
                 <Text style={[styles.bodySubtitle,{margin:0}]}>Onboarding Link</Text>
                 <TouchableOpacity onPress={copyOnboarding}><Text style={[styles.coachID,{fontSize:16}]}>coachsync.me/onboarding/{coach.OnboardingId}</Text></TouchableOpacity>
               </View>
-              <View style={{flex:1,marginTop:38,marginLeft:10}}>
-                <Text style={[styles.bodySubtitle,{color:btnColors.success}]}>
+              <View>
+                <Text style={[styles.bodySubtitle,{color:btnColors.success,textAlign:'center'}]}>
                   <AnimatedText style={fadeStylesOnboarding}>Copied!</AnimatedText>
                 </Text>
               </View>
+            </View>
             </View>
           </View>)}
 

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { paymentsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { paymentsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
@@ -10,10 +10,13 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, Chip } from 'react-native-elements'
 import ConnectStripe from '../assets/connect-stripe.png'
-import { monthNames, sqlToJsDate, getPaymentCharges } from './API.js'
+import { monthNames, sqlToJsDate, getPaymentCharges, parseSimpleDateText } from './API.js'
+
+import userContext from './Context.js'
 
 export default function Payments() {
   const linkTo = useLinkTo()
+  const user = useContext(userContext)
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(paymentsLight)
   const [colors, setColors] = useState(colorsLight)
@@ -24,8 +27,7 @@ export default function Payments() {
   const [showUpgradeNeeded, setUpgradeNeeded] = useState(false)
 
   // Main stage variables.
-  const [coach, setCoach] = useState({})
-  const [coachCreated, setCoachCreated] = useState({})
+  const [coach, setCoach] = useState(user)
   const [monthlyStarting, setMonthlyStarting] = useState({})
   const date = new Date()
   // Payment related.
@@ -51,24 +53,23 @@ export default function Payments() {
 
   useEffect(() => {
     console.log('Welcome to payments.')
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      setCoach(sCoach)
-      refreshPayments(sCoach.Id, sCoach.Token)
-      var d = sqlToJsDate(sCoach.Created)
-      setCoachCreated(d)
+    if (coach != null) {
+      refreshPayments(coach.Id, coach.Token)
+      var d = new Date()
       if (d.getDay() > 1) {
         setMonthlyStarting(monthNames[d.getMonth()] + ' ' + d.getDay() + ', ' + d.getFullYear())
       } else {
-        setMonthlyStarting(monthNames[date.getMonth()] + ' 1, ' + date.getFullYear())
+        setMonthlyStarting(monthNames[d.getMonth()] + ' 1, ' + d.getFullYear())
       }
       setTimeout(() => {
         setActivityIndicator(false)
-        if (sCoach.Plan == 0) {
+        if (coach.Plan == 0) {
           setUpgradeNeeded(true)
         }
         setMain(true)
       }, 500)
+    } else {
+      linkTo('/welcome')
     }
   },[])
 
@@ -101,7 +102,7 @@ export default function Payments() {
               <View style={[styles.bodyContainer,{flex:1,marginLeft:10}]}>
                 <Text style={styles.bodySubtitle}>Total Earnings</Text>
                 <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${total}</Text>
-                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since joining on {monthNames[coachCreated.getMonth()] + ' ' + coachCreated.getDay() + ', ' + coachCreated.getFullYear()}</Text>
+                <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since joining on {parseSimpleDateText(sqlToJsDate(coach.Created))}</Text>
               </View>
             </View>
             <View style={styles.bodyRow}>
