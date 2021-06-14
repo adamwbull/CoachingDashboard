@@ -2,7 +2,7 @@
 /* eslint-disable react/display-name */
 import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, ScrollView, Text, View, Linking, Image } from 'react-native'
-import { managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
+import { messageBox, managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -10,18 +10,119 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup, Chip } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData } from './API.js'
+import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData, updatePaymentMethod } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import AmEx from '../assets/cards/amex.png'
 import Discover from '../assets/cards/discover.png'
 import MasterCard from '../assets/cards/mastercard.png'
 import Visa from '../assets/cards/visa.png'
+import {
+  CardElement,
+  Elements,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 import userContext from './Context.js'
 
+const UpdatePaymentMethodForm = ({coach, styles, onClose, updatePaymentMethodVar}) => {
+  const [paymentMethodName, setPaymentMethodName] = useState('')
+  const [paymentMethodMessage, setPaymentMethodMessage] = useState('')
+
+  const cardInputStyle = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: colorsLight.mainTextColor,
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: btnColors.danger,
+      },
+    },
+  };
+
+  // Initialize an instance of stripe.
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const handlePaymentMethodSubmit = async () => {
+
+    const cardElement = elements.getElement(CardElement);
+
+    // Use card Element to tokenize payment details
+    let { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+      billing_details: {
+        name: paymentMethodName,
+      }
+    });
+
+    if (error) {
+      // show error and collect new card details.
+      setPaymentMethodMessage(error.message);
+      return;
+    }
+
+    // Submit payment method 
+    const updated = await updatePaymentMethod(coach.Token, coach.Id, coach.StripeCustomerId, coach.StripeSubscriptionId, paymentMethod.id);
+    if (updated) {
+      console.log('Updated successfully!')
+      onClose()
+      updatePaymentMethodVar(paymentMethod)
+    } else {
+      setPaymentMethodMessage("There was an error updating your card, please try again later or reach out to Support if the problem persists.");
+    }
+  }
+
+  return (<View style={styles.alertContainer}>
+    <Text style={styles.alertTitle}>Enter New Card</Text>
+    {paymentMethodMessage.length > 0 && (<View style={[messageBox.errorBox,{marginTop:10,marginLeft:10,marginRight:10}]}>
+      <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+      <Text style={messageBox.text}>{paymentMethodMessage}</Text>
+    </View>) || (<View></View>)}
+    <TextInput
+      style={styles.inputCardName}
+      value={paymentMethodName}
+      placeholder='Cardholder Name'
+      placeholderTextColor='#aab7c4'
+      keyboardType='default'
+      onChangeText={(t) => { setPaymentMethodName(t) }}
+    />
+    <View style={styles.cardWrapper}>
+      <CardElement options={cardInputStyle} />
+    </View>
+    <View style={styles.alertButtonRow}>
+      <Button
+        title='Cancel'
+        buttonStyle={styles.alertCancel}
+        containerStyle={styles.alertCancelContainer}
+        titleStyle={{color:'#fff'}}
+        onPress={() => {
+          
+        }}
+      />
+      <Button
+        title={'Save Card Info'}
+        buttonStyle={styles.alertConfirm}
+        containerStyle={styles.alertConfirmContainer}
+        titleStyle={{color:'#fff'}}
+        onPress={async () => {
+          handlePaymentMethodSubmit()
+        }}
+      />
+    </View>
+  </View>)
+}
+
 export default function ManagePlan() {
 
+  const stripePromise = loadStripe('pk_test_51Ibda0Doo38J0s0VtHeC0WxsqtMWNxu6xy9FcAwt9Tch77641I6LeIAmWHcbzVSeiFh6m2smQt3C9OgSYIlo4RAK00ZPlZhqub')
   const linkTo = useLinkTo()
   const user = useContext(userContext)
 
@@ -100,11 +201,9 @@ export default function ManagePlan() {
         setPlanTitle('Free')
         setPlanTitleStyle({backgroundColor:btnColors.primary})
       }
-      setTimeout(() => {
-        setActivityIndicator(false)
-        setBar(true)
-        setMain(true)
-      }, 800)
+      setActivityIndicator(false)
+      setBar(true)
+      navToPayments()
     } else {
       linkTo('/welcome')
     }
@@ -165,7 +264,7 @@ export default function ManagePlan() {
 
     setPastInvoices(invoices[1])
     setPaymentMethod(invoices[2])
-    var brand = invoices[2].data[0].card.brand
+    var brand = invoices[2].card.brand
     if (brand == 'visa') {
       setPaymentMethodImage(Visa)
     } else if (brand == 'mastercard') {
@@ -176,8 +275,35 @@ export default function ManagePlan() {
       setPaymentMethodImage(AmEx)
     }
     setActivityIndicator(false)
-    console.log('paymentMethod:',paymentMethod)
     setShowPayments(true)
+  }
+
+  const updatePaymentMethodVar = (pm) => {
+    console.log('updating state with:',pm)
+    setPaymentMethod(pm)
+    var brand = pm.card.brand
+    if (brand == 'visa') {
+      setPaymentMethodImage(Visa)
+    } else if (brand == 'mastercard') {
+      setPaymentMethodImage(MasterCard)
+    } else if (brand == 'discover') {
+      setPaymentMethodImage(Discover)
+    } else if (brand == 'amex') {
+      setPaymentMethodImage(AmEx)
+    }
+  }
+
+  const updatePaymentMethod = () => {
+    //
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<Elements stripe={stripePromise}>
+          <UpdatePaymentMethodForm coach={coach} styles={styles} onClose={onClose} updatePaymentMethodVar={updatePaymentMethodVar} />
+        </Elements>)
+      },
+      closeOnEscape: false,
+      closeOnClickOutside: false
+    })
   }
   
   // General plan functions.
@@ -221,9 +347,9 @@ export default function ManagePlan() {
     var final = 0;
 
     // Calculate final.
-    for (var i = 0; i < invoice.lines.data.length; i++) {
+    for (var i = 0; i < invoice.lines.data.slice(0).reverse().length; i++) {
       var cur = invoice.lines.data[i]
-      if (cur.proration) {
+      if (cur.proration || plan == 1 || targetPeriod != coach.PaymentPeriod) {
         final += cur.amount
       }
     }
@@ -245,7 +371,7 @@ export default function ManagePlan() {
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
           <Text style={styles.alertTitle}>Upgrade to {p.Title} {periodText}?</Text>
-          {invoice.lines.data.map((line, index) => {
+          {invoice.lines.data.slice(0).reverse().map((line, index) => {
             var coloring = {}
             var negSign = ""
             if (line.amount < 0) {
@@ -253,7 +379,7 @@ export default function ManagePlan() {
               negSign = "-"
             }
             var amt = Math.abs(line.amount)
-            if (line.proration) {
+            if (line.proration || plan == 1 || targetPeriod != coach.PaymentPeriod) {
               return (<View key={line.id} style={styles.amountLineContainer}>
                 <Text style={styles.amountLine}>{line.description}</Text>
                 <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
@@ -264,9 +390,9 @@ export default function ManagePlan() {
             }
           })}
           {invoice.starting_balance != 0 && (<View style={styles.amountLineContainer}>
-                <Text style={styles.amountLine}>Existing credit balance</Text>
-                <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(invoice.starting_balance/100).toFixed(2)}</Text>
-              </View>)}
+            <Text style={styles.amountLine}>Existing credit balance</Text>
+            <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(invoice.starting_balance/100).toFixed(2)}</Text>
+          </View>)}
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
@@ -306,6 +432,7 @@ export default function ManagePlan() {
                 var c = JSON.parse(JSON.stringify(coach))
                 c.Plan = updated.Plan
                 c.PlanExpire = updated.PlanExpire
+                c.PaymentPeriod = targetPeriod
                 setCoach(c)
                 set('Coach',c,ttl)
                 var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
@@ -351,16 +478,18 @@ export default function ManagePlan() {
     const proration = await getUpcomingChangePlanProration(coach.Id, coach.Token, plan, targetPeriod, coach.StripeSubscriptionId, coach.StripeCustomerId)
 
     var invoice = proration[1]
-
+    console.log(proration)
     var final = 0;
 
     // Calculate final.
-    for (var i = 0; i < invoice.lines.data.length; i++) {
+    for (var i = 0; i < invoice.lines.data.slice(0).reverse().length; i++) {
       var cur = invoice.lines.data[i]
-      if (cur.proration) {
+      if (cur.proration || plan == 1) {
         final += cur.amount
       }
     }
+
+    final += invoice.starting_balance
 
     var finalPayText = ""
     var finalText = "Credit to Account"
@@ -376,7 +505,7 @@ export default function ManagePlan() {
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
           <Text style={styles.alertTitle}>Downgrade to {p.Title} {periodText}?</Text>
-          {invoice.lines.data.map((line, index) => {
+          {invoice.lines.data.slice(0).reverse().map((line, index) => {
             var coloring = {}
             var negSign = ""
             if (line.amount < 0) {
@@ -384,7 +513,7 @@ export default function ManagePlan() {
               negSign = "-"
             }
             var amt = Math.abs(line.amount)
-            if (line.proration) {
+            if (line.proration || plan == 1) {
               return (<View key={line.id} style={styles.amountLineContainer}>
                 <Text style={styles.amountLine}>{line.description}</Text>
                 <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
@@ -394,6 +523,10 @@ export default function ManagePlan() {
              </View>)
             }
           })}
+          {invoice.starting_balance != 0 && (<View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Existing credit balance</Text>
+            <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(invoice.starting_balance/100).toFixed(2)}</Text>
+          </View>)}
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
@@ -433,6 +566,7 @@ export default function ManagePlan() {
                 var c = JSON.parse(JSON.stringify(coach))
                 c.Plan = updated.Plan
                 c.PlanExpire = updated.PlanExpire
+                c.PaymentPeriod = targetPeriod
                 setCoach(c)
                 set('Coach',c,ttl)
                 var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
@@ -451,7 +585,7 @@ export default function ManagePlan() {
     
   }
 
-  const switchPayPeriod = async () => {
+  const switchPayPeriod = async (plan) => {
 
     var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
     indicators[coach.Plan] = true
@@ -476,12 +610,14 @@ export default function ManagePlan() {
     var final = 0;
 
     // Calculate final.
-    for (var i = 0; i < invoice.lines.data.length; i++) {
+    for (var i = 0; i < invoice.lines.data.slice(0).reverse().length; i++) {
       var cur = invoice.lines.data[i]
-      if (cur.proration) {
+      if (cur.proration || plan == 1) {
         final += cur.amount
       }
     }
+
+    final += invoice.starting_balance
     
     var finalText = "Credit to Account"
     var finalPayText = ""
@@ -497,7 +633,7 @@ export default function ManagePlan() {
       customUI: ({ onClose }) => {
         return (<View style={styles.alertContainer}>
           <Text style={styles.alertTitle}>Switch to {periodTextCapitalized} Plan?</Text>
-          {invoice.lines.data.map((line, index) => {
+          {invoice.lines.data.slice(0).reverse().map((line, index) => {
             var coloring = {}
             var negSign = ""
             if (line.amount < 0) {
@@ -505,7 +641,7 @@ export default function ManagePlan() {
               negSign = "-"
             }
             var amt = Math.abs(line.amount)
-            if (line.proration) {
+            if (line.proration || plan == 1) {
               return (<View key={line.id} style={styles.amountLineContainer}>
                 <Text style={styles.amountLine}>{line.description}</Text>
                 <Text style={[styles.amountLine,coloring]}>{negSign + "$" + (amt/100).toFixed(2)}</Text>
@@ -515,6 +651,10 @@ export default function ManagePlan() {
              </View>)
             }
           })}
+          {invoice.starting_balance != 0 && (<View style={styles.amountLineContainer}>
+            <Text style={styles.amountLine}>Existing credit balance</Text>
+            <Text style={[styles.amountLine,{color:btnColors.success}]}>{"-$" + Math.abs(invoice.starting_balance/100).toFixed(2)}</Text>
+          </View>)}
           <View style={styles.amountLineFinalContainer}>
             <Text style={styles.amountLine}>Total {finalText}:</Text>
             <Text style={[styles.amountLineBold,finalColoring]}>${final}</Text>
@@ -554,6 +694,7 @@ export default function ManagePlan() {
                 var c = JSON.parse(JSON.stringify(coach))
                 c.Plan = updated.Plan
                 c.PlanExpire = updated.PlanExpire
+                c.PaymentPeriod = targetPeriod
                 setCoach(c)
                 set('Coach',c,ttl)
                 var indicators = JSON.parse(JSON.stringify(plansButtonIndicators))
@@ -579,14 +720,12 @@ export default function ManagePlan() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Manage Plan</Text>
-              <Text style={styles.bodyDesc}>Earn discounts, upgrade, or downgrade your CoachSync plan.</Text>
+              <Text style={styles.bodyDesc}>View invoices, upgrade, or downgrade your CoachSync plan.</Text>
             </View>
           </View>
 
           {showBar && (<>
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
-              {showMain && (<Text style={styles.barSelected}>Overview</Text>)
-                        || (<Text onPress={navToMain} style={styles.barUnselected}>Overview</Text>)}
               {(showPayments || paymentsNav == false) && (<Text style={styles.barSelected}>Payments</Text>)
                         || (<Text onPress={navToPayments} style={styles.barUnselected}>Payments</Text>)}
               {showPlans && (<Text style={styles.barSelected}>Plans</Text>)
@@ -710,7 +849,7 @@ export default function ManagePlan() {
                             buttonStyle={styles.upgradeToPlanButton}
                             containerStyle={styles.upgradeToPlanButtonContainer}
                             titleStyle={{color:'#fff'}}
-                            onPress={switchPayPeriod}
+                            onPress={() => switchPayPeriod(plan.Type)}
                             disabled={plansButtonIndicators[index]}
                           />
                         </>)}
@@ -796,7 +935,7 @@ export default function ManagePlan() {
                   <View style={styles.paymentsNextInvoiceFinal}>
                     <View style={styles.paymentsNextInvoiceAmount}>
                       <Text style={styles.paymentsNextInvoiceAmountDueDateTitle}>Total</Text>
-                      <Text style={styles.paymentsNextInvoiceDueDate}>Due {parseSimpleDateText(sqlToJsDate(coach.PlanExpire))}</Text>
+                      <Text style={styles.paymentsNextInvoiceDueDate}>Billed automatically {parseSimpleDateText(sqlToJsDate(coach.PlanExpire))}</Text>
                    </View>
                    <View style={styles.paymentsNextInvoiceAmountRow}>
                     <Text style={[styles.paymentsNextInvoiceCurrency]}>$</Text>
@@ -818,60 +957,73 @@ export default function ManagePlan() {
               <View style={styles.paymentsMethod}>
                 <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder}]}>Payment Method</Text>
                 <View style={[styles.cardRow,{marginBottom:10,marginTop:10}]}>
-                  <Text style={styles.cardName}>{paymentMethod.data[0].billing_details.name}</Text>
+                  <Text style={styles.cardName}>{paymentMethod.billing_details.name}</Text>
                 </View>
                 <View style={styles.cardNumbers}>
                   <Text style={styles.cardNumberGroup}>xxxx</Text>
                   <Text style={styles.cardNumberGroup}>xxxx</Text>
                   <Text style={styles.cardNumberGroup}>xxxx</Text>
-                  <Text style={styles.cardNumberGroup}>{paymentMethod.data[0].card.last4}</Text>
+                  <Text style={styles.cardNumberGroup}>{paymentMethod.card.last4}</Text>
                 </View>
                 <View style={styles.cardRow}>
                   <Text style={styles.cardExpTitle}>Good Thru</Text>
-                  <Text style={styles.cardExp}>{paymentMethod.data[0].card.exp_month}/{paymentMethod.data[0].card.exp_year}</Text>
+                  <Text style={styles.cardExp}>{paymentMethod.card.exp_month}/{paymentMethod.card.exp_year}</Text>
                   <Image source={paymentMethodImage} style={{height:60,width:60}} />
                 </View>
+                <Button 
+                  title="Update Card"
+                  type="outline"
+                  onPress={updatePaymentMethod}
+                  buttonStyle={{borderRadius:10}}
+                />
               </View>
             </View>
             <View style={styles.bodyContainer}>
-              <Text style={[styles.bodySubtitle,{borderBottomWidth:1,borderBottomColor:colors.headerBorder,marginBottom:10}]}>All Invoices</Text>
+              <View style={styles.invoicesHeader}>
+                <Text style={[styles.bodySubtitle]}>All Invoices</Text>
+                <Icon
+                  name='help-circle-outline'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  style={{}}
+                  onPress={() => window.open('https://wiki.coachsync.me/en/account/invoices', '_blank')}
+                />
+              </View>
               <View style={styles.paymentsControls}>
                 <TouchableOpacity style={styles.paymentControlsTouchAmount}>
-                  <Text style={[styles.paymentsControlsText,{paddingRight:0}]}>Amount</Text>
+                  <Text style={[styles.paymentsControlsText,{paddingRight:0,textAlign:'right'}]}>Amount</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.paymentControlsTouchAmountStatus}>
                   <Text style={styles.paymentsControlsText}></Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.paymentControlsNumber}>
+                  <Text style={[styles.paymentsControlsText,{paddingRight:0}]}>Invoice Number</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.paymentControlsTouchDescription}>
                   <Text style={styles.paymentsControlsText}>Description</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.paymentControlsTouchClient}>
-                  <Text style={styles.paymentsControlsText}>Client</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.paymentControlsTouchDate}>
                   <Text style={styles.paymentsControlsText}>Created</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.paymentControlsTouchIcon}>
-                  <Icon
-                    name='ellipsis-horizontal-outline'
-                    type='ionicon'
-                    size={0}
-                    color={colors.mainTextColor}
-                  />
+                <TouchableOpacity style={styles.paymentControlsTouchView}>
+                  <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Invoice</Text>
                 </TouchableOpacity>
+                
               </View>
               <View style={styles.paymentsPreviousInvoices}>
                 {pastInvoices.data.map((line, index) => {
-                  // amount/Amount, Invoice Number/number, Chip/status Due/period_end, Created/created, View/hosted_invoice_url
+                  // Amount/total, Chip/status, Invoice Number/number, Due/period_end, Created/created, View/hosted_invoice_url
                   return (<View key={line.id} style={styles.paymentRow}>
                       <View style={[styles.paymentRowTouchAmount]}>
                         <Text style={[styles.paymentRowText,{paddingRight:0,textAlign:'right',fontFamily:'PoppinsSemiBold'}]}>
-                          ${(line.amount/100).toFixed(2)}
+                          {line.amount_due > 0 && '$' + Math.abs(line.amount_due/100).toFixed(2) ||
+                          '($' + Math.abs(line.total/100).toFixed(2)+ ')'}
                         </Text>
                       </View>
                       <View style={styles.paymentRowTouchAmountStatus}>
-                        {line.status == 'open' && (<><Chip
-                          title='Pending'
+                        {line.status == 'uncollectible' && (<><Chip
+                          title='Late'
                           type='outline'
                           icon={{
                             name:'checkmark-outline',
@@ -879,7 +1031,7 @@ export default function ManagePlan() {
                             size:16,
                             color:'#fff'
                           }}
-                          disabledStyle={{backgroundColor:btnColors.primary,borderColor:btnColors.primary,color:btnColors.primary,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                          disabledStyle={{backgroundColor:btnColors.caution,borderColor:btnColors.caution,color:btnColors.caution,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
                           disabledTitleStyle={{color:'#fff'}}
                           disabled={true}
                         /></>) ||
@@ -915,7 +1067,20 @@ export default function ManagePlan() {
                               />
                             </>) || 
                             (<>
-                              <Chip
+                              {line.status == 'void' && (<><Chip
+                                title='Void'
+                                type='outline'
+                                icon={{
+                                  name:'checkmark-outline',
+                                  type:'ionicon',
+                                  size:16,
+                                  color:'#fff'
+                                }}
+                                disabledStyle={{backgroundColor:btnColors.danger,borderColor:btnColors.danger,color:btnColors.danger,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                disabledTitleStyle={{color:'#fff'}}
+                                disabled={true}
+                              /></>) || 
+                              (<><Chip
                                 title='Open'
                                 type='outline'
                                 icon={{
@@ -927,28 +1092,40 @@ export default function ManagePlan() {
                                 disabledStyle={{backgroundColor:btnColors.primary,borderColor:btnColors.primary,color:btnColors.primary,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
                                 disabledTitleStyle={{color:'#fff'}}
                                 disabled={true}
-                              />
+                              /></>)}
                             </>)}
                           </>)}
                         </>)}
                       </View>
-                      <View style={styles.paymentRowTouchDescription}>
-                        <Text style={styles.paymentRowText}>Description</Text>
+                      <View style={[styles.paymentRowNumber]}>
+                        <Text style={[styles.paymentRowText]}>
+                          {line.number}
+                        </Text>
                       </View>
-                      <View style={styles.paymentRowTouchClient}>
-                        <Text style={styles.paymentRowText}>Client</Text>
+                      <View style={styles.paymentRowTouchDescription}>
+                        <Text style={styles.paymentRowText}>{
+                          line.billing_reason == 'subscription_create' && 'Subscription created' || 
+                          (line.billing_reason == 'subscription_update' && 'Subscription updated' 
+                          || 'Subscription changed')
+                        }</Text>
                       </View>
                       <View style={styles.paymentRowTouchDate}>
-                        <Text style={styles.paymentRowText}>Date</Text>
+                        <Text style={styles.paymentRowText}>{parseSimpleDateText(new Date(line.created*1000))}</Text>
                       </View>
-                      <TouchableOpacity style={styles.paymentRowTouchIcon}>
-                        <Icon
-                          name='ellipsis-horizontal-outline'
-                          type='ionicon'
-                          size={22}
-                          color={colors.mainTextColor}
-                        />
-                      </TouchableOpacity>
+                      <View style={styles.paymentRowTouchView}>
+                        <Chip
+                            title='View'
+                            type='outline'
+                            onPress={() => {
+                              window.open(line.hosted_invoice_url, '_blank')
+                            }}
+                            buttonStyle={{
+                              padding:5,
+                              margin:5
+                            }}
+                          />
+                      </View>
+                      
                     </View>)
                 })}
               </View>

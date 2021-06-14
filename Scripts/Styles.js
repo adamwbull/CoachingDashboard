@@ -3682,7 +3682,7 @@ export const managePlanLight = StyleSheet.create({
     paddingBottom:5
   },
   paymentsNextInvoiceAmount: {
-    marginRight:10,
+    marginRight:20,
   },
   paymentsNextInvoiceDueDate: {
     fontFamily:'Poppins',
@@ -3729,7 +3729,15 @@ export const managePlanLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentControlsTouchAmount: {
-    flex:8,
+    flex:12,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsNumber: {
+    flex:16,
     height:40,
     alignItems:'flex-end',
     justifyContent:'center',
@@ -3753,23 +3761,23 @@ export const managePlanLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentControlsTouchDescription: {
-    flex:45,
+    flex:55,
     height:40,
     alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
-  paymentControlsTouchClient: {
-    flex:22,
+  paymentControlsTouchView: {
+    flex:14,
     height:40,
-    alignItems:'center',
+    alignItems:'flex-end',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
   paymentControlsTouchDate: {
-    flex:25,
+    flex:19,
     height:40,
     alignItems:'center',
     justifyContent:'center',
@@ -3796,7 +3804,15 @@ export const managePlanLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentRowTouchAmount: {
-    flex:8,
+    flex:12,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowNumber: {
+    flex:16,
     height:40,
     alignItems:'flex-end',
     justifyContent:'center',
@@ -3820,28 +3836,64 @@ export const managePlanLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentRowTouchDescription: {
-    flex:45,
+    flex:55,
     height:40,
     alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
-  paymentRowTouchClient: {
-    flex:22,
+  paymentRowTouchView: {
+    flex:14,
     height:40,
-    alignItems:'center',
+    alignItems:'flex-end',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
   paymentRowTouchDate: {
-    flex:25,
+    flex:19,
     height:40,
     alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
+  },
+  invoicesHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    marginBottom:10
+  },
+  inputCardName: {
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10,
+    borderWidth:1,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.mainBackground,
+    borderColor:colorsLight.secondaryBackground,
+    padding:15,
+    marginLeft:10,
+    marginRight:10,
+    marginTop:10,
+    fontWeight:'1000',
+    width:'100%'
+  },
+  cardWrapper: {
+    borderBottomLeftRadius:10,
+    borderBottomRightRadius:10,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:1,
+    backgroundColor:colorsLight.mainBackground,
+    borderColor:colorsLight.secondaryBackground,
+    padding:15,
+    marginLeft:10,
+    marginRight:10,
+    marginBottom:10,
+    width:'100%'
   },
 })
 

@@ -187,6 +187,31 @@ export async function check() {
 
 */
 
+export async function updatePaymentMethod(token, id, cus, sub, pm) {
+
+  var ret = false
+  var arr = {Token:token, Id:id, StripeCustomerId:cus, StripeSubscriptionId:sub, PaymentMethodId:pm}
+  console.log('Updating payment method...')
+  const res = await fetch(url + '/stripe/update-payment-method', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success == true) {
+    console.log('Updated successfully!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function invoiceData(id, token, cus, sub) {
 
   var ret = false
