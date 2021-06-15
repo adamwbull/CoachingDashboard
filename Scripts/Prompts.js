@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useRef, useState } from 'react'
 import { Image, Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -447,7 +448,7 @@ export default function Prompts() {
           var sliderInnerWidth = {width:genWidth}
           console.log(sliderInnerWidth)
 
-          return (<View style={styles.surveyDataRow} key={index + '-'} style={{width:'100%',height:150}}>
+          return (<View style={[styles.surveyDataRow,{width:'100%',height:150}]} key={index + '-'}>
             <Text style={styles.surveyQuestion}>{q.Question}</Text>
             <View style={styles.sliderOuter}>
               <View style={[styles.sliderInner,sliderInnerWidth]}>
@@ -492,7 +493,7 @@ export default function Prompts() {
             }
             data.push(cur)
           }
-          return (<View style={styles.surveyDataRow} key={index + '-'} style={{width:'100%',height:300,marginBottom:30}}>
+          return (<View style={[styles.surveyDataRow,{width:'100%',height:300,marginBottom:30}]} key={index + '-'}>
             <Text style={styles.surveyQuestion}>{q.Question}</Text>
             <ResponsivePie
               data={data}

@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View, Image } from 'react-native'
-import { allClientsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
+import { allClientsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { allClientsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -22,7 +22,7 @@ export default function AllClients() {
 
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
-  const [showStats, setShowStats] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
   const [showClients, setShowClients] = useState(false)
   const [showClientData, setShowClientData] = useState(false)
 
@@ -79,7 +79,7 @@ export default function AllClients() {
       setCoach(sCoach)
       setTimeout(() => {
         setActivityIndicator(false)
-        setShowStats(true)
+        setShowFilters(true)
         setShowClients(true)
       }, 500)
     }
@@ -99,8 +99,32 @@ export default function AllClients() {
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
-          {showStats && (<View style={styles.bodyContainer}>
-            <Text></Text>
+          {showFilters && (<View style={styles.bodyContainer}>
+            <Text>Filters</Text>
+            <View style={styles.filterRow}>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>Tags</Text>
+              </View>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>Email</Text>
+              </View>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>First Name</Text>
+              </View>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>Last Name</Text>
+              </View>
+            </View>
+            <View style={styles.filterRow}>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>Created</Text>
+              </View>
+              <View style={styles.filterItem}>
+                <Text style={styles.filterItemHeader}>Program</Text>
+              </View>
+              <View style={styles.filterApplyItem}>
+              </View>
+            </View>
           </View>)}
 
           {showClients && (<View style={styles.bodyContainer}>
