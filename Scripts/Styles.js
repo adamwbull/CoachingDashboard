@@ -2881,7 +2881,12 @@ export const allClientsLight = StyleSheet.create({
   },
   clientsControls: {
     flexDirection:'row',
-    alignItems:'center'
+    alignItems:'center',
+    backgroundColor:colorsLight.header,
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1,
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10
   },
   clientsControlsText: {
     padding:10,
@@ -2894,44 +2899,36 @@ export const allClientsLight = StyleSheet.create({
     width:40,
     alignItems:'center',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientControlsTouchClient: {
     flex:25,
     height:40,
     alignItems:'flex-start',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientControlsTouchTags: {
     flex:35,
     height:40,
     alignItems:'flex-start',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientControlsTouchCreated: {
     flex:20,
     height:40,
     alignItems:'flex-start',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientControlsTouchControls: {
     flex:20,
     height:40,
     alignItems:'flex-start',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientRow: {
     flexDirection:'row',
-    alignItems:'center'
+    alignItems:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
   },
   clientRowText: {
     padding:10,
@@ -2940,45 +2937,74 @@ export const allClientsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     width:'100%'
   },
+  clientName: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    color:colorsLight.secondaryTextColor,
+    lineHeight:16
+  },
+  clientEmail: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    lineHeight:14,
+  },
+  clientAvatar: {
+    width:50,
+    height:50,
+    borderRadius:100
+  },
+  clientAvatarContainer: {
+    padding:10
+  },
   clientRowTouchIcon: {
-    height:40,
     width:40,
     alignItems:'center',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientRowTouchClient: {
-    flex:30,
-    height:40,
-    alignItems:'flex-end',
-    justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
+    flex:25,
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
   },
   clientRowTouchTags: {
     flex:35,
-    height:40,
     alignItems:'center',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientRowTouchCreated: {
-    flex:10,
-    height:40,
+    flex:20,
     alignItems:'center',
     justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
   },
   clientRowTouchControls: {
-    flex:35,
-    height:40,
+    flex:20,
     alignItems:'center',
-    justifyContent:'center',
-    borderBottomColor:colorsLight.headerBorder,
-    borderBottomWidth:1
+    justifyContent:'flex-start',
+    flexDirection:'row'
+  },
+  clientAssignTask: {
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:3,
+    borderRadius:10,
+    backgroundColor:btnColors.primary,
+    marginLeft:8
+  },
+  clientProfileButton: {
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:3,
+    borderRadius:10,
+    backgroundColor:btnColors.info,
+    marginLeft:10
+  },
+  clientButtonTitle: {
+    color:'#fff',
+    fontSize:16
   },
   noClients: {
     width:'100%',

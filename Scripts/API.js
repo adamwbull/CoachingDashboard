@@ -267,19 +267,21 @@ export async function switchSubscription(token, id, plan, period, sub) {
 
 }
 
-export async function getClients(id, token) {
+export async function getClientsData(id, token) {
 
   var ret = []
 
-  console.log('Getting client list...')
-  const res = await fetch(url + '/user/coach/clients/' + id + '/' + token, {
+  console.log('Getting client list and programs...')
+  const res = await fetch(url + '/user/coach/client-data/' + id + '/' + token, {
     method:'GET'
   })
 
   const payload = await res.json()
 
+  console.log('payload:', payload)
+
   if (payload.length > 0) {
-    console.log('Clients found!')
+    console.log('Client data found!')
     ret = payload
   } else {
     console.log('No clients found.')

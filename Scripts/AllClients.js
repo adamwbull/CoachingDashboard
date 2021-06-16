@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import { allClientsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
+import { allClientsLight, colorsLight, innerDrawerLight, btnColors, boxColors } from '../Scripts/Styles.js'
 import { allClientsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, ButtonGroup, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { parseSimpleDateText, sqlToJsDate, getClients } from './API.js'
+import { parseSimpleDateText, sqlToJsDate, getClientsData } from './API.js'
 import { Dropdown, Accordion, Radio } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -47,26 +47,6 @@ export default function AllClients() {
   // Client data variables.
   const [clientData, setClientData] = useState({})
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
-
-  // All clients functions.
-  const refreshClients = async (id, token) => {
-    // Get Clients, Programs data.
-    var refresh = JSON.parse(JSON.stringify(await getClients(id, token)));
-    
-    // Supply Selected variable for group management.
-    var len = refresh.length;
-    var activeLen = 0
-    for (var i = 0; i < len; i++) {
-      refresh[i].Selected = false
-      if (refresh[i].Active == true) {
-        activeLen += 1
-      }
-    }
-    setActiveClientCount(activeLen)
-    setClientCount(len)
-    setClients(refresh)
-    generateProgramOptions()
-  }
 
   // Filtering variables.
   const [tags, setTags] = useState([])
@@ -135,6 +115,29 @@ export default function AllClients() {
 
   const selectProgram = (e, d) => {
     setSelectedProgram(d.value)
+  }
+
+  // Client data function.
+  const refreshClients = async (id, token) => {
+
+    // Get Clients, Programs data.
+    var refresh = JSON.parse(JSON.stringify(await getClientsData(id, token)));
+    
+    // Supply Selected variable for group management.
+    var len = refresh[1].length;
+    var activeLen = 0
+    for (var i = 0; i < len; i++) {
+      refresh[1][i].Selected = false
+      if (refresh[1][i].Active == true) {
+        activeLen += 1
+      }
+    }
+    setActiveClientCount(activeLen)
+    setClientCount(len)
+    setClients(refresh[1])
+    setRawClients(refresh[1])
+    generateProgramOptions(refresh[0])
+
   }
 
   useEffect(() => {
@@ -328,35 +331,42 @@ export default function AllClients() {
               <Text style={styles.bodyDesc}>{clientCount} Total | {activeClientCount + activeClientCountSuffix}</Text>
             </View>
             <View style={styles.clientsControls}>
-                  <TouchableOpacity style={styles.clientControlsTouchIcon}>
-                    <Icon
-                      name='square-outline'
-                      type='ionicon'
-                      size={20}
-                      color={colors.mainTextColor}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.clientControlsTouchClient}>
-                    <Text style={[styles.clientsControlsText,{paddingRight:0}]}>Client</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.clientControlsTouchTags}>
-                    <Text style={styles.clientsControlsText}>Tags</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.clientControlsTouchCreated}>
-                    <Text style={styles.clientsControlsText}>Joined</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.clientControlsTouchControls}>
-                    <Text style={styles.clientsControlsText}>Controls</Text>
-                  </TouchableOpacity>
-                </View>
+              <TouchableOpacity style={styles.clientControlsTouchIcon}>
+                <Icon
+                  name='square-outline'
+                  type='ionicon'
+                  size={20}
+                  color={colors.mainTextColor}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clientControlsTouchClient}>
+                <Text style={[styles.clientsControlsText,{paddingRight:0}]}>Client</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clientControlsTouchTags}>
+                <Text style={styles.clientsControlsText}>Tags</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clientControlsTouchCreated}>
+                <Text style={styles.clientsControlsText}>Joined</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.clientControlsTouchControls}>
+                <Text style={styles.clientsControlsText}>Actions</Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.clientList}>
             {clients.length == 0 && (<>
             <Text style={styles.noClients}>No clients found.</Text>
             </>) || 
             (<>
             {clients.map((client, index) => {
-              // Client (Avatar, Name, Email), Tags, Created, Controls (Assign Task, Next Program Task, ), 
-              return (<View key={index} style={styles.clientRow}>
+              // Client (Avatar, Name, Email), Tags, Created, Controls (Assign Task, Statistics), 
+              console.log('client:',client)
+              var rowColoring = {}
+              var nameSuffix = ''
+              if (coach.Id == client.Id) {
+                rowColoring = {backgroundColor:'#EAF7FF'}
+                nameSuffix = ' (You)'
+              }
+              return (<View key={index} style={[styles.clientRow,rowColoring]}>
                 <TouchableOpacity style={styles.clientRowTouchIcon}>
                   <Icon
                     name='square-outline'
@@ -366,18 +376,58 @@ export default function AllClients() {
                   />
                 </TouchableOpacity>
                 <View style={[styles.clientRowTouchClient]}>
-                  <Text style={[styles.clientRowText]}>
-                    ${(client.Amount/100).toFixed(2)}
-                  </Text>
+                  <View style={styles.clientAvatarContainer}>
+                    <Image 
+                      source={{ uri: client.Avatar }}
+                      style={styles.clientAvatar}
+                    />
+                  </View>
+                  <View>
+                    <Text style={[styles.clientName]}>
+                      {client.FirstName + ' ' + client.LastName + nameSuffix}
+                    </Text>
+                    <Text style={[styles.clientEmail]}>
+                      {client.Email}
+                    </Text>
+                  </View>
                 </View>
                 <View style={styles.clientRowTouchTags}>
                   <Text style={styles.clientRowText}>Tags</Text>
                 </View>
                 <View style={styles.clientRowTouchCreated}>
-                  <Text style={styles.clientRowText}>Joined</Text>
+                  <Text style={styles.clientRowText}>{parseSimpleDateText(sqlToJsDate(client.Created))}</Text>
                 </View>
                 <View style={styles.clientRowTouchControls}>
-                  <Text style={styles.clientRowText}>Controls</Text>
+                  <Button 
+                    title='Assign Task'
+                    icon={{
+                      name: 'document',
+                      size: 16,
+                      type: 'ionicon',
+                      color:'#fff',
+                      style: {
+                        marginTop:2
+                      }
+                    }}
+                    iconRight
+                    buttonStyle={styles.clientAssignTask}
+                    titleStyle={styles.clientButtonTitle}
+                  />
+                  <Button 
+                    title='Profile'
+                    icon={{
+                      name: 'person',
+                      size: 16,
+                      type: 'ionicon',
+                      color:'#fff',
+                      style: {
+                        marginTop:2
+                      }
+                    }}
+                    iconRight
+                    buttonStyle={styles.clientProfileButton}
+                    titleStyle={styles.clientButtonTitle}
+                  />
                 </View>
               </View>)
             })}
