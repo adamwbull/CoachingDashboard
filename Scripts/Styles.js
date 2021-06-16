@@ -2799,11 +2799,195 @@ export const allClientsLight = StyleSheet.create({
     padding:20,
     marginBottom:20
   },
+  tag: {
+    paddingLeft:10,
+    paddingRight:3,
+    paddingTop:3,
+    paddingBottom:3
+  },
+  tagContainer: {
+    flex:1,
+    padding:3
+  },
+  tagTitle: {
+    fontFamily:'Poppins',
+    color:'white',
+    fontSize:14,
+  },
   inputTitle: {
     color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold',
     fontSize:18,
   },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:20,
+    padding:10,
+    fontFamily:'Poppins',
+    fontSize:14,
+  },
+  filterTitleContainer: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  filterTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.secondaryTextColor,
+    fontSize:14
+  },
+  filterTitleRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  filterRow: {
+    flexDirection:'row',
+    alignItems:'flex-start',
+    justifyContent:'center'
+  },
+  filterItem: {
+    flex:1,
+    padding:10,
+    justifyContent:'flex-start'
+  },
+  filterItemHeader: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    color:colorsLight.mainTextColor
+  },
+  filterApplyItem: {
+    flex:2,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    padding:10
+  },
+  filterApplyButton: {
+    flex:1
+  },
+  filterResetButton: {
+    flex:1,
+    backgroundColor:colorsLight.secondaryBackground,
+  },
+  filterButtonContainer: {
+    flex:1,
+    marginLeft:10,
+  },
+  filterResetButtonTitle: {
+    color:colorsLight.mainTextColor
+  },
+  clientHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  clientsControls: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  clientsControlsText: {
+    padding:10,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.secondaryTextColor
+  },
+  clientControlsTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientControlsTouchClient: {
+    flex:25,
+    height:40,
+    alignItems:'flex-start',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientControlsTouchTags: {
+    flex:35,
+    height:40,
+    alignItems:'flex-start',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientControlsTouchCreated: {
+    flex:20,
+    height:40,
+    alignItems:'flex-start',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientControlsTouchControls: {
+    flex:20,
+    height:40,
+    alignItems:'flex-start',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  clientRowText: {
+    padding:10,
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    width:'100%'
+  },
+  clientRowTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientRowTouchClient: {
+    flex:30,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientRowTouchTags: {
+    flex:35,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientRowTouchCreated: {
+    flex:10,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  clientRowTouchControls: {
+    flex:35,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  noClients: {
+    width:'100%',
+    padding:10,
+    textAlign:'center',
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  }
 })
 
 export const inviteClientsLight = StyleSheet.create({
