@@ -8,11 +8,11 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { Icon, Button, ButtonGroup, Chip } from 'react-native-elements'
+import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import { parseSimpleDateText, sqlToJsDate, getClientsData } from './API.js'
-import { Dropdown, Accordion, Radio } from 'semantic-ui-react'
+import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
 
@@ -49,6 +49,7 @@ export default function AllClients() {
 
   // Client profile variables.
   const [clientData, setClientData] = useState({})
+  const [notes, setNotes] = useState([])
 
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
 
@@ -180,9 +181,17 @@ export default function AllClients() {
 
   }
 
-  // Client profile function.
+  // Client profile functions.
+  const refreshClientData = async () => {
+
+  }
+
   const viewClientProfile = (index) => {
+    // Start by getting client-specific data for this user.
+    refreshClientData()
+    // Now get the data we already have and do normal switch view logic.
     var newClients = JSON.parse(JSON.stringify(clients))
+    newClients[index].Index = index
     setClientData(newClients[index])
     setShowClients(false)
     setShowFilters(false)
@@ -191,6 +200,26 @@ export default function AllClients() {
       setActivityIndicator(false)
       setShowClientProfile(true)
     }, 500)
+  }
+
+  // Redirect to Messages screen with props.
+  const openMessages = () => {
+    
+  }
+
+  // Present box to confirm action of toggling a single active status.
+  const confirmSingleToggleActive = () => {
+
+  }
+
+  // Open note dialog with new note configuration.
+  const addNewNote = () => {
+
+  }
+
+  // Open note dialog with edit configuration.
+  const editNote = () => {
+
   }
 
   // Main functions.
@@ -262,7 +291,7 @@ export default function AllClients() {
             </View>
             <Text>
             {showClientProfile && (<>
-            <TouchableOpacity onPress={navToMainFromProfile}>Clients</TouchableOpacity>
+            <TouchableOpacity onPress={navToMainFromProfile}><Text>Clients</Text></TouchableOpacity>
             <Text>{' / ' + clientData.FirstName + ' ' + clientData.LastName}</Text>
             </>)}
             </Text>
@@ -590,7 +619,7 @@ export default function AllClients() {
                     }}
                     iconRight
                     buttonStyle={styles.clientAssignTask}
-                    titleStyle={styles.clientButtonTitle}
+                    titleStyle={styles.clientRowButtonTitle}
                   />
                   <Button 
                     title='Profile'
@@ -605,7 +634,7 @@ export default function AllClients() {
                     }}
                     iconRight
                     buttonStyle={styles.clientProfileButton}
-                    titleStyle={styles.clientButtonTitle}
+                    titleStyle={styles.clientRowButtonTitle}
                     onPress={() => viewClientProfile(index)}
                   />
                 </View>
@@ -615,29 +644,83 @@ export default function AllClients() {
             </View>
           </View>)}
 
-          {showClientProfile && (<View style={styles.bodyContainer}>
-            <View style={styles.clientInfoRow}>
-              <Image uri={clientData.Avatar} style={styles.clientImage} />
-              <View style={styles.clientStats}>
-                <View style={styles.clientStatGroup}>
-                  <Text style={styles.clientStatNum}>{clientData.PromptsCompletedCnt}</Text>
-                  <Text style={styles.clientStatDesc}>Prompts</Text>
+          {showClientProfile && (<>
+          <View style={styles.bodyRow}>
+            <View style={styles.bodyContainer}>
+              <View style={styles.clientInfoRow}>
+                <View style={styles.clientInfoHeaderContainer}>
+                  <Image source={{ uri: clientData.Avatar }} style={styles.clientImage} />
+                  <View style={styles.clientInfoHeader}>
+                    <Text style={[styles.bodySubtitle,{lineHeight:20}]}>{clientData.Id == coach.Id && clientData.FirstName + ' ' + clientData.LastName + ' (You)' || clientData.FirstName + ' ' + clientData.LastName}</Text>
+                    <Text style={styles.clientJoinedTitle}>Joined {parseSimpleDateText(sqlToJsDate(clientData.Created))}</Text>
+                  </View>
                 </View>
-                <View style={styles.clientStatGroup}>
-                  <Text style={styles.clientStatNum}>{clientData.ConceptsCompletedCnt}</Text>
-                  <Text style={styles.clientStatDesc}>Concepts</Text>
+              </View>
+              <View style={styles.clientInformation}>
+                <View style={styles.clientInformationRow}>
+                  <Text style={styles.clientInformationRowTitle}>Prompts Completed</Text>
+                  <Text style={styles.clientInformationRowText}>{clientData.PromptsCompletedCnt}</Text>
                 </View>
-                <Text style={styles.clientStatsText}>Completed</Text>
+                <View style={styles.clientInformationRow}>
+                  <Text style={styles.clientInformationRowTitle}>Concepts Completed</Text>
+                  <Text style={styles.clientInformationRowText}>{clientData.ConceptsCompletedCnt}</Text>
+                </View>
+                <View style={styles.clientInformationRow}>
+                  <Text style={styles.clientInformationRowTitle}>Email</Text>
+                  <Text style={styles.clientInformationRowText}>{clientData.Email}</Text>
+                </View>
+                <View style={[styles.clientInformationRow,{borderBottomWidth:0}]}>
+                  <Text style={styles.clientInformationRowTitle}>Birthday</Text>
+                  <Text style={styles.clientInformationRowText}>{parseSimpleDateText(sqlToJsDate(clientData.DoB))}</Text>
+                </View>
+              </View>
+              <View style={styles.clientButtonRow}>
+                <Button 
+                  title='Toggle Active'
+                  buttonStyle={clientData.Active && styles.clientButtonActive || styles.clientButtonInactive}
+                  containerStyle={styles.clientButtonContainer}
+                  titleStyle={clientData.Active && styles.clientButtonTitleActive || styles.clientButtonTitleInactive}
+                  onPress={confirmSingleToggleActive}
+                />
+                <Button 
+                  title='Send Message'
+                  buttonStyle={styles.clientButton}
+                  containerStyle={styles.clientButtonContainer}
+                  titleStyle={styles.clientButtonTitle}
+                  onPress={openMessages}
+                />
               </View>
             </View>
-            <View style={styles.clientInfoRow}>
-              <Text style={styles.bodySubtitle}>{clientData.FirstName + ' ' + clientData.LastName}</Text>
-              <View styNole={styles.clientJoined}>
-                <Text style={styles.clientJoinedTitle}>Joined</Text>
-                <Text style={styles.clientJoinedText}>{parseSimpleDateText(sqlToJsDate(clientData.Created))}</Text>
+            <View style={[styles.bodyContainer,{marginLeft:20}]}>
+              <View style={styles.clientNotesHeader}>
+                <Text style={[styles.clientNotesHeaderTitle]}>Client Notes</Text>
+                <Button 
+                  title='New Note'
+                  icon={
+                    <Icon 
+                      name='add'
+                      type='ionicon'
+                      size={20}
+                      color='#fff'
+                    />
+                  }
+                  buttonStyle={styles.notesAddNewButton}
+                  containerStyle={styles.notesAddNewButtonContainer}
+                  titleStyle={styles.notesAddNewButtonTitle}
+                  onPress={addNewNote}
+                  iconRight
+                />
               </View>
+              {notes.length == 0 && (<Text style={styles.noClients}>No notes yet.</Text>)
+              || (<>
+              {notes.map((note, index) => {
+                //
+                return (<View key={'notes_' + index}></View>)
+              })}
+              </>)}
             </View>
-          </View>)}
+          </View>
+          </>)}
 
         </View>
       </View>

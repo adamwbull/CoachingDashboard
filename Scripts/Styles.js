@@ -2793,11 +2793,16 @@ export const allClientsLight = StyleSheet.create({
     lineHeight:14,
     fontFamily:'Poppins'
   },
+  bodyRow: {
+    flexDirection:'row',
+    alignItems:'flex-start',
+  },
   bodyContainer: {
     backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
     padding:20,
-    marginBottom:20
+    marginBottom:20,
+    flex:1
   },
   tag: {
     padding:5
@@ -3025,7 +3030,7 @@ export const allClientsLight = StyleSheet.create({
     backgroundColor:btnColors.info,
     marginLeft:10
   },
-  clientButtonTitle: {
+  clientRowButtonTitle: {
     color:'#fff',
     fontSize:16
   },
@@ -3036,6 +3041,126 @@ export const allClientsLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
+  },
+  clientInfoRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
+  clientInfoHeaderContainer: {
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  clientImage: {
+    width:80,
+    height:80,
+    borderRadius:100,
+    marginRight:10
+  },
+  clientInfoHeader: {
+    justifyContent:'center'
+  },
+  clientJoinedTitle: {
+    fontSize:18,
+    lineHeight:18,
+    paddingTop:2,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  clientButtonRow: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    paddingTop:20,
+  },
+  clientButton: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    borderWidth:1,
+    borderColor:btnColors.primary,
+    paddingTop:10,
+    paddingLeft:20
+  },
+  clientButtonActive: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    borderWidth:1,
+    borderColor:btnColors.success,
+    paddingTop:10,
+  },
+  clientButtonInactive: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    borderWidth:1,
+    borderColor:btnColors.danger,
+    paddingTop:10,
+  },
+  clientButtonContainer: {
+    flex:1,
+    padding:5,
+  },
+  clientButtonTitle: {
+    color:btnColors.primary,
+    fontFamily:'Poppins'
+  },
+  clientButtonTitleActive: {
+    color:btnColors.success,
+    fontFamily:'Poppins'
+  },
+  clientButtonTitleInactive: {
+    color:btnColors.danger,
+    fontFamily:'Poppins'
+  },
+  clientInformation: {
+    paddingTop:20,
+  },
+  clientInformationRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  clientInformationRowTitle: {
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    marginRight:10,
+    flex:1,
+    borderRightWidth:1,
+    borderRightColor:colorsLight.headerBorder,
+    padding:3,
+  },
+  clientInformationRowText: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.secondaryTextColor,
+    flex:1
+  },
+  clientNotesHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    paddingBottom:10
+  },
+  clientNotesHeaderTitle: {
+    fontSize:20,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  notesAddNewButton: {
+    backgroundColor:btnColors.primary,
+    paddingLeft:7,
+    paddingTop:3,
+    paddingRight:3,
+    paddingBottom:3,
+    borderRadius:10,
+  },
+  notesAddNewButtonTitle: {
+    fontSize:15,
+    color:'#fff',
+    fontFamily:'Poppins'
   }
 })
 
