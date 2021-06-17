@@ -43,66 +43,90 @@ export default function AllClients() {
   // All clients variables.
   const [rawClients, setRawClients] = useState([])
   const [clients, setClients] = useState([])
+  const [programs, setPrograms] = useState([])
+  const [tags, setTags] = useState([])
+  const [bulkAction, setBulkAction] = useState('')
+  const [controlSquareSelected, setControlSquareSelected] = useState(false)
 
   // Client data variables.
   const [clientData, setClientData] = useState({})
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
 
   // Filtering variables.
-  const [tags, setTags] = useState([])
-  const [tagText, setTagText] = useState('')
+  const [searchTags, setSearchTags] = useState([])
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [created, setCreated] = useState('')
   const [createdChoice, setCreatedChoice] = useState('before')
-  const [programs, setPrograms] = useState(['Program 1','Complete This!','Let\'s go!'])
-  const [programOptions, setProgramOptions] = useState([])
+  const [programOptions , setProgramOptions] = useState([])
+  const [tagOptions, setTagOptions] = useState([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(true)
 
   // Filtering functions.
   const applyFilters = () => {
+
     console.log('Applying filters...')
+    var newClients = []
+    var sourceClients = JSON.parse(JSON.stringify(rawClients))
+
+    for (var i = 0; i < sourceClients.length; i++) {
+
+      var source = sourceClients[i]
+      var match = false
+
+      // Check if any of the tags listed are present.
+      // Check if email contains a match.
+      // Check if first name contains a match.
+      // Check if last name begins a match. 
+      // Check if created matches.
+      // Check if user is in given program.
+
+      if (match) {
+        newClients.push(source)
+      }
+
+    }
+
+    setClients(newClients)
+
   }
 
   const clearFilters = () => {
     generateProgramOptions()
-    setTagText('')
-    setTags([])
+    setSearchTags([])
     setEmail('')
     setFirstName('')
     setLastName('')
     setCreated('')
     setSelectedProgram('')
+    setClients(JSON.parse(JSON.stringify(rawClients)))
   }
 
   const toggleFilters = () => {
     setFiltersOpen(!filtersOpen)
   }
 
-  const generateProgramOptions = () => {
-    console.log('Generating program options...')
+  const generateProgramOptions = (programs) => {
     var pList = []
     for (var i = 0; i < programs.length; i++) {
-      pList.push({key:programs[i],text:programs[i],value:programs[i]})
+      pList.push({key:programs[i].Id,text:programs[i].Title,value:programs[i].Id})
     }
     setProgramOptions(pList)
   }
 
-  const addTag = (e) => {
-    if (e.key === 'Enter' && tagText.length > 0) {
-      var ts = JSON.parse(JSON.stringify(tags))
-      ts.push(tagText)
-      setTags(ts)
-      setTagText('')
+  const generateTagOptions = (tags) => {
+    var list = []
+    for (var i = 0; i < tags.length; i++) {
+      var tag = tags[i]
+      list.push({key:tag.Id,text:tag.Title,value:tag.Title+'_'+tag.Id})
     }
+    setTagOptions(list)
   }
 
-  const removeTag = (index) => {
-    var ts = JSON.parse(JSON.stringify(tags))
-    ts.splice(index, 1)
-    setTags(ts)
+  const selectTags = (e, d) => {
+    setSearchTags(e.value)
   }
 
   const selectCreated = (t) => {
@@ -117,12 +141,51 @@ export default function AllClients() {
     setSelectedProgram(d.value)
   }
 
+  // Bulk action functions.
+  const selectBulkAction = (e, d) => {
+    setBulkAction(d.value)
+  }
+
+  const executeBulkAction = () => {
+    if (bulkAction != '') {
+      //
+    }
+  }
+
+  const selectAllClients = () => {
+
+    var target = !controlSquareSelected
+    var newClients = JSON.parse(JSON.stringify(clients))
+
+    for (var i = 0; i < newClients.length; i ++) {
+      newClients[i].Selected = target
+    }
+
+    setClients(newClients)
+    setControlSquareSelected(target)
+
+  }
+
+  const selectClient = (index) => {
+    
+    var newClients = JSON.parse(JSON.stringify(clients))
+
+    for (var i = 0; i < newClients.length; i ++) {
+      if (i == index) {
+        newClients[i].Selected = !newClients[i].Selected
+      }
+    }
+
+    setClients(newClients)
+
+  }
+
   // Client data function.
   const refreshClients = async (id, token) => {
 
     // Get Clients, Programs data.
     var refresh = JSON.parse(JSON.stringify(await getClientsData(id, token)));
-    
+    console.log('refresh:',refresh)
     // Supply Selected variable for group management.
     var len = refresh[1].length;
     var activeLen = 0
@@ -132,11 +195,15 @@ export default function AllClients() {
         activeLen += 1
       }
     }
-    setActiveClientCount(activeLen)
-    setClientCount(len)
+    // minus one for the coach's test account
+    setActiveClientCount(activeLen-1)
+    setClientCount(len-1)
     setClients(refresh[1])
     setRawClients(refresh[1])
     generateProgramOptions(refresh[0])
+    generateTagOptions(refresh[2])
+    setPrograms(refresh[0])
+    setTags(refresh[2])
 
   }
 
@@ -271,41 +338,19 @@ export default function AllClients() {
                       value={selectedProgram}
                     />
                   </View>
-                  <View style={styles.filterItem}>
+                  <View style={[styles.filterItem,{flex:2}]}>
                     <Text style={styles.filterItemHeader}>Tags</Text>
-                    <TextInput 
-                      placeholder='Type a tag then hit Enter...'
-                      onChangeText={(t) => setTagText(t)}
-                      onKeyPress={addTag}
-                      value={tagText}
-                      style={styles.inputStyle}
-                      placeholderTextColor='#8c9197'
+                    <Dropdown 
+                      placeholder="Choose tags..."
+                      fluid
+                      multiple
+                      selection
+                      options={tagOptions}
+                      className={'tags'}
+                      onChange={(e, d) => selectTags(e, d)}
                     />
                   </View>
-                  <View style={[styles.filterItem,{marginTop:30,justifyContent:'flex-start',flexDirection:'row',flexWrap:'wrap',paddingRight:5}]}>
-                    {tags.length == 0 && 
-                    (<></>) || 
-                    (<>
-                    {tags.map((tag, index) => {
-                      return (<View key={'tag_' + index}><Chip 
-                        title={tag}
-                        icon={{
-                          name: 'close-circle',
-                          type: 'ionicon',
-                          size:16,
-                          color: 'white'
-                        }}
-                        iconStyle={{marginTop:3}}
-                        buttonStyle={styles.tag}
-                        containerStyle={styles.tagContainer}
-                        titleStyle={styles.tagTitle}
-                        onPress={() => removeTag(index)}
-                        iconRight
-                      /></View>)
-                    })}
-                    </>)}
-                  </View>
-                  <View style={[styles.filterItem,{marginTop:30,alignItems:'flex-end',flexDirection:'row'}]}>
+                  <View style={[styles.filterItem,{marginTop:25,alignItems:'flex-end',flexDirection:'row'}]}>
                     <Button 
                       title='Reset'
                       buttonStyle={styles.filterResetButton}
@@ -330,20 +375,47 @@ export default function AllClients() {
               <Text style={styles.bodySubtitle}>Client List</Text>
               <Text style={styles.bodyDesc}>{clientCount} Total | {activeClientCount + activeClientCountSuffix}</Text>
             </View>
+            <View style={styles.clientBulkOptions}>
+              <Dropdown 
+                placeholder="Bulk Actions..."
+                selection
+                options={[
+                  {key:'Assign Task',text:'Assign Task',value:'Assign Task'},
+                  {key:'Toggle Active',text:'Toggle Active',value:'Toggle Active'},
+                ]}
+                onChange={(e, d) => selectBulkAction(e, d)}
+                value={bulkAction}
+              />
+              <Button 
+                title='Apply'
+                buttonStyle={styles.clientBulkApplyButton}
+                containerStyle={styles.clientBulkApplyButtonContainer}
+                titleStyle={styles.clientBulkApplyButtonTitle}
+                onPress={executeBulkAction}
+              />
+            </View>
             <View style={styles.clientsControls}>
-              <TouchableOpacity style={styles.clientControlsTouchIcon}>
-                <Icon
+              <TouchableOpacity 
+                style={styles.clientControlsTouchIcon}
+                onPress={selectAllClients}
+              >
+                {controlSquareSelected && (<Icon
+                  name='checkbox'
+                  type='ionicon'
+                  size={20}
+                  color={colors.mainTextColor}
+                />) || (<Icon
                   name='square-outline'
                   type='ionicon'
                   size={20}
                   color={colors.mainTextColor}
-                />
+                />)}
               </TouchableOpacity>
               <TouchableOpacity style={styles.clientControlsTouchClient}>
                 <Text style={[styles.clientsControlsText,{paddingRight:0}]}>Client</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.clientControlsTouchTags}>
-                <Text style={styles.clientsControlsText}>Tags</Text>
+                <Text style={styles.clientsControlsText}>Programs & Tags</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.clientControlsTouchCreated}>
                 <Text style={styles.clientsControlsText}>Joined</Text>
@@ -359,21 +431,57 @@ export default function AllClients() {
             (<>
             {clients.map((client, index) => {
               // Client (Avatar, Name, Email), Tags, Created, Controls (Assign Task, Statistics), 
-              console.log('client:',client)
               var rowColoring = {}
               var nameSuffix = ''
               if (coach.Id == client.Id) {
                 rowColoring = {backgroundColor:'#EAF7FF'}
                 nameSuffix = ' (You)'
               }
+              // Build programs and tags.
+              const chips = []
+              for (var i = 0; i < client.ProgramAssocs.length; i++) {
+                var program = client.ProgramAssocs[i]
+                // Find the title of this program from the main list.
+                var title = ''
+                for (var j = 0; j < programs.length; j++) {
+                  var p = programs[j]
+                  if (p.Id == program.ProgramId) {
+                    title = p.Title
+                    break
+                  }
+                }
+                chips.push({Title:title,Type:0})
+              }
+              for (var i = 0; i < client.TagAssocs.length; i++) {
+                var tag = client.TagAssocs[i]
+                // Find the title of this program from the main list.
+                var title = ''
+                for (var j = 0; j < tags.length; j++) {
+                  var t = tags[j]
+                  if (t.Id == tag.TagId) {
+                    title = t.Title
+                    break
+                  }
+                }
+                chips.push({Title:title,Type:1})
+              }
+              //console.log('client:',client)
               return (<View key={index} style={[styles.clientRow,rowColoring]}>
-                <TouchableOpacity style={styles.clientRowTouchIcon}>
-                  <Icon
+                <TouchableOpacity 
+                  style={styles.clientRowTouchIcon}
+                  onPress={() => selectClient(index)}
+                >
+                  {client.Selected && (<Icon
+                    name='checkbox'
+                    type='ionicon'
+                    size={20}
+                    color={colors.mainTextColor}
+                  />) || (<Icon
                     name='square-outline'
                     type='ionicon'
                     size={20}
                     color={colors.mainTextColor}
-                  />
+                  />)}
                 </TouchableOpacity>
                 <View style={[styles.clientRowTouchClient]}>
                   <View style={styles.clientAvatarContainer}>
@@ -392,7 +500,38 @@ export default function AllClients() {
                   </View>
                 </View>
                 <View style={styles.clientRowTouchTags}>
-                  <Text style={styles.clientRowText}>Tags</Text>
+                  {chips.length == 0 && (<Text style={styles.clientRowText}>No programs or tags yet.</Text>) ||
+                  (<>
+                    {chips.map((chip, index) => {
+                      if (chip.Type == 0) {
+                        return (<View key={'chip_' + index}>
+                          <Chip 
+                            title={chip.Title}
+                            icon={{
+                              name: 'documents-outline',
+                              type: 'ionicon',
+                              size:16,
+                              color: 'white'
+                            }}
+                            iconStyle={{marginTop:3}}
+                            buttonStyle={[styles.tag,{backgroundColor:btnColors.success}]}
+                            containerStyle={styles.tagContainer}
+                            titleStyle={styles.tagTitle}
+                          />
+                      </View>)
+                      } else {
+                        return (<View key={'chip_' + index}>
+                          <Chip 
+                            title={chip.Title}
+                            iconStyle={{marginTop:3}}
+                            buttonStyle={[styles.tag,{backgroundColor:colorsLight.mainTextColor}]}
+                            containerStyle={styles.tagContainer}
+                            titleStyle={styles.tagTitle}
+                          />
+                        </View>)
+                      }
+                    })}
+                  </>)}
                 </View>
                 <View style={styles.clientRowTouchCreated}>
                   <Text style={styles.clientRowText}>{parseSimpleDateText(sqlToJsDate(client.Created))}</Text>
@@ -452,7 +591,7 @@ export default function AllClients() {
             </View>
             <View style={styles.clientInfoRow}>
               <Text style={styles.bodySubtitle}>{clientData.FirstName + ' ' + clientData.LastName}</Text>
-              <View style={styles.clientJoined}>
+              <View styNole={styles.clientJoined}>
                 <Text style={styles.clientJoinedTitle}>Joined</Text>
                 <Text style={styles.clientJoinedText}>{parseSimpleDateText(sqlToJsDate(clientData.Created))}</Text>
               </View>

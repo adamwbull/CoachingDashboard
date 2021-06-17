@@ -278,8 +278,6 @@ export async function getClientsData(id, token) {
 
   const payload = await res.json()
 
-  console.log('payload:', payload)
-
   if (payload.length > 0) {
     console.log('Client data found!')
     ret = payload

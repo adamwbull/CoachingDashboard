@@ -2800,10 +2800,7 @@ export const allClientsLight = StyleSheet.create({
     marginBottom:20
   },
   tag: {
-    paddingLeft:10,
-    paddingRight:3,
-    paddingTop:3,
-    paddingBottom:3
+    padding:5
   },
   tagContainer: {
     flex:1,
@@ -2862,11 +2859,13 @@ export const allClientsLight = StyleSheet.create({
     padding:10
   },
   filterApplyButton: {
-    flex:1
+    flex:1,
+    borderRadius:10
   },
   filterResetButton: {
     flex:1,
     backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10
   },
   filterButtonContainer: {
     flex:1,
@@ -2878,6 +2877,25 @@ export const allClientsLight = StyleSheet.create({
   clientHeader: {
     flexDirection:'row',
     alignItems:'center',
+  },
+  clientBulkOptions: {
+    flexDirection:'row',
+    alignItems:'center',
+    zIndex:1000,
+    paddingTop:10,
+    paddingBottom:10
+  },
+  clientBulkApplyButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+    padding:9,
+  },
+  clientBulkApplyButtonContainer: {
+    marginLeft:10
+  },
+  clientBulkApplyButtonTitle: {
+    color:'#fff',
+    fontSize:16
   },
   clientsControls: {
     flexDirection:'row',
@@ -2970,7 +2988,7 @@ export const allClientsLight = StyleSheet.create({
   },
   clientRowTouchTags: {
     flex:35,
-    alignItems:'center',
+    alignItems:'flex-start',
     justifyContent:'center',
   },
   clientRowTouchCreated: {

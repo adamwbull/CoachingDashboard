@@ -14,6 +14,22 @@
 
 }
 
+.tags {
+  background-color: #ebeef6 !important;
+  padding:10px !important;
+  color:#23272a !important;
+  border:0 !important;
+  border-radius:20px !important;
+  height:40px !important;
+}
+.ui.multiple.dropdown>.text {
+  margin:1px 0px 0px 3px !important;
+}
+
+.ui.multiple.dropdown>.label {
+  margin-top:-2px !important;
+}
+
 .program::placeholder {
   color:#23272a !important;
 }
