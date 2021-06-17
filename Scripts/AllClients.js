@@ -30,17 +30,16 @@ export default function AllClients() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
   const [showClients, setShowClients] = useState(false)
-  const [showClientData, setShowClientData] = useState(false)
+  const [showClientProfile, setShowClientProfile] = useState(false)
+  const [showAssignTask, setShowAssignTask] = useState(false)
 
   // Main variables.
   const [coach, setCoach] = useState(user)
 
-  // Stats variables.
+  // All clients variables.
   const [clientCount, setClientCount] = useState(0)
   const [activeClientCount, setActiveClientCount] = useState(0)
   const [activeClientCountSuffix, setActiveClientCountSuffix] = useState(' / 3 Active')
-
-  // All clients variables.
   const [rawClients, setRawClients] = useState([])
   const [clients, setClients] = useState([])
   const [programs, setPrograms] = useState([])
@@ -48,8 +47,9 @@ export default function AllClients() {
   const [bulkAction, setBulkAction] = useState('')
   const [controlSquareSelected, setControlSquareSelected] = useState(false)
 
-  // Client data variables.
+  // Client profile variables.
   const [clientData, setClientData] = useState({})
+
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
 
   // Filtering variables.
@@ -180,7 +180,30 @@ export default function AllClients() {
 
   }
 
-  // Client data function.
+  // Client profile function.
+  const viewClientProfile = (index) => {
+    var newClients = JSON.parse(JSON.stringify(clients))
+    setClientData(newClients[index])
+    setShowClients(false)
+    setShowFilters(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowClientProfile(true)
+    }, 500)
+  }
+
+  // Main functions.
+  const navToMainFromProfile = () => {
+    setShowClientProfile(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowFilters(true)
+      setShowClients(true)
+    }, 500)
+  }
+
   const refreshClients = async (id, token) => {
 
     // Get Clients, Programs data.
@@ -237,6 +260,12 @@ export default function AllClients() {
               <Text style={styles.bodyTitle}>Clients</Text>
               <Text style={styles.bodyDesc}>View and manage your clients.</Text>
             </View>
+            <Text>
+            {showClientProfile && (<>
+            <TouchableOpacity onPress={navToMainFromProfile}>Clients</TouchableOpacity>
+            <Text>{' / ' + clientData.FirstName + ' ' + clientData.LastName}</Text>
+            </>)}
+            </Text>
           </View>
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
@@ -391,6 +420,7 @@ export default function AllClients() {
                 selection
                 options={[
                   {key:'Assign Task',text:'Assign Task',value:'Assign Task'},
+                  {key:'Next Program Task',text:'Next Program Task',value:'Next Program Task'},
                   {key:'Toggle Active',text:'Toggle Active',value:'Toggle Active'},
                 ]}
                 onChange={(e, d) => selectBulkAction(e, d)}
@@ -576,6 +606,7 @@ export default function AllClients() {
                     iconRight
                     buttonStyle={styles.clientProfileButton}
                     titleStyle={styles.clientButtonTitle}
+                    onPress={() => viewClientProfile(index)}
                   />
                 </View>
               </View>)
@@ -584,7 +615,7 @@ export default function AllClients() {
             </View>
           </View>)}
 
-          {showClientData && (<View style={styles.bodyContainer}>
+          {showClientProfile && (<View style={styles.bodyContainer}>
             <View style={styles.clientInfoRow}>
               <Image uri={clientData.Avatar} style={styles.clientImage} />
               <View style={styles.clientStats}>
