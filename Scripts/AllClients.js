@@ -372,8 +372,18 @@ export default function AllClients() {
 
           {showClients && (<View style={[styles.bodyContainer]}>
             <View style={styles.clientHeader}>
-              <Text style={styles.bodySubtitle}>Client List</Text>
-              <Text style={styles.bodyDesc}>{clientCount} Total | {activeClientCount + activeClientCountSuffix}</Text>
+              <View style={styles.clientHeaderLeft}>
+                <Text style={styles.bodySubtitle}>Client List</Text>
+                <Text style={styles.bodyDesc}>{clientCount} Total | {activeClientCount + activeClientCountSuffix}</Text>
+              </View>
+              <Icon
+                name='help-circle-outline'
+                type='ionicon'
+                size={30}
+                color={colors.mainTextColor}
+                style={{}}
+                onPress={() => window.open('https://wiki.coachsync.me/en/clients', '_blank')}
+              />
             </View>
             <View style={styles.clientBulkOptions}>
               <Dropdown 

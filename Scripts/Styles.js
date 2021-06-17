@@ -2877,6 +2877,11 @@ export const allClientsLight = StyleSheet.create({
   clientHeader: {
     flexDirection:'row',
     alignItems:'center',
+    justifyContent:'space-between'
+  },
+  clientHeaderLeft: {
+    flexDirection:'row',
+    alignItems:'center',
   },
   clientBulkOptions: {
     flexDirection:'row',
