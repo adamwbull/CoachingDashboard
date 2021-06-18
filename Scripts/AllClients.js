@@ -31,6 +31,7 @@ export default function AllClients() {
   const [showFilters, setShowFilters] = useState(false)
   const [showClients, setShowClients] = useState(false)
   const [showClientProfile, setShowClientProfile] = useState(false)
+  const [showNoteForm, setShowNoteForm] = useState(false)
   const [showAssignTask, setShowAssignTask] = useState(false)
 
   // Main variables.
@@ -50,8 +51,12 @@ export default function AllClients() {
   // Client profile variables.
   const [clientData, setClientData] = useState({})
   const [notes, setNotes] = useState([])
-
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
+
+  // Notes variables.
+  const [newNote, setNewNote] = useState(false)
+  const [noteTitle, setNoteTitle] = useState('')
+  const [noteRichText, setNoteRichText] = useState('')
 
   // Filtering variables.
   const [searchTags, setSearchTags] = useState([])
@@ -183,7 +188,7 @@ export default function AllClients() {
 
   // Client profile functions.
   const refreshClientData = async () => {
-
+    // Get notes.
   }
 
   const viewClientProfile = (index) => {
@@ -214,12 +219,26 @@ export default function AllClients() {
 
   // Open note dialog with new note configuration.
   const addNewNote = () => {
-
+    setShowClientProfile(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowNoteForm(true)
+    }, 500)
   }
 
   // Open note dialog with edit configuration.
   const editNote = () => {
 
+  }
+
+  const navToProfileFromNoteForm = () => {
+    setShowNoteForm(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowClientProfile(true)
+    }, 500)
   }
 
   // Main functions.
@@ -721,6 +740,27 @@ export default function AllClients() {
             </View>
           </View>
           </>)}
+
+          {showNoteForm && (<View style={styles.bodyContainer}>
+            <View style={[styles.clientRowTouchControls,{marginBottom:10}]}>
+              <Icon
+                name='chevron-back'
+                type='ionicon'
+                size={25}
+                color={colors.secondaryTextColor}
+                style={{marginRight:0}}
+                onPress={navToProfileFromNoteForm}
+              />
+              <Text style={[styles.bodySubtitle,{fontSize:24}]}>{newNote && 'New' || 'Edit'} Note</Text>
+            </View>
+            <Text style={styles.inputLabel}>Note Title</Text>
+            <TextInput 
+              style={styles.inputStyle}
+              placeholder='Title'
+              onChangeText={(t) => setNoteTitle(t)}
+              value={noteTitle}
+            />
+          </View>)}
 
         </View>
       </View>

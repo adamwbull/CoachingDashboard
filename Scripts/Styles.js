@@ -3161,7 +3161,12 @@ export const allClientsLight = StyleSheet.create({
     fontSize:15,
     color:'#fff',
     fontFamily:'Poppins'
-  }
+  },
+  inputLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    width:'100%',
+  },
 })
 
 export const inviteClientsLight = StyleSheet.create({
