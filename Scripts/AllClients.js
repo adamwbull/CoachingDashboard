@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useRef, useContext } from 'react'
 import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import { allClientsLight, colorsLight, innerDrawerLight, btnColors, boxColors } from '../Scripts/Styles.js'
 import { allClientsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
@@ -15,6 +15,7 @@ import { parseSimpleDateText, sqlToJsDate, getClientsData } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
+import JoditEditor from "jodit-react";
 
 import userContext from './Context.js'
 
@@ -56,7 +57,17 @@ export default function AllClients() {
   // Notes variables.
   const [newNote, setNewNote] = useState(false)
   const [noteTitle, setNoteTitle] = useState('')
+  const editor = useRef(null)
+  const editorConfig = {
+		readonly: false,
+    cleanHTML: true,
+    limitChars:3000,
+    askBeforePasteHTML:false,
+    askBeforePastFromWord:false,
+    allowResizeY:true
+	}
   const [noteRichText, setNoteRichText] = useState('')
+  const [noteSavingIndicator, setNoteSavingIndicator] = useState(false)
 
   // Filtering variables.
   const [searchTags, setSearchTags] = useState([])
@@ -65,7 +76,7 @@ export default function AllClients() {
   const [lastName, setLastName] = useState('')
   const [created, setCreated] = useState('')
   const [createdChoice, setCreatedChoice] = useState('before')
-  const [programOptions , setProgramOptions] = useState([])
+  const [programOptions, setProgramOptions] = useState([])
   const [tagOptions, setTagOptions] = useState([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(true)
@@ -217,8 +228,11 @@ export default function AllClients() {
 
   }
 
-  // Open note dialog with new note configuration.
+  // Notes functions.
   const addNewNote = () => {
+    setNewNote(true)
+    setNoteTitle('')
+    setNoteRichText('')
     setShowClientProfile(false)
     setActivityIndicator(true)
     setTimeout(() => {
@@ -227,9 +241,27 @@ export default function AllClients() {
     }, 500)
   }
 
-  // Open note dialog with edit configuration.
   const editNote = () => {
 
+  }
+
+  const saveNote = async () => {
+
+    setNoteSavingIndicator(true)
+
+    // Save note remotely.
+    var saved = false
+    if (newNote) {
+      saved = await insertNote(coach.Token, coach.Id, clientData.Id, noteTitle, noteRichText)
+      // Add note to list locally.
+      var newNotes = JSON.parse(JSON.stringify(notes))
+      newNotes.push(saved)
+      setNotes(newNotes)
+    } else {
+      saved = await updateNote(coach.Token, coach.Id, clientData.Id, noteTitle, noteRichText)
+    }
+
+    // Show saved text and fade.
   }
 
   const navToProfileFromNoteForm = () => {
@@ -732,7 +764,7 @@ export default function AllClients() {
               </View>
               {notes.length == 0 && (<Text style={styles.noClients}>No notes yet.</Text>)
               || (<>
-              {notes.map((note, index) => {
+              {notes.slice(0).reverse().map((note, index) => {
                 //
                 return (<View key={'notes_' + index}></View>)
               })}
@@ -742,7 +774,7 @@ export default function AllClients() {
           </>)}
 
           {showNoteForm && (<View style={styles.bodyContainer}>
-            <View style={[styles.clientRowTouchControls,{marginBottom:10}]}>
+            <View style={[styles.clientRowTouchControls,{marginBottom:10,borderBottomColor:colorsLight.headerBorder,borderBottomWidth:1}]}>
               <Icon
                 name='chevron-back'
                 type='ionicon'
@@ -753,13 +785,30 @@ export default function AllClients() {
               />
               <Text style={[styles.bodySubtitle,{fontSize:24}]}>{newNote && 'New' || 'Edit'} Note</Text>
             </View>
-            <Text style={styles.inputLabel}>Note Title</Text>
+            <Text style={[styles.inputLabel,{marginBottom:3}]}>Note Title</Text>
             <TextInput 
               style={styles.inputStyle}
-              placeholder='Title'
+              placeholder='ex. Session #5 Notes'
               onChangeText={(t) => setNoteTitle(t)}
               value={noteTitle}
             />
+            <Text style={[styles.inputLabel,{marginTop:10,marginBottom:2}]}>Body</Text>
+            <JoditEditor
+             	ref={editor}
+              value={noteRichText}
+              config={editorConfig}
+ 		          tabIndex={1}
+ 		          onBlur={newContent => setNoteRichText(newContent)}
+            />
+            <View style={styles.noteSubmitButtonRow}>
+              <Button 
+                title='Save'
+                buttonStyle={styles.filterApplyButton}
+                containerStyle={[styles.filterButtonContainer,{marginLeft:0,marginTop:20,padding:0}]}
+                onPress={saveNote}
+                disabled={noteSavingIndicator}
+              />
+            </View>
           </View>)}
 
         </View>

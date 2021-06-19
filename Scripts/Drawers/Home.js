@@ -16,10 +16,10 @@ import { set, get, getTTL, ttl } from '../Storage.js'
 const Drawer = createDrawerNavigator()
 
 // Items.
-import Overview from '../Overview.js'
 import Payments from '../Payments.js'
 import AllClients from '../AllClients.js'
 import InviteClients from '../InviteClients.js'
+import FeatureBoard from '../FeatureBoard.js'
 
 export default function Home() {
   const linkTo = useLinkTo();
@@ -71,24 +71,6 @@ export default function Home() {
         }
       }}
     >
-      <Drawer.Screen name="Overview" component={Overview}
-        options={{
-          title:'Overview - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='apps'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Overview</Text>)
-          }
-        }}
-      />
       <Drawer.Screen name="AllClients" component={AllClients}
         options={{
           title:'Clients - CoachSync',
@@ -140,6 +122,24 @@ export default function Home() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Payments</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="FeatureBoard" component={FeatureBoard}
+        options={{
+          title:'Feature Board - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='bulb-outline'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Feature Board</Text>)
           }
         }}
       />

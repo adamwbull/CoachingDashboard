@@ -40,7 +40,7 @@ export default function Welcome() {
       if (r.RegistrationCompleted == 0) {
         linkTo('/sign-up')
       } else {
-        linkTo('/home')
+        linkTo('/clients')
       }
     }
   }, []);
@@ -95,7 +95,7 @@ export default function Welcome() {
 
       } else {
         set('Coach', success, ttl)
-        linkTo('/home')
+        linkTo('/clients')
         window.location.reload(true); 
       }
     } else {
@@ -149,7 +149,7 @@ export default function Welcome() {
         {errorText && (<View style={messageBox.errorBox}>
             <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
             <Text style={messageBox.text}>{errorText} We can help you <Link to='/forgot-password' style={welcome.linkBlend}>recover your password</Link>.
-            {attemptsLeft !== null && attemptsLeft > 0 && attemptsLeft < 10 && (<View>{"\n"}{"\n"}<Text style={[messageBox.text]}>For security reasons, after <Text style={bold}>{attemptsLeft}</Text> more failed login attempts, you'll have to wait <Text style={bold}>30 minutes</Text> before trying again.</Text></View>)}
+            {attemptsLeft !== null && attemptsLeft > 0 && attemptsLeft < 10 && (<View>{"\n"}{"\n"}<Text style={[messageBox.text]}>For security reasons, after <Text style={bold}>{attemptsLeft}</Text> more failed login attempts, you&apos;ll have to wait <Text style={bold}>30 minutes</Text> before trying again.</Text></View>)}
             </Text>
           </View>) || (<View></View>)}
         <Text style={welcome.inputLabel}>Email</Text>

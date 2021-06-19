@@ -562,7 +562,7 @@ export default function SignUp() {
 
   }
   const dashboard = async () => {
-    linkTo('/home')
+    linkTo('/clients')
   }
 
   return (<ScrollView contentContainerStyle={[signUp.container,scrollStyle]} scrollEnabled={true} onLayout={onLayout} onScroll={onScroll}>

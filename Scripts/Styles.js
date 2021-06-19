@@ -3167,6 +3167,11 @@ export const allClientsLight = StyleSheet.create({
     fontSize:20,
     width:'100%',
   },
+  noteSubmitButtonRow: {
+    flexDirection:'row',
+    justifyContent:'flex-end',
+    alignItems:'center'
+  }
 })
 
 export const inviteClientsLight = StyleSheet.create({

@@ -51,27 +51,18 @@ export default function FeatureBoard() {
 
     setFeatureRequests(data[0])
     setReleaseNotes(data[1])
-    
+
   }
 
   useEffect(() => {
-    console.log('Welcome to all clients.')
+    console.log('Welcome to features.')
     if (coach != null) {
-      refreshClients(coach.Id, coach.Token)
-      // Stats info calculations. //
-      var plan = coach.Plan
-      if (plan == 1) {
-        setActiveClientCountSuffix(' / 10 Active')
-      } else if (plan == 2) {
-        setActiveClientCountSuffix(' Active')
-      }
-      // ------------------------ //
       setTimeout(() => {
         setActivityIndicator(false)
-        setShowFilters(true)
-        setShowClients(true)
       }, 500)
     }
   }, [])
+
+  return (<></>)
 
 }

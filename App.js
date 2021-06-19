@@ -21,10 +21,10 @@ const linking = {
         screens: {
           Home: {
             screens: {
-              Overview: 'home',
               AllClients: 'clients',
               InviteClients: 'invite-clients',
-              Payments: 'payments'
+              Payments: 'payments',
+              FeatureBoard: 'features'
             }
           },
           MobileApp: {
