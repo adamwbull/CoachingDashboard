@@ -11,11 +11,12 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { parseSimpleDateText, sqlToJsDate, getClientsData } from './API.js'
+import { parseSimpleDateText, sqlToJsDate, getClientsData, getNotes, insertNote, updateNote, currentDate } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
 import JoditEditor from "jodit-react";
+import { useSpring, animated } from 'react-spring';
 
 import userContext from './Context.js'
 
@@ -49,13 +50,18 @@ export default function AllClients() {
   const [bulkAction, setBulkAction] = useState('')
   const [controlSquareSelected, setControlSquareSelected] = useState(false)
 
+  // Assign task variables.
+  const [assignClients, setAssignClients] = useState([])
+
   // Client profile variables.
   const [clientData, setClientData] = useState({})
   const [notes, setNotes] = useState([])
+  const [tasks, setTasks] = useState([])
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
 
   // Notes variables.
   const [newNote, setNewNote] = useState(false)
+  const [noteId, setNoteId] = useState(0)
   const [noteTitle, setNoteTitle] = useState('')
   const editor = useRef(null)
   const editorConfig = {
@@ -68,7 +74,7 @@ export default function AllClients() {
 	}
   const [noteRichText, setNoteRichText] = useState('')
   const [noteSavingIndicator, setNoteSavingIndicator] = useState(false)
-
+  const [savedAnim, setSavedAnim] = useState(false)
   // Filtering variables.
   const [searchTags, setSearchTags] = useState([])
   const [email, setEmail] = useState('')
@@ -197,17 +203,20 @@ export default function AllClients() {
 
   }
 
+  // Assign tasks functions.
+
   // Client profile functions.
-  const refreshClientData = async () => {
+  const refreshClientData = async (clientId) => {
     // Get notes.
+    var ns = await getNotes(clientId, coach.Id, coach.Token)
+    setNotes(ns)
   }
 
   const viewClientProfile = (index) => {
-    // Start by getting client-specific data for this user.
-    refreshClientData()
-    // Now get the data we already have and do normal switch view logic.
+    // Get the data we already have and do normal switch view logic.
     var newClients = JSON.parse(JSON.stringify(clients))
     newClients[index].Index = index
+    refreshClientData(newClients[index].Id)
     setClientData(newClients[index])
     setShowClients(false)
     setShowFilters(false)
@@ -218,12 +227,18 @@ export default function AllClients() {
     }, 500)
   }
 
-  // Redirect to Messages screen with props.
+  const viewAssignTask = (index) => {
+    var newClients = JSON.parse(JSON.stringify(clients))
+    var newAssignClients = JSON.parse(JSON.stringify(assignClients))
+    newAssignClients.push(newClients[index])
+    setAssignClients(newAssignClients)
+
+  }
+
   const openMessages = () => {
     
   }
 
-  // Present box to confirm action of toggling a single active status.
   const confirmSingleToggleActive = () => {
 
   }
@@ -231,6 +246,7 @@ export default function AllClients() {
   // Notes functions.
   const addNewNote = () => {
     setNewNote(true)
+    setNoteId(0)
     setNoteTitle('')
     setNoteRichText('')
     setShowClientProfile(false)
@@ -241,8 +257,18 @@ export default function AllClients() {
     }, 500)
   }
 
-  const editNote = () => {
-
+  const editNote = (index) => {
+    var n = notes[index]
+    setNewNote(false)
+    setNoteId(n.Id)
+    setNoteTitle(n.Title)
+    setNoteRichText(n.RichText)
+    setShowClientProfile(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowNoteForm(true)
+    }, 500)
   }
 
   const saveNote = async () => {
@@ -253,16 +279,44 @@ export default function AllClients() {
     var saved = false
     if (newNote) {
       saved = await insertNote(coach.Token, coach.Id, clientData.Id, noteTitle, noteRichText)
+      console.log('insert ret:',saved)
+      setSavedAnim(true)
+      setNoteSavingIndicator(false)
+      setNoteId(saved)
+      setNewNote(false)
       // Add note to list locally.
       var newNotes = JSON.parse(JSON.stringify(notes))
-      newNotes.push(saved)
+      var date = currentDate()
+      var ins = {}
+      ins.Id = saved
+      ins.Title = noteTitle
+      ins.RichText = noteRichText
+      ins.Created = date
+      ins.LastUpdated = date
+      newNotes.unshift(ins)
       setNotes(newNotes)
     } else {
-      saved = await updateNote(coach.Token, coach.Id, clientData.Id, noteTitle, noteRichText)
+      saved = await updateNote(coach.Token, coach.Id, noteId, noteTitle, noteRichText)
+      setSavedAnim(true)
+      setNoteSavingIndicator(false)
     }
 
     // Show saved text and fade.
+    setTimeout(() => {
+      setSavedAnim(false)
+    }, 500)
   }
+
+  // Animations and copy functions.
+  const AnimatedText = animated(Text);
+
+  const fadeStylesSaved = useSpring({
+    from: { opacity: 0,textAlign:'center',fontFamily:'Poppins',fontSize:18,color:btnColors.success },
+    to: {
+      textAlign:'center',fontFamily:'Poppins',fontSize:18,color:btnColors.success,
+      opacity: savedAnim ? 1 : 0
+    }
+  })
 
   const navToProfileFromNoteForm = () => {
     setShowNoteForm(false)
@@ -671,6 +725,7 @@ export default function AllClients() {
                     iconRight
                     buttonStyle={styles.clientAssignTask}
                     titleStyle={styles.clientRowButtonTitle}
+                    onPress={() => viewAssignTask(index)}
                   />
                   <Button 
                     title='Profile'
@@ -697,81 +752,137 @@ export default function AllClients() {
 
           {showClientProfile && (<>
           <View style={styles.bodyRow}>
-            <View style={styles.bodyContainer}>
-              <View style={styles.clientInfoRow}>
-                <View style={styles.clientInfoHeaderContainer}>
-                  <Image source={{ uri: clientData.Avatar }} style={styles.clientImage} />
-                  <View style={styles.clientInfoHeader}>
-                    <Text style={[styles.bodySubtitle,{lineHeight:20}]}>{clientData.Id == coach.Id && clientData.FirstName + ' ' + clientData.LastName + ' (You)' || clientData.FirstName + ' ' + clientData.LastName}</Text>
-                    <Text style={styles.clientJoinedTitle}>Joined {parseSimpleDateText(sqlToJsDate(clientData.Created))}</Text>
+            <View style={styles.bodyColumn}>
+              <View style={styles.bodyContainer}>
+                <View style={styles.clientInfoRow}>
+                  <View style={styles.clientInfoHeaderContainer}>
+                    <Icon
+                      name='chevron-back'
+                      type='ionicon'
+                      size={30}
+                      color={colors.secondaryTextColor}
+                      style={{marginRight:0}}
+                      onPress={navToMainFromProfile}
+                    />
+                    <Image source={{ uri: clientData.Avatar }} style={styles.clientImage} />
+                    <View style={styles.clientInfoHeader}>
+                      <Text style={[styles.bodySubtitle,{lineHeight:20}]}>{clientData.Id == coach.Id && clientData.FirstName + ' ' + clientData.LastName + ' (You)' || clientData.FirstName + ' ' + clientData.LastName}</Text>
+                      <Text style={styles.clientJoinedTitle}>Joined {parseSimpleDateText(sqlToJsDate(clientData.Created))}</Text>
+                    </View>
                   </View>
                 </View>
+                <View style={styles.clientInformation}>
+                  <View style={styles.clientInformationRow}>
+                    <Text style={styles.clientInformationRowTitle}>Prompts Completed</Text>
+                    <Text style={styles.clientInformationRowText}>{clientData.PromptsCompletedCnt}</Text>
+                  </View>
+                  <View style={styles.clientInformationRow}>
+                    <Text style={styles.clientInformationRowTitle}>Concepts Completed</Text>
+                    <Text style={styles.clientInformationRowText}>{clientData.ConceptsCompletedCnt}</Text>
+                  </View>
+                  <View style={styles.clientInformationRow}>
+                    <Text style={styles.clientInformationRowTitle}>Email</Text>
+                    <Text style={styles.clientInformationRowText}>{clientData.Email}</Text>
+                  </View>
+                  <View style={[styles.clientInformationRow,{borderBottomWidth:0}]}>
+                    <Text style={styles.clientInformationRowTitle}>Birthday</Text>
+                    <Text style={styles.clientInformationRowText}>{parseSimpleDateText(sqlToJsDate(clientData.DoB))}</Text>
+                  </View>
+                </View>
+                <View style={styles.clientButtonRow}>
+                  <Button 
+                    title='Toggle Active'
+                    buttonStyle={clientData.Active && styles.clientButtonActive || styles.clientButtonInactive}
+                    containerStyle={styles.clientButtonContainer}
+                    titleStyle={clientData.Active && styles.clientButtonTitleActive || styles.clientButtonTitleInactive}
+                    onPress={confirmSingleToggleActive}
+                  />
+                  <Button 
+                    title='Send Message'
+                    buttonStyle={styles.clientButton}
+                    containerStyle={styles.clientButtonContainer}
+                    titleStyle={styles.clientButtonTitle}
+                    onPress={openMessages}
+                  />
+                </View>
               </View>
-              <View style={styles.clientInformation}>
-                <View style={styles.clientInformationRow}>
-                  <Text style={styles.clientInformationRowTitle}>Prompts Completed</Text>
-                  <Text style={styles.clientInformationRowText}>{clientData.PromptsCompletedCnt}</Text>
+              <View style={[styles.bodyContainer]}>
+                <View style={styles.clientNotesHeader}>
+                  <Text style={[styles.clientNotesHeaderTitle]}>Client Notes</Text>
+                  <Button 
+                    title='New Note'
+                    icon={
+                      <Icon 
+                        name='add'
+                        type='ionicon'
+                        size={20}
+                        color='#fff'
+                      />
+                    }
+                    buttonStyle={styles.notesAddNewButton}
+                    containerStyle={styles.notesAddNewButtonContainer}
+                    titleStyle={styles.notesAddNewButtonTitle}
+                    onPress={addNewNote}
+                    iconRight
+                  />
                 </View>
-                <View style={styles.clientInformationRow}>
-                  <Text style={styles.clientInformationRowTitle}>Concepts Completed</Text>
-                  <Text style={styles.clientInformationRowText}>{clientData.ConceptsCompletedCnt}</Text>
-                </View>
-                <View style={styles.clientInformationRow}>
-                  <Text style={styles.clientInformationRowTitle}>Email</Text>
-                  <Text style={styles.clientInformationRowText}>{clientData.Email}</Text>
-                </View>
-                <View style={[styles.clientInformationRow,{borderBottomWidth:0}]}>
-                  <Text style={styles.clientInformationRowTitle}>Birthday</Text>
-                  <Text style={styles.clientInformationRowText}>{parseSimpleDateText(sqlToJsDate(clientData.DoB))}</Text>
-                </View>
-              </View>
-              <View style={styles.clientButtonRow}>
-                <Button 
-                  title='Toggle Active'
-                  buttonStyle={clientData.Active && styles.clientButtonActive || styles.clientButtonInactive}
-                  containerStyle={styles.clientButtonContainer}
-                  titleStyle={clientData.Active && styles.clientButtonTitleActive || styles.clientButtonTitleInactive}
-                  onPress={confirmSingleToggleActive}
-                />
-                <Button 
-                  title='Send Message'
-                  buttonStyle={styles.clientButton}
-                  containerStyle={styles.clientButtonContainer}
-                  titleStyle={styles.clientButtonTitle}
-                  onPress={openMessages}
-                />
+                {notes.length == 0 && (<Text style={styles.noClients}>No notes yet.</Text>)
+                || (<>
+                {notes.map((note, index) => {
+                  //
+                  return (<TouchableOpacity 
+                    key={'notes_' + index} style={styles.noteRow}
+                    onPress={() => editNote(index)}
+                  >
+                    <Text style={styles.noteTitle}>{note.Title}</Text>
+                    <View style={styles.noteDates}>
+                      {note.Created != note.LastUpdated && (<Text style={styles.noteDate}>Updated {parseSimpleDateText(sqlToJsDate(note.LastUpdated))}</Text>) ||
+                      (<Text style={styles.noteDate}>Created {parseSimpleDateText(sqlToJsDate(note.Created))}</Text>)}
+                    </View>
+                    <Icon 
+                      name='chevron-forward'
+                      type='ionicon'
+                      size={30}
+                      color={colors.mainTextColor}
+                    />
+                  </TouchableOpacity>)
+                })}
+                </>)}
               </View>
             </View>
-            <View style={[styles.bodyContainer,{marginLeft:20}]}>
-              <View style={styles.clientNotesHeader}>
-                <Text style={[styles.clientNotesHeaderTitle]}>Client Notes</Text>
-                <Button 
-                  title='New Note'
-                  icon={
-                    <Icon 
-                      name='add'
-                      type='ionicon'
-                      size={20}
-                      color='#fff'
-                    />
-                  }
-                  buttonStyle={styles.notesAddNewButton}
-                  containerStyle={styles.notesAddNewButtonContainer}
-                  titleStyle={styles.notesAddNewButtonTitle}
-                  onPress={addNewNote}
-                  iconRight
-                />
+            <View style={styles.bodyColumn}>
+              <View style={[styles.bodyContainer]}>
+                <View style={styles.clientNotesHeader}>
+                  <Text style={[styles.clientNotesHeaderTitle]}>Client Tasks</Text>
+                  <Button 
+                    title='Assign Task'
+                    icon={
+                      <Icon 
+                        name='document'
+                        type='ionicon'
+                        size={20}
+                        color='#fff'
+                      />
+                    }
+                    buttonStyle={styles.notesAddNewButton}
+                    containerStyle={styles.notesAddNewButtonContainer}
+                    titleStyle={styles.notesAddNewButtonTitle}
+                    onPress={addNewNote}
+                    iconRight
+                  />
+                </View>
+                {tasks.length == 0 && (<Text style={styles.noClients}>No tasks yet.</Text>)
+                || (<>
+                {tasks.map((task, index) => {
+                  //
+                  return (<View key={'task_'+index}>
+                  </View>)
+                })}
+                </>)}
               </View>
-              {notes.length == 0 && (<Text style={styles.noClients}>No notes yet.</Text>)
-              || (<>
-              {notes.slice(0).reverse().map((note, index) => {
-                //
-                return (<View key={'notes_' + index}></View>)
-              })}
-              </>)}
             </View>
           </View>
-          </>)}
+          </>)} 
 
           {showNoteForm && (<View style={styles.bodyContainer}>
             <View style={[styles.clientRowTouchControls,{marginBottom:10,borderBottomColor:colorsLight.headerBorder,borderBottomWidth:1}]}>
@@ -802,13 +913,41 @@ export default function AllClients() {
             />
             <View style={styles.noteSubmitButtonRow}>
               <Button 
-                title='Save'
+                title={newNote && 'Save' || 'Update'}
                 buttonStyle={styles.filterApplyButton}
                 containerStyle={[styles.filterButtonContainer,{marginLeft:0,marginTop:20,padding:0}]}
                 onPress={saveNote}
                 disabled={noteSavingIndicator}
               />
             </View>
+            {noteSavingIndicator && (<ActivityIndicatorView />)}
+            <AnimatedText style={fadeStylesSaved}>Saved!</AnimatedText>
+          </View>)}
+
+          {showAssignTask && (<View style={{flexDirection:'row'}}>
+            <View style={{flex:1}}></View>
+            <View style={[styles.bodyContainer,{flex:2}]}>
+              <Text style={styles.bodySubtitle}>Assign Task</Text>
+              <Text style={styles.bodyDesc}>
+                Currently assigning a task to
+                {assignClients.map((c, i) => {
+                  var comma = ''
+                  if (i != assignClients.length-1) {
+                    comma = ','
+                  }
+                  
+                  if (i == 3) {
+                    var count = assignClients.length+1-i
+                    return (<Text>{' and '+count+' more.'}</Text>)
+                  } else if (i < 3) {
+                    return (<Text key={'assign_'+i}>{' '+c.FirstName+' '+c.LastName+comma}</Text>)
+                  } else {
+                    return (<></>)
+                  }
+                })}
+              </Text>
+            </View>
+            <View style={{flex:1}}></View>
           </View>)}
 
         </View>

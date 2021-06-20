@@ -2797,6 +2797,10 @@ export const allClientsLight = StyleSheet.create({
     flexDirection:'row',
     alignItems:'flex-start',
   },
+  bodyColumn: {
+    flexDirection:'column',
+    flex:1,
+  },
   bodyContainer: {
     backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
@@ -2983,7 +2987,9 @@ export const allClientsLight = StyleSheet.create({
     borderRadius:100
   },
   clientAvatarContainer: {
-    padding:10
+    padding:10,
+    flexDirection:'row',
+    alignItems:'center'
   },
   clientRowTouchIcon: {
     width:40,
@@ -3147,6 +3153,30 @@ export const allClientsLight = StyleSheet.create({
   clientNotesHeaderTitle: {
     fontSize:20,
     fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  noteRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    paddingBottom:10,
+    paddingTop:10,
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  noteTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    flex:1,
+  },
+  noteDates: {
+    justifyContent:'center',
+    flex:1
+  },
+  noteDate: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    lineHeight:16,
     color:colorsLight.mainTextColor
   },
   notesAddNewButton: {

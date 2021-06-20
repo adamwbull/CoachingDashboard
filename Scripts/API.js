@@ -187,6 +187,83 @@ export async function check() {
 
 */
 
+export async function getNotes(clientId, coachId, token) {
+
+  var ret = false
+
+  console.log('Getting notes...')
+  const res = await fetch(url + '/notes/' + clientId + '/' + coachId + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Notes found!')
+    ret = payload
+  } else {
+    console.log('No notes found!')
+    ret = []
+  }
+
+  return ret
+
+}
+
+
+export async function updateNote(token, coachId, id, title, richText) {
+
+  var ret = false
+  var arr = {Token:token, CoachId:coachId, Id:id, Title:title, RichText:richText}
+
+  console.log('Updating note...')
+  const res = await fetch(url + '/notes/update', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload[1].affectedRows > 0) {
+    console.log('Note modified!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function insertNote(token, coachId, clientId, title, richText) {
+
+  var ret = false
+  var arr = {Token:token, CoachId:coachId, ClientId:clientId, Title:title, RichText:richText}
+
+  console.log('Inserting note...')
+  const res = await fetch(url + '/notes/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+  console.log('note creation payload:',payload)
+
+  if (payload[1].affectedRows > 0) {
+    console.log('Note created!')
+    ret = payload[1].insertId
+  }
+
+  return ret
+
+}
+
 export async function updatePaymentMethod(token, id, cus, sub, pm) {
 
   var ret = false
