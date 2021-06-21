@@ -3201,6 +3201,12 @@ export const allClientsLight = StyleSheet.create({
     flexDirection:'row',
     justifyContent:'flex-end',
     alignItems:'center'
+  },
+  assignTaskButtonsContainer: {
+    padding:10
+  },
+  assignTaskButtonContainer: {
+    marginBottom:10
   }
 })
 

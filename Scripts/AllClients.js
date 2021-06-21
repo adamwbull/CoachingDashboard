@@ -12,7 +12,7 @@ import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import { parseSimpleDateText, sqlToJsDate, getClientsData, getNotes, insertNote, updateNote, currentDate } from './API.js'
-import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
+import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
 import JoditEditor from "jodit-react";
@@ -52,7 +52,11 @@ export default function AllClients() {
 
   // Assign task variables.
   const [assignClients, setAssignClients] = useState([])
-
+  const [allInProgram, setAllInProgram] = useState(false)
+  const [showAssignTaskButtons, setShowAssignTaskButtons] = useState(true)
+  const [showSelectProgramToAdvance, setShowSelectProgramToAdvance] = useState(false)
+  const [programsUsersAreIn, setProgramsUsersAreIn] = useState([])
+  
   // Client profile variables.
   const [clientData, setClientData] = useState({})
   const [notes, setNotes] = useState([])
@@ -228,11 +232,19 @@ export default function AllClients() {
   }
 
   const viewAssignTask = (index) => {
+    setShowFilters(false)
+    setShowClients(false)
+    setShowClientProfile(false)
+    setActivityIndicator(true)
     var newClients = JSON.parse(JSON.stringify(clients))
     var newAssignClients = JSON.parse(JSON.stringify(assignClients))
     newAssignClients.push(newClients[index])
     setAssignClients(newAssignClients)
-
+    setAllInProgram(false)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowAssignTask(true)
+    }, 150)
   }
 
   const openMessages = () => {
@@ -867,7 +879,7 @@ export default function AllClients() {
                     buttonStyle={styles.notesAddNewButton}
                     containerStyle={styles.notesAddNewButtonContainer}
                     titleStyle={styles.notesAddNewButtonTitle}
-                    onPress={addNewNote}
+                    onPress={() => viewAssignTask(clientData.Index)}
                     iconRight
                   />
                 </View>
@@ -927,25 +939,63 @@ export default function AllClients() {
           {showAssignTask && (<View style={{flexDirection:'row'}}>
             <View style={{flex:1}}></View>
             <View style={[styles.bodyContainer,{flex:2}]}>
-              <Text style={styles.bodySubtitle}>Assign Task</Text>
-              <Text style={styles.bodyDesc}>
+              <Text style={[styles.bodySubtitle,{textAlign:'center',fontSize:22}]}>Assign Task</Text>
+              <Text style={[styles.bodyDesc,{textAlign:'center',fontSize:18,marginTop:10,marginBottom:10}]}>
                 Currently assigning a task to
                 {assignClients.map((c, i) => {
                   var comma = ''
                   if (i != assignClients.length-1) {
                     comma = ','
                   }
+                  var period = ''
+                  if (i == assignClients.length-1) {
+                    period = '.'
+                  }
                   
                   if (i == 3) {
                     var count = assignClients.length+1-i
                     return (<Text>{' and '+count+' more.'}</Text>)
                   } else if (i < 3) {
-                    return (<Text key={'assign_'+i}>{' '+c.FirstName+' '+c.LastName+comma}</Text>)
+                    return (<Text key={'assign_'+i}>{' '+c.FirstName+' '+c.LastName+comma+period}</Text>)
                   } else {
                     return (<></>)
                   }
                 })}
               </Text>
+              {showAssignTaskButtons && (<View style={styles.assignTaskButtonsContainer}>
+                <Button 
+                  title='Assign Single Task'
+                  buttonStyle={styles.assignTaskButton}
+                  containerStyle={styles.assignTaskButtonContainer}
+                  onPress={() => {}}
+                />
+                {allInProgram && (<Button 
+                  title='Advance To Next Program Task'
+                  buttonStyle={styles.assignTaskButton}
+                  containerStyle={styles.assignTaskButtonContainer}
+                  onPress={() => {}}
+                />) || (<Popup 
+                  position='top center'
+                  wide='very'
+                  content={assignClients.length > 1 && 'Not all users are enrolled in a program.' || 'This user is not enrolled in a program.'}
+                  trigger={<Button 
+                    title='Advance To Next Program Task'
+                    buttonStyle={styles.assignTaskButton}
+                    onPress={() => {}}
+                    disabled={true}
+                  />}
+                />)}
+              </View>)}
+              {showSelectProgramToAdvance && (<View>
+                {programs.map((program, index) => {
+                  return (<View key={'programAssign_'+index}>
+                    <Text style={styles.bodySubtitle}>{program.Title}</Text>
+                    <View>
+                      {assignProgramAvatars.map()}
+                    </View>
+                  </View>)
+                })}
+              </View>)}
             </View>
             <View style={{flex:1}}></View>
           </View>)}
