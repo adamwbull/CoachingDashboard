@@ -38,6 +38,7 @@ export default function Prompts() {
   const [showMain, setMain] = useState(false)
   const [scrollToEnd, setScrollToEnd] = useState(false)
   const [showAddingPDF, setShowAddingPDF] = useState(false)
+  
   // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
   const [showPromptOptions, setShowPromptOptions] = useState(-1)
@@ -64,12 +65,14 @@ export default function Prompts() {
   const [videoActivityIndicator, setVideoActivityIndicator] = useState(false)
   const [createButtonDisabled, setCreateButtonDisabled] = useState(false)
   const [createButtonActivityIndicator, setCreateButtonActivityIndicator] = useState(false)
+  
   // Text Prompts data to upload.
   const [textPromptTitle, setTextPromptTitle] = useState('')
   const [promptType, setPromptType] = useState(0)
   const [textPromptText, setTextPromptText] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [videoType, setVideoType] = useState(-1) // 0 - YT, 1 - Upload
+  
   // Text Prompts builder data
   const [tempVideoUrl, setTempVideoUrl] = useState('')
   const [tempVideoFile, setTempVideoFile] = useState('')
@@ -141,7 +144,9 @@ export default function Prompts() {
   const [showViewPDF, setShowViewPDF] = useState(false)
   const [viewPDF, setViewPDF] = useState({})
   const [viewSigned, setViewSigned] = useState([])
-  
+  const [showPDFOptions, setShowPDFOptions] = useState(-1)
+  const [deletePDFIndex, setDeletePDFIndex] = useState(-1)
+
   // PDF data.
   const [pdfTitle, setPDFTitle] = useState('')
   const [pdf, setPDF] = useState(false)
@@ -1166,6 +1171,15 @@ export default function Prompts() {
     }
   }
 
+  const viewPDFTrigger = async (i) => {
+    setMain(false)
+    setViewPDF(contracts[i])
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowViewPDF(true)
+    },500)
+  }
 
   return (<ScrollView contentContainerStyle={styles.scrollView} scrollToEnd={scrollToEnd}>
     <View style={styles.container}>
@@ -1221,8 +1235,8 @@ export default function Prompts() {
                       promptIcon = 'videocam'
                     }
                     var name = prompt.Title
-                    if (name.length > 13) {
-                      name = name.slice(0,13) + '...'
+                    if (name.length > 17) {
+                      name = name.slice(0,17) + '...'
                     }
                     var text = prompt.Text
                     if (text.length > 80) {
@@ -1296,8 +1310,8 @@ export default function Prompts() {
                   {surveys.map((survey, index) => {
                     var promptIcon = 'clipboard-outline'
                     var name = survey.Title
-                    if (name.length > 13) {
-                      name = name.slice(0,13) + '...'
+                    if (name.length > 17) {
+                      name = name.slice(0,17) + '...'
                     }
                     var text = survey.Text
                     if (text.length > 80) {
@@ -1380,8 +1394,8 @@ export default function Prompts() {
                     {payments.map((payment, index) => {
                       var icon = 'card-outline'
                       var name = payment.Title
-                      if (name.length > 13) {
-                        name = name.slice(0,13) + '...'
+                      if (name.length > 17) {
+                        name = name.slice(0,17) + '...'
                       }
                       var text = survey.Text
                       if (text.length > 80) {
@@ -1451,25 +1465,18 @@ export default function Prompts() {
                   containerStyle={styles.promptAddButtonContainer}
                   onPress={addContract} />
                 </View>
-                {contracts.length > 0 && (<View>
-                </View>) || (<View style={styles.helpBox}>
-                  {contractsDisabled && (<Text style={styles.helpBoxError}><Text style={styles.proPlanText}>Professional Plan</Text> is needed to use this feature.</Text>) || (<></>)}
-                  <Text style={styles.helpBoxText}>Contracts that can be signed in-app by Clients.{"\n"}Assign directly to Clients or include in a Program.</Text>
-                </View>) || 
-                (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                {contracts.length > 0 &&(<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
                   {contracts.map((contract, index) => {
-                    var conceptIcon = 'document'
                     var name = contract.Title
-                    if (name.length > 13) {
-                      name = name.slice(0,13) + '...'
+                    if (name.length > 17) {
+                      name = name.slice(0,17) + '...'
                     }
-                    var text = concept.Title
                     return (<View style={styles.taskBox} key={'contract_'+index}>
                       <View style={styles.taskPreview}>
                         <View style={styles.taskPreviewHeader}>
                           <View style={styles.taskPreviewHeaderIcon}>
                             <Icon
-                              name={conceptIcon}
+                              name={'document'}
                               type='ionicon'
                               size={22}
                               color={colors.mainTextColor}
@@ -1477,7 +1484,13 @@ export default function Prompts() {
                           </View>
                           <Text style={styles.taskPreviewTitle}>{name}</Text>
                         </View>
-                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Contract will be lost. Are you sure you want to continue?</Text></>) || 
+                        (<><Document file={contract.File}>
+                          <Page
+                            pageNumber={1}
+                            width={200}
+                          />
+                        </Document></>)}
                       </View>
                       {deletePDFIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePDFTrigger(index)}>
                         <Text style={styles.taskButtonText}>Confirm</Text>
@@ -1485,7 +1498,7 @@ export default function Prompts() {
                       <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePDFIndex(-1)}>
                         <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
                       </TouchableOpacity></View></>)
-                      || (<>
+                      || (<> 
                         {showPDFOptions == index &&
                           (<>
                             <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPDFOptions(-1)}>
@@ -1508,7 +1521,10 @@ export default function Prompts() {
                       </>)}
                     </View>)
                   })}
-                </ScrollView>)}
+                </ScrollView>) || (<View style={styles.helpBox}>
+                  {contractsDisabled && (<Text style={styles.helpBoxError}><Text style={styles.proPlanText}>Professional Plan</Text> is needed to use this feature.</Text>) || (<></>)}
+                  <Text style={styles.helpBoxText}>Contracts that can be signed in-app by Clients.{"\n"}Assign directly to Clients or include in a Program.</Text>
+                </View>)}
               </View>
             </View>
           </>)}

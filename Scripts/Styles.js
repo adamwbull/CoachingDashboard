@@ -865,7 +865,7 @@ export const promptsLight = StyleSheet.create({
   taskPreviewTitle: {
     flex:1,
     marginLeft:10,
-    fontSize:16,
+    fontSize:13,
     color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold'
   },
