@@ -1511,6 +1511,124 @@ export const promptsLight = StyleSheet.create({
     textAlign:'right',
     fontSize:16,
     color:'#fff'
+  },
+  newContractContainer: {
+    padding:20,
+    borderRadius:10,
+    marginBottom:20,
+    backgroundColor:colorsLight.mainBackground,
+  },
+  newContractHeader: {
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
+    paddingBottom:5,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  newContractDescTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    paddingLeft:5,
+    paddingRight:10,
+  },
+  newContractBody: {
+    padding:10,
+    marginRight:10,
+    flex:2,
+  },
+  newContractVideoSection: {
+    flex:2,
+    paddingLeft:10,
+    paddingRight:10,
+    marginLeft:10,
+  },
+  newContractTitleLabel: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:18,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  newContractVideoEmpty: {
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    justifyContent:'center',
+    alignItems:'center',
+    flex:1
+  },
+  newContractVideoEmptyText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  newContractFooter: {
+    flex:1,
+  },
+  newContractAddButtonTitle: {
+    fontSize:16,
+    fontFamily:'Poppins'
+  },
+  newContractAddButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  newContractAddButtonContainer: {
+    width:'60%',
+    paddingLeft:10,
+    paddingRight:20,
+    marginTop:20
+  },
+  showContractOptionsChooseUpload: {
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:10,
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    height:250,
+    width:'100%',
+    marginTop:10,
+    marginRight:10
+  },
+  showContractOptionsChooseUploadTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showContractOptionsChooseUploadTypes: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  showContractOptionsChooseUploadSize: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    textAlign:'center',
+    color:colorsLight.secondaryTextColor
+  },
+  uploadFileTitleButton: {
+    backgroundColor:btnColors.success,
+    borderRadius:50,
+    padding:10,
+  },
+  uploadFileTitleButtonContainer: {
+    padding:5
   }
 });
 
@@ -3207,6 +3325,13 @@ export const allClientsLight = StyleSheet.create({
   },
   assignTaskButtonContainer: {
     marginBottom:10
+  },
+  taskButtonsList: {
+    padding:10
+  },
+  taskButton: {
+    backgroundColor:btnColors.success,
+    borderRadius:10
   }
 })
 

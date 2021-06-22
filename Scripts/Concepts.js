@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-duplicate-props */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useRef } from 'react'
 import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'

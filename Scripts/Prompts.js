@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useRef, useState } from 'react'
@@ -12,14 +13,16 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getPayments, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, getSurveys, createMeasurementSurvey, createSurveyItem, getPromptResponses, getTextPrompts, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt } from './API.js'
-import { Popup, Dropdown, Tab } from 'semantic-ui-react'
+import { getPromptsData, getContracts, getPayments, getSurveys, getTextPrompts, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, createMeasurementSurvey, createSurveyItem, getPromptResponses, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt, createContract, uploadPDF } from './API.js'
+import { Popup, Dropdown, Tab, Checkbox } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 import { Slider } from 'react-native-elements';
 import { ResponsivePie, } from '@nivo/pie'
 import { ResponsiveBar } from '@nivo/bar'
 import CurrencyInput from 'react-currency-input-field';
 import StripeImage from '../assets/stripe-purple.png'
+import { Document, Page, pdfjs } from "react-pdf";
+import './CSS/prompts.css'
 
 export default function Prompts() {
   const linkTo = useLinkTo()
@@ -34,7 +37,7 @@ export default function Prompts() {
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setMain] = useState(false)
   const [scrollToEnd, setScrollToEnd] = useState(false)
-
+  const [showAddingPDF, setShowAddingPDF] = useState(false)
   // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
   const [showPromptOptions, setShowPromptOptions] = useState(-1)
@@ -135,6 +138,19 @@ export default function Prompts() {
   const [viewPayment, setViewPayment] = useState({})
   const [viewPaymentResponses, setViewPaymentResponses] = useState([])
 
+  const [showViewPDF, setShowViewPDF] = useState(false)
+  const [viewPDF, setViewPDF] = useState({})
+  const [viewSigned, setViewSigned] = useState([])
+  
+  // PDF data.
+  const [pdfTitle, setPDFTitle] = useState('')
+  const [pdf, setPDF] = useState(false)
+  const [pdfUrl, setPDFUrl] = useState('')
+  const [numPDFPages, setNumPDFPages] = useState(1)
+  const [pdfPageIndex, setPDFPageIndex] = useState(1)
+  const [pdfType, setPDFType] = useState(0)
+  const [canBeOptedOut, setCanBeOptedOut] = useState(0)
+
   // Get existing Text Prompts, Surveys, Payments, and Contracts.
   const refreshTextPrompts = async (id, token) => {
     var refresh = await getTextPrompts(id, token)
@@ -151,6 +167,21 @@ export default function Prompts() {
     setPayments(refresh)
   }
 
+  const refreshContracts = async (id, token) => {
+    var refresh = await getContracts(id, token)
+    setContracts(refresh)
+  }
+  
+  const refreshPromptsData = async (id, token) => {
+    var refresh = await getPromptsData(id, token)
+    if (refresh.length > 0) {
+      setPrompts(refresh[0])
+      setSurveys(refresh[1])
+      setPayments(refresh[2])
+      setContracts(refresh[3])
+    }
+  }
+
   // Main loader.
   useEffect(() => {
     const sCoach = get('Coach')
@@ -163,9 +194,7 @@ export default function Prompts() {
         setContractsDisabled(false)
       }
       try {
-        refreshTextPrompts(sCoach.Id, sCoach.Token)
-        refreshSurveys(sCoach.Id, sCoach.Token)
-        refreshPayments(sCoach.Id, sCoach.Token)
+        refreshPromptsData(sCoach.Id, sCoach.Token)
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -1000,13 +1029,28 @@ export default function Prompts() {
   }
 
   // Contract controls.
+  const returnToMainFromPDF = () => {
+    setActivityIndicator(true)
+    setPDFTitle('')
+    setPDF(false)
+    setPDFPageIndex(1)
+    setNumPDFPages(1)
+    setCreateButtonDisabled(true)
+    setShowAddingPDF(false)
+    setShowViewPDF(false)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setMain(true)
+    },500)
+  }
+  
   const addContract = () => {
     console.log ('Add new contract...')
     setMain(false)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
-      setAddingPDF(true)
+      setShowAddingPDF(true)
     },500)
   }
 
@@ -1036,6 +1080,92 @@ export default function Prompts() {
       refreshSurveys(coach.Id, coach.Token)
     }
   }
+
+  const hiddenPDFInput = React.useRef(null)
+
+  const handlePDFFocusBack = () => {
+    window.removeEventListener('focus', handlePDFFocusBack)
+    setVideoActivityIndicator(false)
+  }
+
+  const handlePDFClick = event => {
+    hiddenPDFInput.current.click()
+    window.addEventListener('focus', handlePDFFocusBack)
+    setVideoActivityIndicator(true)
+    setVideoError('')
+  }
+
+  const handlePDFFile = async () => {
+
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['pdf']
+      var fileType = fileArr[1]
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 20000000) {
+          setVideoActivityIndicator(false)
+          console.log('file:',file)
+          var url = URL.createObjectURL(file)
+          console.log('url:',url)
+          setPDFUrl(url)
+          setPDF(file)
+        } else {
+          setVideoError('File size should be less than 20 MB.')
+        }
+      } else {
+        setVideoError('File type should be pdf.')
+      }
+    } else {
+      setVideoActivityIndicator(false)
+    }
+
+  }
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    console.log(numPages)
+    setNumPDFPages(numPages)
+  }
+
+  const getPDFAttachment = async () => {
+    var file = pdf
+    var ret = false
+    if (file != '') {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['pdf']
+      var fileType = fileArr[1]
+      var fileMime = 'application/pdf'
+      var ts = Math.floor(Math.random() * (999999999999+1) + 1);
+      ts = ts.toString();
+      var fileName = `${coach.Id}_${coach.Token}_${ts}.${fileType}`
+      var newFile = new File([file], fileName, {type: fileMime})
+      var url = await uploadPDF(newFile) + '/pdfs/' + fileName
+      return url
+    } else {
+      return ''
+    }
+  }
+
+  const submitPDF = async () => {
+    setCreateButtonDisabled(true)
+    setCreateButtonActivityIndicator(true)
+    var fileUploaded = await getPDFAttachment()
+    var created = await createContract(coach.Token, coach.Id, pdfTitle, fileUploaded, pdfType, canBeOptedOut)
+    if (created) {
+      refreshContracts(coach.Id, coach.Token)
+      setPDF(false)
+      setPDFUrl('')
+      setCreateButtonActivityIndicator(false)
+      setShowAddingPDF(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        window.location.reload()
+      },1000)
+    } else {
+      console.log('Error creating PDF concept.')
+    }
+  }
+
 
   return (<ScrollView contentContainerStyle={styles.scrollView} scrollToEnd={scrollToEnd}>
     <View style={styles.container}>
@@ -1325,7 +1455,60 @@ export default function Prompts() {
                 </View>) || (<View style={styles.helpBox}>
                   {contractsDisabled && (<Text style={styles.helpBoxError}><Text style={styles.proPlanText}>Professional Plan</Text> is needed to use this feature.</Text>) || (<></>)}
                   <Text style={styles.helpBoxText}>Contracts that can be signed in-app by Clients.{"\n"}Assign directly to Clients or include in a Program.</Text>
-                </View>)}
+                </View>) || 
+                (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                  {contracts.map((contract, index) => {
+                    var conceptIcon = 'document'
+                    var name = contract.Title
+                    if (name.length > 13) {
+                      name = name.slice(0,13) + '...'
+                    }
+                    var text = concept.Title
+                    return (<View style={styles.taskBox} key={'contract_'+index}>
+                      <View style={styles.taskPreview}>
+                        <View style={styles.taskPreviewHeader}>
+                          <View style={styles.taskPreviewHeaderIcon}>
+                            <Icon
+                              name={conceptIcon}
+                              type='ionicon'
+                              size={22}
+                              color={colors.mainTextColor}
+                            />
+                          </View>
+                          <Text style={styles.taskPreviewTitle}>{name}</Text>
+                        </View>
+                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                      </View>
+                      {deletePDFIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePDFTrigger(index)}>
+                        <Text style={styles.taskButtonText}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePDFIndex(-1)}>
+                        <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Cancel</Text>
+                      </TouchableOpacity></View></>)
+                      || (<>
+                        {showPDFOptions == index &&
+                          (<>
+                            <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPDFOptions(-1)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
+                            </TouchableOpacity>
+                            <View style={styles.taskButtons}>
+                              <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePDFIndex(index)}>
+                                <Text style={styles.taskButtonText}>Delete</Text>
+                              </TouchableOpacity>
+                            </View>
+                          </>)
+                          ||
+                          (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPDFOptions(index)}>
+                            <Text style={styles.taskButtonText}>Edit</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPDFTrigger(index)}>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                          </TouchableOpacity>
+                        </View></>)}
+                      </>)}
+                    </View>)
+                  })}
+                </ScrollView>)}
               </View>
             </View>
           </>)}
@@ -2021,6 +2204,168 @@ export default function Prompts() {
                 <View style={{paddingLeft:10,alignItems:'flex-end',justifyContent:'center'}}>
                   <Image source={StripeImage} style={{width:150,height:34}} />
                 </View>
+              </View>
+            </View>
+          </>)}
+
+          {showAddingPDF && (<>
+            <View style={styles.newContractContainer}>
+
+              <View style={styles.newContractHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPDF}
+                />
+                <Text style={styles.newContractDescTitle}>New Contract</Text>
+              </View>
+
+              <View style={{flexDirection:'row'}}>
+                <View style={styles.newContractBody}>
+                  <Text style={styles.newContractTitleLabel}>Title</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    value={pdfTitle}
+                    placeholder='ex. Base Program Agreement'
+                    onChangeText={(text) => setPDFTitle(text)}
+                  />
+                  <Checkbox 
+                    label='Set as onboarding contract' 
+                    className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                    checked={pdfType == 1} 
+                    onChange={(event, data) => {
+                      var checked = 0
+                      if (data.checked) {
+                        checked = 1
+                      }
+                      setPDFType(checked)
+                    }}
+                  />
+                  <Checkbox 
+                    label='Client can opt out in app'
+                    className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                    checked={canBeOptedOut == 1} 
+                    onChange={(event, data) => {
+                      var checked = 0
+                      if (data.checked) {
+                        checked = 1
+                      }
+                      setCanBeOptedOut(checked)
+                    }}
+                  />
+                  {(pdfTitle.length == 0 || pdf == false) && (<Popup
+                    position='top center'
+                    content='All fields need to be filled out first!' trigger={<Button
+                    title='Create PDF'
+                    disabled={true}
+                    titleStyle={styles.newContractAddButtonTitle}
+                    buttonStyle={styles.newContractAddButton}
+                    containerStyle={[styles.newContractAddButtonContainer,{width:'100%',padding:0}]}
+                  />}/>) || (<Button
+                    title='Create PDF'
+                    titleStyle={styles.newContractAddButtonTitle}
+                    buttonStyle={styles.newContractAddButton}
+                    containerStyle={[styles.newContractAddButtonContainer,{width:'100%',padding:0}]}
+                    onPress={submitPDF}
+                    disabled={createButtonDisabled}
+                  />)}
+                  {createButtonActivityIndicator && (<View style={[styles.newContractAddButtonContainer,{marginTop:10,width:'100%',padding:0}]}><ActivityIndicatorView /></View>)}
+                  <View style={[styles.newContractAddButtonSpacer]}></View>
+                </View>
+
+                <View style={{alignItems:'center',marginLeft:10,flex:4}}>
+                  <input type="file" ref={hiddenPDFInput} onChange={handlePDFFile} style={{display:'none'}} />
+                  {pdf == false && (<TouchableOpacity style={[styles.showContractOptionsChooseUpload,{marginBottom:10}]} onPress={handlePDFClick}>
+                    <Text style={styles.showContractOptionsChooseUploadTitle}>Upload PDF</Text>
+                    <Text style={styles.showContractOptionsChooseUploadSize}>max 20 MB</Text>
+                    {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
+                  </TouchableOpacity>) || (<>
+                    <View style={{padding:10,backgroundColor:colors.secondaryBackground,marginTop:10,borderRadius:10}}>
+                      {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',padding:10,flex:1,marginBottom:10}}>
+                        <Icon
+                          name='chevron-back'
+                          type='ionicon'
+                          size={35}
+                          color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
+                          onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+                        />
+                        <Button
+                          title='Choose Another PDF'
+                          titleStyle={styles.uploadFileTitle}
+                          buttonStyle={[styles.uploadFileTitleButton,{backgroundColor:btnColors.danger}]}
+                          containerStyle={styles.uploadFileTitleButtonContainer}
+                          onPress={() => {setPDF(false); setPDFPageIndex(1); setNumPDFPages(1)}}
+                        />
+                        <Icon
+                          name='chevron-forward'
+                          type='ionicon'
+                          size={35}
+                          color={colors.mainTextColor}
+                          color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
+                          onPress={() => setPDFPageIndex(pdfPageIndex+1)}
+                        />
+                      </View>)}
+                      <Document
+                        file={pdf}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page
+                          key={`page_${pdfPageIndex}`}
+                          pageNumber={pdfPageIndex}
+                        />
+                      </Document>
+                    </View>
+                  </>)}
+                  {videoActivityIndicator && (<ActivityIndicatorView />)}
+                </View>
+              </View>
+
+            </View>
+          </>)}
+
+          {showViewPDF && (<>
+            <View style={styles.newContractContainer}>
+              <View style={styles.newContractHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPDF}
+                />
+                <Text style={styles.newContractDescTitle}>{viewPDF.Title}</Text>
+              </View>
+              <View style={styles.newContractBody}>
+              <View style={{padding:10,backgroundColor:colors.secondaryBackground}}>
+                {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',padding:10,flex:1,marginBottom:10}}>
+                  <Icon
+                    name='chevron-back'
+                    type='ionicon'
+                    size={35}
+                    color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
+                    onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+                  />
+                  <Icon
+                    name='chevron-forward'
+                    type='ionicon'
+                    size={35}
+                    color={colors.mainTextColor}
+                    color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
+                    onPress={() => setPDFPageIndex(pdfPageIndex+1)}
+                  />
+                </View>)}
+                <Document
+                  file={viewPDF.File}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                >
+                  <Page
+                    key={`page_${pdfPageIndex}`}
+                    pageNumber={pdfPageIndex}
+                  />
+                </Document>
+              </View>
               </View>
             </View>
           </>)}

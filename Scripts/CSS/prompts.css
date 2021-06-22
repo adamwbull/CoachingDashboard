@@ -1,0 +1,12 @@
+.checkbox-custom-dark {
+    font-size:20px !important;
+    padding:10px;
+    font-family:'Poppins';
+    color:'#fff';
+}
+.checkbox-custom-light {
+    font-size:20px !important;
+    padding:10px;
+    font-family:'Poppins';
+    color:'#000';
+}

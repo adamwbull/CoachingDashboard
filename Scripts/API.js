@@ -603,6 +603,32 @@ export async function stripeOnboardUser(id, token, stripeAccountId) {
 
 }
 
+export async function createContract(coachToken, coachId, title, file, type, canBeOptedOut) {
+
+  var ret = false
+  var arr = {Token:coachToken, CoachId:coachId, Title:title, File:file, Type:type, CanBeOptedOut:canBeOptedOut}
+
+  console.log('Uploading this contract...')
+  const res = await fetch(url + '/contract/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success) {
+    console.log('Contract uploaded!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function createPDFConcept(coachToken, coachId, title, file) {
 
   var ret = false
@@ -1202,6 +1228,29 @@ export async function getTextPrompts(id, token) {
   var ret = false
   console.log('Getting text prompts...')
   const res = await fetch(url + '/prompts/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Prompts found!')
+    ret = payload
+  } else {
+    console.log('No prompts found!')
+    ret = []
+  }
+
+  return ret
+
+}
+
+
+export async function getPromptsData(id, token) {
+
+  var ret = false
+  console.log('Getting all prompts data...')
+  const res = await fetch(url + '/user/coach/prompts-data/' + id + '/' + token, {
     method:'GET'
   })
 

@@ -53,14 +53,44 @@ export default function AllClients() {
   // Assign task variables.
   const [assignClients, setAssignClients] = useState([])
   const [allInProgram, setAllInProgram] = useState(false)
+  const [showAssignTaskOptions, setShowAssignTaskOptions] = useState(false)
   const [showAssignTaskButtons, setShowAssignTaskButtons] = useState(true)
+  const [assignTaskButtons, setAssignTaskButtons] = useState([
+    {
+      Title: 'Text Prompt',
+      OP: () => {},
+      disabled:false
+    },
+    {
+      Title: 'Survey',
+      OP: () => {},
+      disabled:false
+    },
+    {
+      Title: 'Payment',
+      OP: () => {},
+      disabled:false
+    },
+    {
+      Title: 'Contract',
+      OP: () => {},
+      disabled:false
+    },
+    {
+      Title: 'Concept',
+      OP: () => {},
+      disabled:false
+    }
+  ])
+
   const [showSelectProgramToAdvance, setShowSelectProgramToAdvance] = useState(false)
   const [programsUsersAreIn, setProgramsUsersAreIn] = useState([])
-  
+
   // Client profile variables.
   const [clientData, setClientData] = useState({})
   const [notes, setNotes] = useState([])
   const [tasks, setTasks] = useState([])
+
   // FirstName, LastName, Email, Avatar, DoB, Created, ConceptsCompletedCnt, PromptsCompletedCnt.
 
   // Notes variables.
@@ -231,14 +261,23 @@ export default function AllClients() {
     }, 500)
   }
 
-  const viewAssignTask = (index) => {
+  const viewAssignTask = (indexes) => {
     setShowFilters(false)
     setShowClients(false)
     setShowClientProfile(false)
     setActivityIndicator(true)
+    // Get targeted clients.
     var newClients = JSON.parse(JSON.stringify(clients))
     var newAssignClients = JSON.parse(JSON.stringify(assignClients))
-    newAssignClients.push(newClients[index])
+    for (var i = 0; i < newClients.length; i++) {
+      if (indexes.includes(newClients[i].Index)) {
+        newAssignClients.push(newClients[i])
+      }
+    }
+    // Loop through to check if assignTaskButtons needs to be updated.
+    for (var j = 0; j < assignTaskButtons.length; j++) {
+       
+    }
     setAssignClients(newAssignClients)
     setAllInProgram(false)
     setTimeout(() => {
@@ -348,6 +387,18 @@ export default function AllClients() {
       setShowFilters(true)
       setShowClients(true)
     }, 500)
+  }
+
+  const navToMainFromAssignTask = () => {
+    setShowAssignTask(false)
+    setShowAssignTaskButtons(true)
+    setShowSelectProgramToAdvance(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowFilters(true)
+      setShowClients(true)
+    }, 150)
   }
 
   const refreshClients = async (id, token) => {
@@ -737,7 +788,7 @@ export default function AllClients() {
                     iconRight
                     buttonStyle={styles.clientAssignTask}
                     titleStyle={styles.clientRowButtonTitle}
-                    onPress={() => viewAssignTask(index)}
+                    onPress={() => viewAssignTask([index])}
                   />
                   <Button 
                     title='Profile'
@@ -879,7 +930,7 @@ export default function AllClients() {
                     buttonStyle={styles.notesAddNewButton}
                     containerStyle={styles.notesAddNewButtonContainer}
                     titleStyle={styles.notesAddNewButtonTitle}
-                    onPress={() => viewAssignTask(clientData.Index)}
+                    onPress={() => viewAssignTask([clientData.Index])}
                     iconRight
                   />
                 </View>
@@ -939,7 +990,24 @@ export default function AllClients() {
           {showAssignTask && (<View style={{flexDirection:'row'}}>
             <View style={{flex:1}}></View>
             <View style={[styles.bodyContainer,{flex:2}]}>
-              <Text style={[styles.bodySubtitle,{textAlign:'center',fontSize:22}]}>Assign Task</Text>
+              <View style={{flexDirection:'row'}}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={30}
+                  color={colors.secondaryTextColor}
+                  style={{marginRight:0}}
+                  onPress={navToMainFromAssignTask}
+                />
+                <Text style={[styles.bodySubtitle,{textAlign:'center',fontSize:22,flex:1}]}>Assign Task</Text>
+                <Icon
+                  name='chevron-forward'
+                  type='ionicon'
+                  size={30}
+                  color={colors.mainBackground}
+                  style={{marginRight:0}}
+                />
+              </View>
               <Text style={[styles.bodyDesc,{textAlign:'center',fontSize:18,marginTop:10,marginBottom:10}]}>
                 Currently assigning a task to
                 {assignClients.map((c, i) => {
@@ -969,6 +1037,28 @@ export default function AllClients() {
                   containerStyle={styles.assignTaskButtonContainer}
                   onPress={() => {}}
                 />
+                {showAssignTaskOptions && (<View style={styles.taskButtonsList}>
+                  {assignTaskButtons.map((taskButton, index) => {
+                    if (taskButton.disabled) {
+                      return (<Popup 
+                        position='top center'
+                        wide='very'
+                        content={'No ' + taskButton.Title + ' tasks created.'}
+                        trigger={<Button key={'taskButton_'+index}
+                          title={'Assign ' + taskButton.Title + ' Task'}
+                          buttonStyle={styles.taskButton}
+                          disabled={true}
+                        />}
+                      />)
+                    } else {
+                      return (<Button key={'taskButton_'+index}
+                        title={taskButton.Title}
+                        buttonStyle={styles.taskButton}
+                        onPress={taskButton.onPress}
+                      />)
+                    }
+                  })}
+                </View>)}
                 {allInProgram && (<Button 
                   title='Advance To Next Program Task'
                   buttonStyle={styles.assignTaskButton}
