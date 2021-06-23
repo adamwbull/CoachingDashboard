@@ -596,8 +596,8 @@ export const drawerLight = StyleSheet.create({
     borderRadius:10,
     paddingTop:1,
     paddingBottom:1,
-    paddingLeft:3,
-    paddingRight:3,
+    paddingLeft:5,
+    paddingRight:5,
     fontSize:16
   },
   headerMain: {
@@ -4712,7 +4712,10 @@ export const featureBoardLight = StyleSheet.create({
   featureBoardHeader: {
     flexDirection:'row',
     justifyContent:'space-between',
-    alignItems:'center'
+    alignItems:'center',
+    paddingBottom:10,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
   },
   featureBoardHeaderText: {
     flex:1
@@ -4720,7 +4723,33 @@ export const featureBoardLight = StyleSheet.create({
   requestFeatureButton: {
     borderRadius:10,
     backgroundColor:btnColors.primary
-  }
+  },
+  featureBoardNone: {
+    fontSize:18,
+    marginTop:10,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  featureRequestForm: {
+    marginTop:20,
+  },
+  inputLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    width:'100%',
+    color:colorsLight.mainTextColor,
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
 })
 
 export const basic = StyleSheet.create({
