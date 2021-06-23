@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { parseSimpleDateText, sqlToJsDate, getClientsData } from './API.js'
+import { parseSimpleDateText, sqlToJsDate, getFeatureBoardData } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -65,8 +65,8 @@ export default function FeatureBoard() {
   }
 
   // Main functions.
-  const getFeatureData = async () => {
-    var data = await fetchFeatureData(coach.Id, coach.Token)
+  const refreshData = async () => {
+    var data = await getFeatureBoardData(coach.Token)
 
     setFeatureRequests(data[0])
     setReleaseNotes(data[1])
@@ -76,6 +76,7 @@ export default function FeatureBoard() {
   useEffect(() => {
     console.log('Welcome to features.')
     if (coach != null) {
+      refreshData(coach.Token)
       setTimeout(() => {
         setActivityIndicator(false)
         setShowBar(true)

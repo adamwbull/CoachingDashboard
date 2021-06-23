@@ -187,6 +187,28 @@ export async function check() {
 
 */
 
+export async function getFeatureBoardData(token) {
+
+  var ret = false
+
+  console.log('Getting feature board data...')
+  const res = await fetch(url + '/features-and-release-notes/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Data retrieved!')
+    ret = payload
+  } else {
+    console.log('There was a problem getting feature board data.')
+  }
+
+  return ret
+
+}
+
 export async function getNotes(clientId, coachId, token) {
 
   var ret = false
