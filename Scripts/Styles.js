@@ -579,13 +579,26 @@ export const drawerLight = StyleSheet.create({
     borderBottomWidth:1,
     borderBottomColor:colorsLight.headerBorder,
     justifyContent:'center',
-    alignItems:'center'
+    alignItems:'center',
+    flexDirection:'row'
   },
   headerText: {
     fontFamily:'PoppinsSemiBold',
-    fontSize:25,
+    fontSize:19,
     textAlign:'center',
     lineHeight:25,
+    marginRight:3,
+  },
+  headerBeta: {
+    fontFamily:'PoppinsSemiBold',
+    color:'#fff',
+    backgroundColor:btnColors.danger,
+    borderRadius:10,
+    paddingTop:1,
+    paddingBottom:1,
+    paddingLeft:3,
+    paddingRight:3,
+    fontSize:16
   },
   headerMain: {
     flex:1,
@@ -4630,6 +4643,86 @@ export const socialFeedLight = StyleSheet.create({
   },
 })
 
+export const featureBoardLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20,
+    flex:1
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  barSelected: {
+    padding:10,
+    marginRight:10,
+    backgroundColor:btnColors.primary,
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:16,
+    borderRadius:10,
+  },
+  barUnselected: {
+    padding:10,
+    marginRight:10,
+    color:btnColors.primary,
+    fontFamily:'Poppins',
+    fontSize:16
+  },
+  featureBoardHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  },
+  featureBoardHeaderText: {
+    flex:1
+  },
+  requestFeatureButton: {
+    borderRadius:10,
+    backgroundColor:btnColors.primary
+  }
+})
+
 export const basic = StyleSheet.create({
   container: {
     flex: 1,
@@ -4646,6 +4739,13 @@ export const basic = StyleSheet.create({
   body: {
     flex:1,
     borderWidth:0,
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20,
+    flex:1
   },
   bodyHeader: {
     flexDirection:'row',

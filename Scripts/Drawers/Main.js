@@ -126,6 +126,7 @@ export default function Main() {
       </View>
       <View style={styles.headerTextContainer}>
         <Text style={styles.headerText}>CoachSync</Text>
+        <Text style={styles.headerBeta}>Beta</Text>
       </View>
       <View style={styles.headerMain}>
         <View style={styles.headerUser}>
