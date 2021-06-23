@@ -603,6 +603,32 @@ export async function stripeOnboardUser(id, token, stripeAccountId) {
 
 }
 
+export async function updateContract(coachToken, coachId, id, type, canBeOptedOut) {
+
+  var ret = false
+  var arr = {Token:coachToken, CoachId:coachId, Id:id, Type:type, CanBeOptedOut:canBeOptedOut}
+
+  console.log('Updating this contract...')
+  const res = await fetch(url + '/contract/update', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success) {
+    console.log('Contract updated!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function createContract(coachToken, coachId, title, file, type, canBeOptedOut) {
 
   var ret = false

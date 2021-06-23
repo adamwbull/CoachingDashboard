@@ -9,7 +9,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button } from 'react-native-elements'
-import { stripeCheckUser } from './API.js'
+import { stripeCheckUser, stripeOnboardUser } from './API.js'
 import ConnectStripe from '../assets/connect-stripe.png'
 
 export default function Integrations() {
@@ -106,9 +106,19 @@ export default function Integrations() {
                 <Text style={styles.bodySubtitle}>Stripe Info</Text>
                 <Text style={styles.bodyDesc}>Connect your Stripe account to enable Client payment collection.</Text>
               </View>
-              {showConnectStripe && (<TouchableOpacity onPress={connectStripe} style={{justifyContent:'center',flex:1,alignItems:'flex-end',marginTop:7}}>
-                <Image source={ConnectStripe} style={{width:150,height:32}} />
-              </TouchableOpacity>) || (<Text style={styles.stripeConnected}>Stripe connected!</Text>)}
+              {true && (<View style={{flexDirection:'row',alignItems:'center',flex:1,justifyContent:'flex-end',marginTop:7}}>
+                <Icon
+                  name='help-circle-outline'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  style={{marginRight:10}}
+                  onPress={() => window.open('https://wiki.coachsync.me/en/account/integrations', '_blank')}
+                />
+                <TouchableOpacity onPress={connectStripe}>
+                  <Image source={ConnectStripe} style={{width:150,height:32}} />
+                </TouchableOpacity>
+              </View>) || (<Text style={styles.stripeConnected}>Stripe connected!</Text>)}
             </View>
           </View>)}
 

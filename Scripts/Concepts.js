@@ -480,13 +480,16 @@ export default function Concepts() {
                 {concepts.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
                   {concepts.map((concept, index) => {
                     var conceptIcon = 'book'
+                    if (concept.Video != '') {
+                      conceptIcon = 'videocam'
+                    }
                     var name = concept.Title
-                    if (name.length > 13) {
-                      name = name.slice(0,13) + '...'
+                    if (name.length > 18) {
+                      name = name.slice(0,18) + '...'
                     }
                     var text = concept.RichText
-                    if (text.length > 120) {
-                      text = text.slice(0,120) + '...'
+                    if (text.length > 90) {
+                      text = text.slice(0,90) + '...'
                     }
                     return (<View style={styles.taskBox} key={index}>
                       <View style={styles.taskPreview}>
@@ -501,7 +504,8 @@ export default function Concepts() {
                           </View>
                           <Text style={styles.taskPreviewTitle}>{name}</Text>
                         </View>
-                        {deleteConceptIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                        {deleteConceptIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || 
+                        (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
                       </View>
                       {deleteConceptIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteConceptTrigger(index)}>
                         <Text style={styles.taskButtonText}>Confirm</Text>
@@ -554,9 +558,9 @@ export default function Concepts() {
                 {pdfs.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
                   {pdfs.map((concept, index) => {
                     var conceptIcon = 'document'
-                    var name = 'PDF'
-                    if (name.length > 13) {
-                      name = name.slice(0,13) + '...'
+                    var name = concept.Title
+                    if (name.length > 18) {
+                      name = name.slice(0,18) + '...'
                     }
                     var text = concept.Title
                     return (<View style={styles.taskBox} key={index}>
@@ -572,7 +576,13 @@ export default function Concepts() {
                           </View>
                           <Text style={styles.taskPreviewTitle}>{name}</Text>
                         </View>
-                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}><div dangerouslySetInnerHTML={{__html: text}} /></Text></>)}
+                        {deletePDFIndex == index && (<><Text style={styles.taskWarningText}>This Concept will be lost forever. Are you sure you want to continue?</Text></>) || 
+                        (<><Document file={concept.File}>
+                          <Page
+                            pageNumber={1}
+                            width={200}
+                          />
+                        </Document></>)}
                       </View>
                       {deletePDFIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePDFTrigger(index)}>
                         <Text style={styles.taskButtonText}>Confirm</Text>

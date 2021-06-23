@@ -1533,10 +1533,39 @@ export const promptsLight = StyleSheet.create({
     paddingLeft:5,
     paddingRight:10,
   },
+  viewContractInfo: {
+    width:632,
+    paddingTop:10,
+    paddingBottom:10,
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
   newContractBody: {
     padding:10,
-    marginRight:10,
-    flex:2,
+    flex:1
+  },
+  newContractBodyView: {
+    paddingTop:10,
+    paddingBottom:10,
+    paddingLeft:'25%',
+    paddingRight:'25%',
+    flex:1
+  },
+  pdfNav: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:10,
+    flex:1,
+    marginBottom:10
+  },
+  newContractBodyPDF: {
+    padding:10,
+    marginTop:10,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    width:632
   },
   newContractVideoSection: {
     flex:2,
@@ -1769,7 +1798,7 @@ export const conceptsLight = StyleSheet.create({
   taskPreviewTitle: {
     flex:1,
     marginLeft:10,
-    fontSize:16,
+    fontSize:13,
     color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold'
   },

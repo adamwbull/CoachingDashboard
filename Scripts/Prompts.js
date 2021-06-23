@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useContext } from 'react'
 import { Image, Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { promptsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark, btnColors } from '../Scripts/Styles.js'
@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { getPromptsData, getContracts, getPayments, getSurveys, getTextPrompts, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, createMeasurementSurvey, createSurveyItem, getPromptResponses, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt, createContract, uploadPDF } from './API.js'
+import { stripeCheckUser, updateContract, getPromptsData, getContracts, getPayments, getSurveys, getTextPrompts, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, createMeasurementSurvey, createSurveyItem, getPromptResponses, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt, createContract, uploadPDF } from './API.js'
 import { Popup, Dropdown, Tab, Checkbox } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 import { Slider } from 'react-native-elements';
@@ -24,12 +24,17 @@ import StripeImage from '../assets/stripe-purple.png'
 import { Document, Page, pdfjs } from "react-pdf";
 import './CSS/prompts.css'
 
+import userContext from './Context.js'
+
 export default function Prompts() {
+
   const linkTo = useLinkTo()
+  const user = useContext(userContext)
+
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(promptsLight)
   const [colors, setColors] = useState(colorsLight)
-  const [coach, setCoach] = useState({})
+  const [coach, setCoach] = useState(user)
 
   // Main stage controls.
   const [paymentsDisabled, setPaymentsDisabled] = useState(true)
@@ -38,7 +43,8 @@ export default function Prompts() {
   const [showMain, setMain] = useState(false)
   const [scrollToEnd, setScrollToEnd] = useState(false)
   const [showAddingPDF, setShowAddingPDF] = useState(false)
-  
+  const [connectStripe, setConnectStripe] = useState(true)
+
   // Text Prompt main stage controls.
   const [deletePromptIndex, setDeletePromptIndex] = useState(-1)
   const [showPromptOptions, setShowPromptOptions] = useState(-1)
@@ -188,18 +194,27 @@ export default function Prompts() {
   }
 
   // Main loader.
+  const triggerStripeCheckUser = async (id, token, stripeAccountId) => {
+    var chargesEnabled = await stripeCheckUser(id, token, stripeAccountId)
+    if (chargesEnabled) {
+      setConnectStripe(false)
+    } else {
+      setConnectStripe(true)
+      setPaymentsDisabled(true)
+    }
+  }
+
   useEffect(() => {
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      setCoach(sCoach)
-      if (sCoach.Plan != 0 && sCoach.StripePublicKey != '') {
+    if (coach != null) {
+      triggerStripeCheckUser(coach.Id, coach.Token, coach.StripeAccountId)
+      if (coach.Plan != 0 && coach.StripePublicKey != '') {
         setPaymentsDisabled(false)
       }
-      if (sCoach.Plan == 2) {
+      if (coach.Plan == 2) {
         setContractsDisabled(false)
       }
       try {
-        refreshPromptsData(sCoach.Id, sCoach.Token)
+        refreshPromptsData(coach.Id, coach.Token)
       } finally {
         setActivityIndicator(true)
         setTimeout(() => {
@@ -907,6 +922,8 @@ export default function Prompts() {
       setCurrentSurveyItem(0)
       setSurveyItemMain(false)
       setSurveyTitle('')
+      setCreateButtonDisabled(false)
+      setCreateButtonActivityIndicator(false)
       setSurveyText('')
       setSurveyItems([])
       setTimeout(() => {
@@ -1040,7 +1057,7 @@ export default function Prompts() {
     setPDF(false)
     setPDFPageIndex(1)
     setNumPDFPages(1)
-    setCreateButtonDisabled(true)
+    setCreateButtonDisabled(false)
     setShowAddingPDF(false)
     setShowViewPDF(false)
     setTimeout(() => {
@@ -1051,6 +1068,7 @@ export default function Prompts() {
   
   const addContract = () => {
     console.log ('Add new contract...')
+    setPDFPageIndex(1)
     setMain(false)
     setActivityIndicator(true)
     setTimeout(() => {
@@ -1128,7 +1146,6 @@ export default function Prompts() {
   }
 
   const onDocumentLoadSuccess = ({ numPages }) => {
-    console.log(numPages)
     setNumPDFPages(numPages)
   }
 
@@ -1164,8 +1181,43 @@ export default function Prompts() {
       setShowAddingPDF(false)
       setActivityIndicator(true)
       setTimeout(() => {
-        window.location.reload()
+        setCreateButtonDisabled(false)
+        setActivityIndicator(false)
+        setMain(true)
       },1000)
+    } else {
+      console.log('Error creating PDF concept.')
+    }
+  }
+
+  const updatePDF = async () => {
+    setCreateButtonDisabled(true)
+    setCreateButtonActivityIndicator(true)
+    var created = await updateContract(coach.Token, coach.Id, viewPDF.Id, pdfType, canBeOptedOut)
+    if (created) {
+      var cs = JSON.parse(JSON.stringify(contracts))
+      if (pdfType == 1) {
+        for (var i = 0; i < cs.length; i++) {
+          cs[i].Type = 0
+        }
+      }
+      cs[viewPDF.Index].Type = pdfType
+      cs[viewPDF.Index].CanBeOptedOut = canBeOptedOut
+      setContracts(cs)
+      setPDF(false)
+      setPDFUrl('')
+      setPDFPageIndex(1)
+      setCanBeOptedOut(0)
+      setPDFType(0)
+      setCreateButtonActivityIndicator(false)
+      setViewPDF(false)
+      setShowViewPDF(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        setCreateButtonDisabled(false)
+        setActivityIndicator(false)
+        setMain(true)
+      }, 1000)
     } else {
       console.log('Error creating PDF concept.')
     }
@@ -1173,7 +1225,12 @@ export default function Prompts() {
 
   const viewPDFTrigger = async (i) => {
     setMain(false)
-    setViewPDF(contracts[i])
+    setPDFPageIndex(1)
+    var c = JSON.parse(JSON.stringify(contracts[i]))
+    c.Index = i
+    setCanBeOptedOut(contracts[i].CanBeOptedOut)
+    setPDFType(contracts[i].Type)
+    setViewPDF(c)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -1277,7 +1334,7 @@ export default function Prompts() {
                           </TouchableOpacity></View></>)
                           ||
                           (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPromptOptions(index)}>
-                            <Text style={styles.taskButtonText}>Edit</Text>
+                            <Text style={styles.taskButtonText}>Options</Text>
                           </TouchableOpacity>
                           <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPromptTrigger(index)}>
                             <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
@@ -1295,7 +1352,7 @@ export default function Prompts() {
             <View style={styles.promptListContainer}>
               <View style={styles.promptHeader}>
                 <Text style={styles.promptHeaderTitle}>Surveys</Text>
-                <Text style={styles.promptHeaderCount}>{0} total</Text>
+                <Text style={styles.promptHeaderCount}>{surveys.length} total</Text>
               </View>
               <View style={styles.promptsRow}>
                 <View style={styles.addPromptContainer}>
@@ -1352,7 +1409,7 @@ export default function Prompts() {
                           </TouchableOpacity></View></>)
                           ||
                           (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowSurveyOptions(index)}>
-                            <Text style={styles.taskButtonText}>Edit</Text>
+                            <Text style={styles.taskButtonText}>Options</Text>
                           </TouchableOpacity>
                           <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
                             <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
@@ -1370,22 +1427,23 @@ export default function Prompts() {
             <View style={styles.promptListContainer}>
               <View style={styles.promptHeader}>
                 <Text style={styles.promptHeaderTitle}>Payments</Text>
-                <Text style={styles.promptHeaderCount}>{0} total</Text>
+                <Text style={styles.promptHeaderCount}>{payments.length} total</Text>
               </View>
               <View style={styles.promptsRow}>
                 <View style={styles.addPromptContainer}>
                   <Button
-                  title='Add Payment'
-                  disabled={paymentsDisabled}
-                  titleStyle={styles.promptAddButtonTitle}
-                  buttonStyle={styles.promptAddButton}
-                  containerStyle={styles.promptAddButtonContainer}
-                  onPress={addPayment} />
+                    title='Add Payment'
+                    disabled={paymentsDisabled}
+                    titleStyle={styles.promptAddButtonTitle}
+                    buttonStyle={styles.promptAddButton}
+                    containerStyle={styles.promptAddButtonContainer}
+                    onPress={addPayment} 
+                  />
                 </View>
                 {paymentsDisabled && (<View style={styles.helpBox}>
                   <Text style={styles.helpBoxText}>
-                    {coach.Plan == 1 && (<Text style={styles.helpBoxError}><Text style={styles.standardPlanText}>Standard Plan</Text> is needed to use this feature.</Text>) || (<></>)}
-                    {coach.StripePublicKey == '' && (<Text>Must set up <Link to='/payments' style={{color:btnColors.primary}}>Stripe keys in Settings</Link>.</Text>)}{"\n"}
+                    {coach.Plan == 0 && (<Text style={styles.helpBoxError}><Text style={styles.standardPlanText}>Standard Plan</Text> is needed to use this feature.</Text>) || (<></>)}
+                    {connectStripe && (<Text>Must set up <Link to='/integrations' style={{color:btnColors.primary}}>Stripe Integration in Settings</Link>.</Text>)}{"\n"}
                     Collect payments directly from Clients.{"\n"}
                     Assign directly to Clients or include in a Program.
                   </Text>
@@ -1436,7 +1494,7 @@ export default function Prompts() {
                             </TouchableOpacity></View></>)
                             ||
                             (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPaymentOptions(index)}>
-                              <Text style={styles.taskButtonText}>Edit</Text>
+                              <Text style={styles.taskButtonText}>Options</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
                               <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
@@ -1453,7 +1511,7 @@ export default function Prompts() {
             <View style={styles.promptListContainer}>
               <View style={styles.promptHeader}>
                 <Text style={styles.promptHeaderTitle}>Contracts</Text>
-                <Text style={styles.promptHeaderCount}>{0} total</Text>
+                <Text style={styles.promptHeaderCount}>{contracts.length} total</Text>
               </View>
               <View style={styles.promptsRow}>
                 <View style={styles.addPromptContainer}>
@@ -1471,15 +1529,21 @@ export default function Prompts() {
                     if (name.length > 17) {
                       name = name.slice(0,17) + '...'
                     }
+                    var icon = 'document'
+                    var iconColor = colors.mainTextColor
+                    if (contract.Type == 1) {
+                      icon = 'star'
+                      iconColor = btnColors.caution
+                    }
                     return (<View style={styles.taskBox} key={'contract_'+index}>
                       <View style={styles.taskPreview}>
                         <View style={styles.taskPreviewHeader}>
                           <View style={styles.taskPreviewHeaderIcon}>
                             <Icon
-                              name={'document'}
+                              name={icon}
                               type='ionicon'
                               size={22}
-                              color={colors.mainTextColor}
+                              color={iconColor}
                             />
                           </View>
                           <Text style={styles.taskPreviewTitle}>{name}</Text>
@@ -1512,10 +1576,10 @@ export default function Prompts() {
                           </>)
                           ||
                           (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPDFOptions(index)}>
-                            <Text style={styles.taskButtonText}>Edit</Text>
+                            <Text style={styles.taskButtonText}>Options</Text>
                           </TouchableOpacity>
                           <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPDFTrigger(index)}>
-                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                            <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Edit</Text>
                           </TouchableOpacity>
                         </View></>)}
                       </>)}
@@ -2239,7 +2303,7 @@ export default function Prompts() {
               </View>
 
               <View style={{flexDirection:'row'}}>
-                <View style={styles.newContractBody}>
+                <View style={[styles.newContractBody]}>
                   <Text style={styles.newContractTitleLabel}>Title</Text>
                   <TextInput
                     style={styles.inputStyle}
@@ -2291,7 +2355,7 @@ export default function Prompts() {
                   <View style={[styles.newContractAddButtonSpacer]}></View>
                 </View>
 
-                <View style={{alignItems:'center',marginLeft:10,flex:4}}>
+                <View style={{alignItems:'center',marginLeft:10,flex:3}}>
                   <input type="file" ref={hiddenPDFInput} onChange={handlePDFFile} style={{display:'none'}} />
                   {pdf == false && (<TouchableOpacity style={[styles.showContractOptionsChooseUpload,{marginBottom:10}]} onPress={handlePDFClick}>
                     <Text style={styles.showContractOptionsChooseUploadTitle}>Upload PDF</Text>
@@ -2299,7 +2363,7 @@ export default function Prompts() {
                     {videoError !== '' && (<Text style={styles.videoError}>{videoError}</Text>)}
                   </TouchableOpacity>) || (<>
                     <View style={{padding:10,backgroundColor:colors.secondaryBackground,marginTop:10,borderRadius:10}}>
-                      {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',padding:10,flex:1,marginBottom:10}}>
+                      {numPDFPages > 1 && (<View style={styles.pdfNav}>
                         <Icon
                           name='chevron-back'
                           type='ionicon'
@@ -2353,35 +2417,70 @@ export default function Prompts() {
                 />
                 <Text style={styles.newContractDescTitle}>{viewPDF.Title}</Text>
               </View>
-              <View style={styles.newContractBody}>
-              <View style={{padding:10,backgroundColor:colors.secondaryBackground}}>
-                {numPDFPages > 1 && (<View style={{flexDirection:'row',justifyContent:'space-between',padding:10,flex:1,marginBottom:10}}>
-                  <Icon
-                    name='chevron-back'
-                    type='ionicon'
-                    size={35}
-                    color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
-                    onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+              <View style={styles.newContractBodyView}>
+                <View style={styles.viewContractInfo}>
+                  <View>
+                    <Checkbox 
+                      label='Set as onboarding contract' 
+                      className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                      checked={pdfType == 1} 
+                      onChange={(event, data) => {
+                        var checked = 0
+                        if (data.checked) {
+                          checked = 1
+                        }
+                        setPDFType(checked)
+                      }}
+                    />
+                    <Checkbox 
+                      label='Client can opt out in app'
+                      className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                      checked={canBeOptedOut == 1} 
+                      onChange={(event, data) => {
+                        var checked = 0
+                        if (data.checked) {
+                          checked = 1
+                        }
+                        setCanBeOptedOut(checked)
+                      }}
+                    />
+                  </View>
+                  <Button
+                    title='Update Details'
+                    titleStyle={styles.newContractAddButtonTitle}
+                    buttonStyle={{borderRadius:10}}
+                    onPress={updatePDF}
+                    disabled={createButtonDisabled}
                   />
-                  <Icon
-                    name='chevron-forward'
-                    type='ionicon'
-                    size={35}
-                    color={colors.mainTextColor}
-                    color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
-                    onPress={() => setPDFPageIndex(pdfPageIndex+1)}
-                  />
-                </View>)}
-                <Document
-                  file={viewPDF.File}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                >
-                  <Page
-                    key={`page_${pdfPageIndex}`}
-                    pageNumber={pdfPageIndex}
-                  />
-                </Document>
-              </View>
+                </View>
+                <View style={styles.newContractBodyPDF}>
+                  {numPDFPages > 1 && (<View style={styles.pdfNav}>
+                    <Icon
+                      name='chevron-back'
+                      type='ionicon'
+                      size={35}
+                      color={(pdfPageIndex == 1) ? colors.secondaryBackground : colors.mainTextColor}
+                      onPress={() => setPDFPageIndex(pdfPageIndex-1)}
+                    />
+                    <Icon
+                      name='chevron-forward'
+                      type='ionicon'
+                      size={35}
+                      color={colors.mainTextColor}
+                      color={(pdfPageIndex == numPDFPages) ? colors.secondaryBackground : colors.mainTextColor}
+                      onPress={() => setPDFPageIndex(pdfPageIndex+1)}
+                    />
+                  </View>)}
+                  <Document
+                    file={viewPDF.File}
+                    onLoadSuccess={onDocumentLoadSuccess}
+                  >
+                    <Page
+                      key={`page_${pdfPageIndex}`}
+                      pageNumber={pdfPageIndex}
+                    />
+                  </Document>
+                </View>
               </View>
             </View>
           </>)}
