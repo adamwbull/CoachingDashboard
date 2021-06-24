@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import { featureBoardLight, colorsLight, innerDrawerLight, btnColors, boxColors } from '../Scripts/Styles.js'
+import { featureBoardLight, colorsLight, innerDrawerLight, btnColors, boxColors, messageBox } from '../Scripts/Styles.js'
 import { featureBoardDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -11,10 +11,11 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { parseSimpleDateText, sqlToJsDate, getFeatureBoardData } from './API.js'
+import { downvoteFeature, upvoteFeature, postFeatureRequest, parseSimpleDateText, sqlToJsDate, getFeatureBoardData } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
+import { Popup } from 'semantic-ui-react'
 
 import userContext from './Context.js'
 
@@ -34,7 +35,7 @@ export default function FeatureBoard() {
   const [showFeatureRequest, setShowFeatureRequest] = useState(false)
   const [showReleaseNotes, setShowReleaseNotes] = useState(false)
   const [showBugReport, setShowBugReport] = useState(false)
-
+  
   // Main variables.
   const [coach, setCoach] = useState(user)
 
@@ -44,13 +45,35 @@ export default function FeatureBoard() {
   // Submit feature idea variables.
   const [requestTitle, setRequestTitle] = useState('')
   const [requestText, setRequestText] = useState('')
+  const [requestButtonDisabled, setRequestButtonDisabled] = useState(false)
+  const [submissionPosted, setSubmissionPosted] = useState(false)
+  const [submissionFailed, setSubmissionFailed] = useState(false)
 
   // Release notes variables.
   const [releaseNotes, setReleaseNotes] = useState([])
 
+  // Feature board functions.
+  const handleFeatureClick = async (upvoted, featureId) => {
+    var res = false
+    if (upvoted) {
+      res = await upvoteFeature(coach.Id, coach.Token, featureId)
+    } else {
+      res = await downvoteFeature(coach.Id, coach.Token, featureId)
+    }
+  }
   // Feature request functions.
-  const submitRequestFeature = () => {
-    //
+  const submitRequestFeature = async () => {
+    setRequestButtonDisabled(true)
+    var post = await postFeatureRequest(coach.Id, requestTitle, requestText, coach.Token)
+    if (true) {
+      setSubmissionPosted(true)
+      setRequestTitle('')
+      setRequestText('')
+    } else {
+      setSubmissionFailed(true)
+    }
+    setRequestButtonDisabled(false)
+    
   }
 
   // Nav functions.
@@ -109,7 +132,7 @@ export default function FeatureBoard() {
   // Main functions.
   const refreshData = async () => {
     var data = await getFeatureBoardData(coach.Token)
-
+    console.log('data',data)
     setFeatureRequests(data[0])
     setReleaseNotes(data[1])
 
@@ -118,7 +141,7 @@ export default function FeatureBoard() {
   useEffect(() => {
     console.log('Welcome to features.')
     if (coach != null) {
-      refreshData(coach.Token)
+      refreshData()
       setTimeout(() => {
         setActivityIndicator(false)
         setShowBar(true)
@@ -132,7 +155,7 @@ export default function FeatureBoard() {
       <View style={styles.main}>
         <View style={styles.body}>
           
-          {showBar && (<>
+          {showBar && (
           <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
             {(showFeatureBoard || loadingNum == 0) && (<Text style={styles.barSelected}>Feature Board</Text>)
             || (<Text onPress={navToFeatureBoard} style={styles.barUnselected}>Feature Board</Text>)}
@@ -143,7 +166,7 @@ export default function FeatureBoard() {
             {(showBugReport || loadingNum == 3) && (<Text style={styles.barSelected}>Report Bug</Text>)
             || (<Text onPress={navToBugReport} style={styles.barUnselected}>Report Bug</Text>)}
           </View>
-          </>)}
+          )}
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
@@ -165,8 +188,26 @@ export default function FeatureBoard() {
               <Text style={styles.featureBoardNone}>No feature requests yet.</Text>
             </View>) || (<>
               {featureRequests.map((feature, index) => {
-                //
-                return (<View key={'featureReq_'+index}>
+                var upvoted = false
+                var upvotedStyle = {color:colors.secondaryTextColor}
+                for (var i = 0; i < feature.Upvotes.length; i++) {
+                  if (feature.Upvotes[i].CoachId == coach.Id) {
+                    upvoted = true
+                    upvotedStyle = {color:btnColors.success}
+                  }
+                }
+                return (<View key={'featureReq_'+index} style={styles.featureRow}>
+                  <View>
+                    <Icon
+                      name='chevron-back'
+                      type='ionicon'
+                      size={30}
+                      color={upvoted && btnColors.success || colors.secondaryTextColor}
+                      style={{marginRight:0}}
+                      onPress={handleFeatureClick(upvoted, feature.Id)}
+                    />
+                    <Text style={[styles.featureRowNum,upvotedStyle]}>{feature.Upvotes.length}</Text>
+                  </View>
                   <Text>{feature.Title}</Text>
                   <Text>{feature.Text}</Text>
                 </View>)
@@ -175,6 +216,12 @@ export default function FeatureBoard() {
           </View>)}
 
           {showFeatureRequest && (<View style={[styles.bodyContainer,{width:'70%',marginLeft:'15%'}]}>
+            {submissionPosted && (<View style={[messageBox.box,{backgroundColor:boxColors.success}]}>
+              <Text style={styles.text}>Submission created! We will review it shortly.</Text>
+            </View>)}
+            {submissionFailed && (<View style={[messageBox.box,{backgroundColor:boxColors.danger}]}>
+              <Text style={styles.text}>Error posting. Please try again or report the problem.</Text>
+            </View>)}
             <Text style={styles.bodyTitle}>Request Feature</Text>
             <Text style={styles.bodyDesc}>Submit an idea for a potential CoachSync feature to appear on the Board. We appreciate your input!</Text>
             <View style={styles.featureRequestForm}>
@@ -194,15 +241,32 @@ export default function FeatureBoard() {
                 placeholder='Describe the feature in detail...'
                 onChangeText={(text) => {setRequestText(text)}}
               />
-              <Button
+              {(requestTitle == 0 || requestText == 0) && (<Popup 
+                position='top center'
+                wide='very'
+                content={'Fill out all fields first.'}
+                trigger={<Button
+                  title='Submit Request'
+                  buttonStyle={styles.requestFeatureButton}
+                  containerStyle={styles.requestFeatureButtonContainer}
+                  titleStyle={{color:'#fff'}}
+                  disabled={true}
+                />}
+              />) 
+              || (<Button
                 title='Submit Request'
                 buttonStyle={styles.requestFeatureButton}
                 containerStyle={styles.requestFeatureButtonContainer}
                 titleStyle={{color:'#fff'}}
                 onPress={submitRequestFeature}
-              />
+                disabled={requestButtonDisabled}
+              />)}
+              <View style={{marginTop:10,height:32}}>
+                {requestButtonDisabled && (<ActivityIndicatorView />)}
+              </View>
             </View>
           </View>)}
+
         </View>
       </View>
     </View>

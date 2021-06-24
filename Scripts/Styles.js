@@ -60,6 +60,18 @@ export const messageBox = StyleSheet.create({
     marginBottom:10,
     borderRadius:10,
   },
+  box: {
+    paddingTop:20,
+    paddingBottom:20,
+    paddingLeft:10,
+    paddingRight:10,
+    width:'100%',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    marginBottom:10,
+    borderRadius:10,
+  },
   icon: {
     flex:1,
     alignItems:'center',
@@ -4674,7 +4686,6 @@ export const featureBoardLight = StyleSheet.create({
     borderRadius:10,
     padding:20,
     marginBottom:20,
-    flex:1
   },
   bodyTitleGroup: {
     flexDirection:'row',
@@ -4750,6 +4761,7 @@ export const featureBoardLight = StyleSheet.create({
     fontSize:18,
     marginBottom:20
   },
+  
 })
 
 export const basic = StyleSheet.create({

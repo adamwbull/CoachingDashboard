@@ -187,6 +187,85 @@ export async function check() {
 
 */
 
+export async function downvoteFeature(coachId, coachToken, featureId) {
+
+  var ret = false
+  var arr = {CoachId:coachId, Token:coachToken, FeatureId:featureId}
+
+  console.log('Downvoting feature...')
+  const res = await fetch(url + '/feature-upvote/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Feature downvoted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function upvoteFeature(coachId, coachToken, featureId) {
+
+  var ret = false
+  var arr = {CoachId:coachId, Token:coachToken, FeatureId:featureId}
+
+  console.log('Upvoting feature...')
+  const res = await fetch(url + '/feature-upvote/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Feature upvoted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+
+export async function postFeatureRequest(coachId, title, text, token) {
+
+  var ret = false
+  var arr = {CoachId:coachId, Title:title, Text:text, Token:token}
+
+  console.log('Submitting feature request...')
+  const res = await fetch(url + '/feature/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Feature request submitted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function getFeatureBoardData(token) {
 
   var ret = false
