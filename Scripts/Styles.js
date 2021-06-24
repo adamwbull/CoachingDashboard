@@ -4761,7 +4761,38 @@ export const featureBoardLight = StyleSheet.create({
     fontSize:18,
     marginBottom:20
   },
-  
+  featureRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    paddingTop:10,
+    paddingBottom:10,
+    paddingLeft:20,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  featureRowVoting: {
+    alignItems:'center',
+    justifyContent:'center',
+    paddingRight:20
+  },
+  featureRowNum: {
+    fontSize:16,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center'
+  },
+  featureRowData: {
+    justifyContent:'center'
+  },
+  featureRowTitle: {
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  featureRowText: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins'
+  }
 })
 
 export const basic = StyleSheet.create({

@@ -55,11 +55,39 @@ export default function FeatureBoard() {
   // Feature board functions.
   const handleFeatureClick = async (upvoted, featureId) => {
     var res = false
-    if (upvoted) {
+    // Notify db.
+    if (!upvoted) {
       res = await upvoteFeature(coach.Id, coach.Token, featureId)
     } else {
       res = await downvoteFeature(coach.Id, coach.Token, featureId)
     }
+    // Update locally.
+    var og = JSON.parse(JSON.stringify(featureRequests))
+    if (res && upvoted) {
+      // Remove upvote from list.
+      for (var i = 0; i < og.length; i++) {
+        if (og[i].Id == featureId) {
+          var upvotes = JSON.parse(JSON.stringify(og[i].Upvotes))
+          for (var j = 0; j < upvotes.length; j++) {
+            var upvote = upvotes[j]
+            if (upvote.CoachId == coach.Id) {
+              upvotes.splice(j, 1)
+            }
+          }
+          og[i].Upvotes = upvotes
+        }
+      }
+    } else if (res && !upvoted) {
+      // Add upvote to list.
+      for (var i = 0; i < og.length; i++) {
+        if (og[i].Id == featureId) {
+          var upvotes = JSON.parse(JSON.stringify(og[i].Upvotes))
+          upvotes.push({CoachId:coach.Id, FeatureId:featureId})
+          og[i].Upvotes = upvotes
+        }
+      }
+    }
+    setFeatureRequests(og.sort(compare))
   }
   // Feature request functions.
   const submitRequestFeature = async () => {
@@ -130,10 +158,14 @@ export default function FeatureBoard() {
   }
 
   // Main functions.
+  const compare = (a, b) => {
+    return b.Upvotes.length - a.Upvotes.length
+  }
+
   const refreshData = async () => {
     var data = await getFeatureBoardData(coach.Token)
     console.log('data',data)
-    setFeatureRequests(data[0])
+    setFeatureRequests(data[0].sort(compare))
     setReleaseNotes(data[1])
 
   }
@@ -188,6 +220,7 @@ export default function FeatureBoard() {
               <Text style={styles.featureBoardNone}>No feature requests yet.</Text>
             </View>) || (<>
               {featureRequests.map((feature, index) => {
+                console.log('feature:',feature)
                 var upvoted = false
                 var upvotedStyle = {color:colors.secondaryTextColor}
                 for (var i = 0; i < feature.Upvotes.length; i++) {
@@ -197,19 +230,21 @@ export default function FeatureBoard() {
                   }
                 }
                 return (<View key={'featureReq_'+index} style={styles.featureRow}>
-                  <View>
+                  <View style={styles.featureRowVoting}>
                     <Icon
-                      name='chevron-back'
+                      name='arrow-up'
                       type='ionicon'
                       size={30}
                       color={upvoted && btnColors.success || colors.secondaryTextColor}
-                      style={{marginRight:0}}
-                      onPress={handleFeatureClick(upvoted, feature.Id)}
+                      style={{marginBottom:-10}}
+                      onPress={() => handleFeatureClick(upvoted, feature.Id)}
                     />
                     <Text style={[styles.featureRowNum,upvotedStyle]}>{feature.Upvotes.length}</Text>
                   </View>
-                  <Text>{feature.Title}</Text>
-                  <Text>{feature.Text}</Text>
+                  <View style={styles.featureRowData}>
+                    <Text style={styles.featureRowTitle}>{feature.Title}</Text>
+                    <Text style={styles.featureRowText}>{feature.Text}</Text>
+                  </View>
                 </View>)
               })}
             </>)}
