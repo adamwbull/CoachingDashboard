@@ -106,7 +106,7 @@ export default function Integrations() {
                 <Text style={styles.bodySubtitle}>Stripe Info</Text>
                 <Text style={styles.bodyDesc}>Connect your Stripe account to enable Client payment collection.</Text>
               </View>
-              {true && (<View style={{flexDirection:'row',alignItems:'center',flex:1,justifyContent:'flex-end',marginTop:7}}>
+              {showConnectStripe && (<View style={{flexDirection:'row',alignItems:'center',flex:1,justifyContent:'flex-end',marginTop:7}}>
                 <Icon
                   name='help-circle-outline'
                   type='ionicon'

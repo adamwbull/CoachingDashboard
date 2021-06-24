@@ -239,6 +239,31 @@ export async function upvoteFeature(coachId, coachToken, featureId) {
 
 }
 
+export async function postBugReport(coachId, title, text, token) {
+
+  var ret = false
+  var arr = {ClientId:coachId, PageText:title, Description:text, Token:token}
+
+  console.log('Submitting bug report...')
+  const res = await fetch(url + '/bug-report/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Bug report submitted!')
+    ret = true
+  }
+
+  return ret
+
+}
 
 export async function postFeatureRequest(coachId, title, text, token) {
 

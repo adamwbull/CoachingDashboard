@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { downvoteFeature, upvoteFeature, postFeatureRequest, parseSimpleDateText, sqlToJsDate, getFeatureBoardData } from './API.js'
+import { postBugReport, downvoteFeature, upvoteFeature, postFeatureRequest, parseSimpleDateText, sqlToJsDate, getFeatureBoardData } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -52,6 +52,11 @@ export default function FeatureBoard() {
   // Release notes variables.
   const [releaseNotes, setReleaseNotes] = useState([])
 
+  // Bug report variables.
+  const [bugPageText, setBugPageText] = useState('')
+  const [bugDescription, setBugDescription] = useState('')
+  const [bugButtonDisabled, setBugButtonDisabled] = useState(false)
+
   // Feature board functions.
   const handleFeatureClick = async (upvoted, featureId) => {
     var res = false
@@ -89,6 +94,7 @@ export default function FeatureBoard() {
     }
     setFeatureRequests(og.sort(compare))
   }
+
   // Feature request functions.
   const submitRequestFeature = async () => {
     setRequestButtonDisabled(true)
@@ -101,6 +107,21 @@ export default function FeatureBoard() {
       setSubmissionFailed(true)
     }
     setRequestButtonDisabled(false)
+    
+  }
+
+  // Bug report functions.
+  const submitBugReport = async () => {
+    setBugButtonDisabled(true)
+    var post = await postBugReport(coach.Id, bugPageText, bugDescription, coach.Token)
+    if (true) {
+      setSubmissionPosted(true)
+      setBugPageText('')
+      setBugDescription('')
+    } else {
+      setSubmissionFailed(true)
+    }
+    setBugButtonDisabled(false)
     
   }
 
@@ -119,6 +140,8 @@ export default function FeatureBoard() {
   }
 
   const navToFeatureRequest = () => {
+    setSubmissionFailed(false)
+    setSubmissionPosted(false)
     setShowReleaseNotes(false)
     setShowFeatureBoard(false)
     setShowBugReport(false)
@@ -145,6 +168,8 @@ export default function FeatureBoard() {
   }
 
   const navToBugReport = () => {
+    setSubmissionFailed(false)
+    setSubmissionPosted(false)
     setShowReleaseNotes(false)
     setShowFeatureRequest(false)
     setShowFeatureBoard(false)
@@ -250,6 +275,57 @@ export default function FeatureBoard() {
             </>)}
           </View>)}
 
+          {showReleaseNotes && (<View style={styles.bodyContainer}>
+            <Text style={[styles.bodyTitle,{paddingBottom:5,borderBottomColor:colors.headerBorder,borderBottomWidth:1}]}>Release Notes</Text>
+            {releaseNotes.length == 0 && (<Text style={styles.featureBoardNone}>No release notes yet.</Text>) ||
+            (<>
+              {releaseNotes.map((release, index) => {
+                var n = []
+                var c = []
+                var b = []
+
+                for (var i = 0; i < release.Items.length; i++) {
+                  var item = release.Items[i]
+                  if (item.Category == 0) {
+                    n.push(item)
+                  } else if (item.Category == 1) {
+                    c.push(item)
+                  } else if (item.Category == 2) {
+                    b.push(item)
+                  }
+                }
+
+                return (<View key={'release_'+index} style={styles.releaseRow}>
+                  <Text style={styles.inputLabel}>{release.Title}</Text>
+                  {n.length > 0 && (<>
+                    <Text style={[styles.releaseBox,{backgroundColor:btnColors.success}]}>New</Text>
+                    {n.map((item, i) => {
+                      return (<View key={'releaseItem_n_'+i}>
+                        <Text style={styles.releaseText}><Text style={{color:btnColors.success}}>+</Text>  {item.Text}</Text>
+                      </View>)
+                    })}
+                  </>)}
+                  {c.length > 0 && (<>
+                    <Text style={[styles.releaseBox,{backgroundColor:btnColors.caution}]}>Changes</Text>
+                    {c.map((item, i) => {
+                      return (<View key={'releaseItem_c_'+i}>
+                        <Text style={styles.releaseText}><Text style={{color:btnColors.caution}}>#</Text> {item.Text}</Text>
+                      </View>)
+                    })}
+                  </>)}
+                  {b.length > 0 && (<>
+                    <Text style={[styles.releaseBox,{backgroundColor:btnColors.danger}]}>Bug Fixes</Text>
+                    {b.map((item, i) => {
+                      return (<View key={'releaseItem_b_'+i}>
+                        <Text style={styles.releaseText}><Text style={{color:btnColors.danger}}>-</Text> {item.Text}</Text>
+                      </View>)
+                    })}
+                  </>)}
+                </View>)
+              })}
+            </>)}
+          </View>)}
+
           {showFeatureRequest && (<View style={[styles.bodyContainer,{width:'70%',marginLeft:'15%'}]}>
             {submissionPosted && (<View style={[messageBox.box,{backgroundColor:boxColors.success}]}>
               <Text style={styles.text}>Submission created! We will review it shortly.</Text>
@@ -258,7 +334,7 @@ export default function FeatureBoard() {
               <Text style={styles.text}>Error posting. Please try again or report the problem.</Text>
             </View>)}
             <Text style={styles.bodyTitle}>Request Feature</Text>
-            <Text style={styles.bodyDesc}>Submit an idea for a potential CoachSync feature to appear on the Board. We appreciate your input!</Text>
+            <Text style={styles.bodyDesc}>Submit an idea for a potential CoachSync feature. We appreciate your input!</Text>
             <View style={styles.featureRequestForm}>
               <Text style={styles.inputLabel}>Title</Text>
               <TextInput
@@ -277,7 +353,7 @@ export default function FeatureBoard() {
                 onChangeText={(text) => {setRequestText(text)}}
               />
               {(requestTitle == 0 || requestText == 0) && (<Popup 
-                position='top center'
+                position='bottom center'
                 wide='very'
                 content={'Fill out all fields first.'}
                 trigger={<Button
@@ -298,6 +374,58 @@ export default function FeatureBoard() {
               />)}
               <View style={{marginTop:10,height:32}}>
                 {requestButtonDisabled && (<ActivityIndicatorView />)}
+              </View>
+            </View>
+          </View>)}
+
+          {showBugReport && (<View style={[styles.bodyContainer,{width:'70%',marginLeft:'15%'}]}>
+            {submissionPosted && (<View style={[messageBox.box,{backgroundColor:boxColors.success}]}>
+              <Text style={styles.text}>Bug report sent! We will review it shortly.</Text>
+            </View>)}
+            {submissionFailed && (<View style={[messageBox.box,{backgroundColor:boxColors.danger}]}>
+              <Text style={styles.text}>Error posting. Please try again.</Text>
+            </View>)}
+            <Text style={styles.bodyTitle}>Submit Bug Report</Text>
+            <Text style={styles.bodyDesc}>By submitting bug reports, we can fix problems faster. Be as detailed as possible.</Text>
+            <View style={styles.featureRequestForm}>
+              <Text style={styles.inputLabel}>Bug Location</Text>
+              <TextInput
+                style={styles.inputStyle}
+                value={bugPageText}
+                placeholder='ex. Programs or Clients page'
+                onChangeText={(text) => {setBugPageText(text)}}
+              />
+              <Text style={styles.inputLabel}>Description</Text>
+              <TextInput
+                style={styles.inputStyle}
+                value={bugDescription}
+                numberOfLines={4}
+                multiline={true}
+                placeholder='Describe the bug in detail...'
+                onChangeText={(text) => {setBugDescription(text)}}
+              />
+              {(bugPageText == 0 || bugDescription == 0) && (<Popup 
+                position='bottom center'
+                wide='very'
+                content={'Fill out all fields first.'}
+                trigger={<Button
+                  title='Submit Bug Report'
+                  buttonStyle={styles.requestFeatureButton}
+                  containerStyle={styles.requestFeatureButtonContainer}
+                  titleStyle={{color:'#fff'}}
+                  disabled={true}
+                />}
+              />) 
+              || (<Button
+                title='Submit Bug Report'
+                buttonStyle={styles.requestFeatureButton}
+                containerStyle={styles.requestFeatureButtonContainer}
+                titleStyle={{color:'#fff'}}
+                onPress={submitBugReport}
+                disabled={bugButtonDisabled}
+              />)}
+              <View style={{marginTop:10,height:32}}>
+                {bugButtonDisabled && (<ActivityIndicatorView />)}
               </View>
             </View>
           </View>)}

@@ -4792,6 +4792,26 @@ export const featureBoardLight = StyleSheet.create({
     fontSize:16,
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins'
+  },
+  releaseRow: {
+    padding:10,
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder
+  },
+  releaseBox: {
+    padding:5,
+    color:'#fff',
+    marginBottom:10,
+    marginTop:10,
+    alignSelf:'flex-start',
+    borderRadius:5,
+    fontFamily:'Poppins',
+    fontSize:18
+  },
+  releaseText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
   }
 })
 
