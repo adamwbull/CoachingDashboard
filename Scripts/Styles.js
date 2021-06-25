@@ -988,7 +988,6 @@ export const promptsLight = StyleSheet.create({
     paddingRight:10,
   },
   newPromptBody: {
-    flexDirection:'row',
     padding:10,
   },
   newPromptForm: {

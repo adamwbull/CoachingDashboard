@@ -187,6 +187,106 @@ export async function check() {
 
 */
 
+export async function deletePayment(paymentId, coachId, coachToken) {
+
+  var ret = false
+  var arr = {PaymentId:paymentId, CoachId:coachId, Token:coachToken}
+  
+  console.log('Deleting payment...')
+  const res = await fetch(url + '/payment/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Payment deleted.')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function updatePayment(coachToken, coachId, id, type) {
+
+  var ret = false
+  var arr = {Token:coachToken, CoachId:coachId, PaymentId:id, Type:type}
+
+  console.log('Updating this payment...')
+  const res = await fetch(url + '/payment/update', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success) {
+    console.log('Payment updated!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function getPaymentResponses(paymentId, coachId, coachToken) {
+
+  var ret = []
+
+  console.log('Getting payment responses...')
+  const res = await fetch(url + '/payment-charges/coach/'+paymentId+'/'+coachId+'/'+coachToken, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Responses found!')
+    ret = payload
+  } else {
+    console.log('No responses found!')
+  }
+
+  return ret
+
+}
+
+export async function createPayment(token, coachId, amount, title, memo, type, paymentRoute) {
+
+  var ret = false
+  var arr = {Token:token, CoachId:coachId, Amount:amount, Title:title, Memo:memo, Type:type, PaymentRoute:paymentRoute}
+
+  console.log('Creating payment...')
+  const res = await fetch(url + '/payment/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Payment created.')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function downvoteFeature(coachId, coachToken, featureId) {
 
   var ret = false

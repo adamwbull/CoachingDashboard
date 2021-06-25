@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import ReactPlayer from 'react-player'
-import { stripeCheckUser, updateContract, getPromptsData, getContracts, getPayments, getSurveys, getTextPrompts, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, createMeasurementSurvey, createSurveyItem, getPromptResponses, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt, createContract, uploadPDF } from './API.js'
+import { deletePayment, updatePayment, getPaymentResponses, createPayment, stripeCheckUser, updateContract, getPromptsData, getContracts, getPayments, getSurveys, getTextPrompts, lightenHex, getSurveyResponses, sqlToJsDate, parseSimpleDateText, deleteSurvey, createMeasurementSurvey, createSurveyItem, getPromptResponses, getProgressBar, checkStorage, uploadVideo, createPrompt, deletePrompt, createContract, uploadPDF } from './API.js'
 import { Popup, Dropdown, Tab, Checkbox } from 'semantic-ui-react'
 import JoditEditor from "jodit-react";
 import { Slider } from 'react-native-elements';
@@ -125,9 +125,9 @@ export default function Prompts() {
   // Payment prompt data to upload.
   const [paymentTitle, setPaymentTitle] = useState('')
   const [paymentMemo, setPaymentMemo] = useState('')
-  const [paymentAmount, setPaymentAmount] = useState(0)
-
-
+  const [paymentAmount, setPaymentAmount] = useState(undefined)
+  const [paymentType, setPaymentType] = useState(0)
+  const [paymentTypeUpdate, setPaymentTypeUpdate] = useState(0)
   // Main page Data.
   const [prompts, setPrompts] = useState([])
   const [surveys, setSurveys] = useState([])
@@ -993,9 +993,12 @@ export default function Prompts() {
   // Payment controls.
   const viewPaymentTrigger = async (i) => {
     setMain(false)
-    setViewPayment(prompts[i])
-    var responses = await getPaymentResponses(prompts[i].Id, coach.Id, coach.Token)
-    setViewPromptResponses(responses)
+    var p = JSON.parse(JSON.stringify(payments[i]))
+    p.Index = i
+    setViewPayment(p)
+    setPaymentTypeUpdate(payments[i].Type)
+    var responses = await getPaymentResponses(payments[i].Id, coach.Id, coach.Token)
+    setViewPaymentResponses(responses)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
@@ -1003,51 +1006,96 @@ export default function Prompts() {
     },500)
   }
 
+  const updatePaymentTrigger = async () => {
+    setCreateButtonDisabled(true)
+    setCreateButtonActivityIndicator(true)
+    var created = await updatePayment(coach.Token, coach.Id, viewPayment.Id, paymentTypeUpdate)
+    if (created) {
+      var cs = JSON.parse(JSON.stringify(payments))
+      if (paymentTypeUpdate == 1) {
+        for (var i = 0; i < cs.length; i++) {
+          cs[i].Type = 0
+        }
+      }
+      cs[viewPayment.Index].Type = paymentTypeUpdate
+      setPayments(cs)
+      setCreateButtonActivityIndicator(false)
+      setShowViewPayment(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        setCreateButtonDisabled(false)
+        setActivityIndicator(false)
+        setMain(true)
+      }, 1000)
+    } else {
+      console.log('Error creating payment.')
+    }
+  }
+
   const addPayment = () => {
     setMain(false)
     setActivityIndicator(true)
     setTimeout(() => {
-      setScrollToEnd(true)
       setActivityIndicator(false)
       setAddingPayment(true)
     },500)
   }
 
   const duplicatePayment = async (i) => {
-    var s = surveys[i]
+    var s = payments[i]
     setMain(false)
-    setDeleteSurveyIndex(-1)
-    setShowSurveyOptions(-1)
-    setCurrentSurveyItem(0)
-    // Set prompt data.
-    setSurveyTitle(s.Title)
-    setSurveyText(s.Text)
-    setSurveyItems(s.Items)
     setActivityIndicator(true)
+    setDeletePaymentIndex(-1)
+    setShowPaymentOptions(-1)
+    // Set prompt data.
+    setPaymentTitle(s.Title)
+    setPaymentMemo(s.Memo)
+    setPaymentAmount(s.Amount)
+    setPaymentType(s.Type)
     setTimeout(() => {
       setActivityIndicator(false)
-      setSurveyItemMain(true)
-      setAddingSurveyPrompt(true)
+      setAddingPayment(true)
     },500)
   }
 
   const deletePaymentTrigger = async (i) => {
-    var deleted = await deleteSurvey(surveys[i].Id, coach.Id, coach.Token)
+    var deleted = await deletePayment(payments[i].Id, coach.Id, coach.Token)
     if (deleted) {
-      setDeleteSurveyIndex(-1)
-      setShowSurveyOptions(-1)
-      refreshSurveys(coach.Id, coach.Token)
+      setDeletePaymentIndex(-1)
+      setShowPaymentOptions(-1)
+      refreshPayments(coach.Id, coach.Token)
     }
   }
 
   const returnToMainFromPayment = () => {
     setAddingPayment(false)
-    setViewPayment(false)
+    setViewPayment({})
+    setPaymentAmount(undefined)
+    setPaymentTitle('')
+    setPaymentMemo('')
+    setShowViewPayment(false)
     setActivityIndicator(true)
     setTimeout(() => {
       setActivityIndicator(false)
       setMain(true)
     },500)
+  }
+
+  const submitPayment = async () => {
+    setCreateButtonActivityIndicator(true)
+    setCreateButtonDisabled(true)
+    var post = await createPayment(coach.Token, coach.Id, paymentAmount, paymentTitle, paymentMemo, paymentType, 0)
+    if (post) {
+      refreshPayments(coach.Id, coach.Token)
+      setCreateButtonActivityIndicator(false)
+      setCreateButtonDisabled(false)
+      setAddingPayment(false)
+      setActivityIndicator(true)
+      setTimeout(() => {
+        setActivityIndicator(false)
+        setMain(true)
+      },500)
+    }
   }
 
   // Contract controls.
@@ -1455,26 +1503,33 @@ export default function Prompts() {
                       if (name.length > 17) {
                         name = name.slice(0,17) + '...'
                       }
-                      var text = survey.Text
+                      var text = payment.Memo
                       if (text.length > 80) {
                         text = text.slice(0,80) + '...'
+                      }
+                      var iconColor = colors.mainTextColor
+                      if (payment.Type == 1) {
+                        icon = 'star'
+                        iconColor = btnColors.caution
                       }
                       return (<View style={styles.taskBox} key={index + '-'}>
                         <View style={styles.taskPreview}>
                           <View style={styles.taskPreviewHeader}>
                             <View style={styles.taskPreviewHeaderIcon}>
                               <Icon
-                                name={promptIcon}
+                                name={icon}
                                 type='ionicon'
                                 size={22}
-                                color={colors.mainTextColor}
+                                color={iconColor}
                               />
                             </View>
                             <Text style={styles.taskPreviewTitle}>{name}</Text>
                           </View>
-                          {deletePaymentIndex == index && (<><Text style={styles.taskWarningText}>This Task and all responses will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>{text}</Text></>)}
+                          {deletePaymentIndex == index && (<><Text style={styles.taskWarningText}>This Task will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>
+                          <Text style={{fontFamily:'PoppinsSemiBold'}}>${payment.Amount}</Text> - {text}
+                          </Text></>)}
                         </View>
-                        {deletePaymentIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deleteSurveyTrigger(index)}>
+                        {deletePaymentIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePaymentTrigger(index)}>
                           <Text style={styles.taskButtonText}>Confirm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => setDeletePaymentIndex(-1)}>
@@ -1486,7 +1541,7 @@ export default function Prompts() {
                               <TouchableOpacity style={styles.taskButtonTop} onPress={() => setShowPaymentOptions(-1)}>
                                 <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Go Back</Text>
                               </TouchableOpacity>
-                              <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicateSurvey(index)}>
+                              <View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => duplicatePayment(index)}>
                               <Text style={styles.taskButtonText}>Duplicate</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.taskButtonRight} onPress={() => setDeletePaymentIndex(index)}>
@@ -1496,8 +1551,8 @@ export default function Prompts() {
                             (<><View style={styles.taskButtons}><TouchableOpacity style={styles.taskButtonLeft} onPress={() => setShowPaymentOptions(index)}>
                               <Text style={styles.taskButtonText}>Options</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewSurveyTrigger(index)}>
-                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
+                            <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPaymentTrigger(index)}>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Edit</Text>
                             </TouchableOpacity>
                           </View></>)}
                         </>)}
@@ -2243,28 +2298,48 @@ export default function Prompts() {
                     numberOfLines={2}
                   />
                   <Text style={styles.newPromptTitleLabel}>Amount (USD)</Text>
-                  <CurrencyInput
-                    id="input-example"
-                    name="input-name"
-                    placeholder="ex. 100.00"
-                    prefix='$'
-                    style={{color:colors.mainTextColor,
-                    backgroundColor:colors.secondaryBackground,
-                    borderRadius:10,
-                    borderWidth:0,
-                    padding:10,
-                    width:'100%',
-                    fontFamily:'Poppins',
-                    fontSize:18,
-                    marginBottom:20}}
-                    defaultValue={undefined}
-                    decimalsLimit={2}
-                    onValueChange={(value, name) => console.log(value, name)}
-                  />
+                  <View style={{flexDirection:'row',alignItems:'center',marginBottom:20}}>
+                    <CurrencyInput
+                      id="input-example"
+                      name="input-name"
+                      placeholder="ex. 100.00"
+                      prefix='$'
+                      style={{color:colors.mainTextColor,
+                      backgroundColor:colors.secondaryBackground,
+                      borderRadius:10,
+                      borderWidth:0,
+                      padding:10,
+                      width:'25%',
+                      marginRight:10,
+                      fontFamily:'Poppins',
+                      fontSize:18}}
+                      defaultValue={paymentAmount}
+                      decimalsLimit={2}
+                      onValueChange={(value, name) => {
+                        var v = value
+                        if (value == undefined) {
+                          v = 0
+                        }
+                        setPaymentAmount(v)
+                      }}
+                    />
+                    <Checkbox 
+                      label='Set as onboarding payment' 
+                      className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                      checked={paymentType == 1} 
+                      onChange={(event, data) => {
+                        var checked = 0
+                        if (data.checked) {
+                          checked = 1
+                        }
+                        setPaymentType(checked)
+                      }}
+                    />
+                  </View>
                 </View>
               </View>
               <View style={[styles.newPromptFooter,{flexDirection:'row',alignItems:'center',justifyContent:'center'}]}>
-                {(surveyTitle.length == 0 || surveyText.length == 0 || surveyItems.length == 0) && (<Popup
+                {(paymentTitle.length == 0 || paymentMemo.length == 0 || paymentAmount == 0) && (<Popup
                   position='top center'
                   content='Base fields need to be filled out, and at least one survey item created!' trigger={<Button
                   title='Create Payment'
@@ -2277,13 +2352,77 @@ export default function Prompts() {
                   titleStyle={styles.newPromptAddButtonTitle}
                   buttonStyle={styles.newPromptAddButton}
                   containerStyle={[styles.newPromptAddButtonContainer,{flex:1,padding:0}]}
-                  onPress={submitSurvey}
+                  onPress={submitPayment}
                   disabled={createButtonDisabled}
                 />)}
                 {createButtonActivityIndicator && (<View style={[styles.newPromptAddButtonContainer,{marginTop:10}]}><ActivityIndicatorView /></View>)}
                 <View style={{paddingLeft:10,alignItems:'flex-end',justifyContent:'center'}}>
                   <Image source={StripeImage} style={{width:150,height:34}} />
                 </View>
+              </View>
+            </View>
+          </>)}
+
+          {showViewPayment && (<>
+            <View style={styles.newPromptContainer}>
+              <View style={styles.newPromptHeader}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={25}
+                  color={colors.mainTextColor}
+                  onPress={returnToMainFromPayment}
+                />
+                <Text style={styles.newPromptDescTitle}>{viewPayment.Title} (${viewPayment.Amount})</Text>
+              </View>
+              <View style={styles.newPromptBody}>
+                <View style={{flexDirection:'row',alignItems:'center',paddingTop:10,paddingBottom:10}}>
+                  <Checkbox 
+                    label='Set as onboarding payment' 
+                    className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
+                    checked={paymentTypeUpdate == 1} 
+                    onChange={(event, data) => {
+                      var checked = 0
+                      if (data.checked) {
+                        checked = 1
+                      }
+                      setPaymentTypeUpdate(checked)
+                    }}
+                  />
+                  <Button
+                    title='Update'
+                    titleStyle={styles.newContractAddButtonTitle}
+                    buttonStyle={{borderRadius:10}}
+                    onPress={updatePaymentTrigger}
+                    disabled={paymentTypeUpdate == viewPayment.Type}
+                  />
+                </View>
+                <View style={styles.newPromptBodyLeft}>
+                  <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Memo</Text>
+                  <Text style={styles.viewPromptBodyText}>{viewPayment.Memo}</Text>
+                </View>
+              </View>
+              <View style={styles.viewPromptResponses}>
+                <View style={styles.newPromptHeader}>
+                  <Text style={styles.newPromptDescTitle}>{viewPaymentResponses.length} Client Payments{(viewPaymentResponses.length == 1) ? '' : 's'}</Text>
+                </View>
+                {viewPaymentResponses.length > 0 && (<>
+                  {viewPaymentResponses.map((response, index) => {
+                    return (<View style={[styles.responseRow]} key={index + '+'}>
+                      <View style={styles.responseClientInfo}>
+                        <View style={styles.responseClientInfoInner}>
+                          <Image source={response.Client[0].Avatar} style={{width:30,height:30,borderRadius:40}} />
+                          <Text style={styles.responseClientText}>{response.Client[0].FirstName + ' ' + response.Client[0].LastName}</Text>
+                        </View>
+                        <Text style={styles.responseClientCreated}>
+                          Paid {parseSimpleDateText(sqlToJsDate(response.Created))}
+                        </Text>
+                      </View>
+                    </View>)
+                  })}
+                </>) || (<>
+                  <Text style={styles.noPromptResponses}>No clients have made a payment yet.</Text>
+                </>)}
               </View>
             </View>
           </>)}
