@@ -176,6 +176,7 @@ export default function Welcome() {
         buttonStyle={welcome.submitButton}
         containerStyle={welcome.submitButtonContainer}
         onPress={onSubmit}/>
+        <Text style={[welcome.subtitle,{marginTop:20}]}><Link to='/forgot-password' style={welcome.link}>Forgot password?</Link></Text>
       </View>
 
     </View>

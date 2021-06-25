@@ -17,6 +17,7 @@ const linking = {
     screens: {
       Welcome: 'welcome',
       SignUp: 'sign-up',
+      ForgotPassword:'/forgot-password',
       Main: {
         screens: {
           Home: {
@@ -61,7 +62,7 @@ import Main from './Scripts/Drawers/Main.js'
 // Import auth flow.
 import Welcome from './Scripts/Welcome.js'
 import SignUp from './Scripts/SignUp.js'
-
+import ForgotPassword from './Scripts/ForgotPassword.js'
 
 const Stack = createStackNavigator()
 
@@ -103,6 +104,7 @@ export default function App() {
         <Stack.Screen name="Welcome" component={Welcome} options={{title:'Log In - CoachSync'}} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Main" component={Main} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       </Stack.Navigator>
     </NavigationContainer>
   </Provider>)

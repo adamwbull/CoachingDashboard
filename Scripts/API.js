@@ -187,6 +187,34 @@ export async function check() {
 
 */
 
+export async function forgotPasswordRequest(email) {
+
+  var ret = false
+  var arr = {Email:email, Token:key}
+
+  console.log('Requesting email update...')
+  const res = await fetch(url + '/system-email/change-email', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success == true) {
+    console.log('Request passed!')
+    ret = true
+  } else {
+    console.log('Request failed.')
+  }
+
+  return ret
+
+}
+
 export async function deletePayment(paymentId, coachId, coachToken) {
 
   var ret = false
