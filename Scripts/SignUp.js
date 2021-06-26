@@ -825,7 +825,8 @@ export default function SignUp() {
           disabled={buttonDisabled}
           buttonStyle={signUp.submitButton}
           containerStyle={signUp.submitButtonContainer}
-          onPress={onSubmit}/>
+          onPress={onSubmit} />
+          <Text style={[signUp.subtitle,{marginTop:20}]}><Link to='/welcome' style={signUp.link}>Return to log in.</Link></Text>
         </View>
       </View>)}
     </View>

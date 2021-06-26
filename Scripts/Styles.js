@@ -214,7 +214,7 @@ export const signUpLight = StyleSheet.create({
     flex: 1, flexWrap: 'wrap'
   },
   pricingIntro: {
-    fontSize:20,
+    fontSize:18,
     marginBottom:5,
     textAlign:'center',
     fontFamily:'Poppins',
@@ -247,9 +247,9 @@ export const signUpLight = StyleSheet.create({
     padding:20
   },
   logo: {
-    width:200,
+    width:120,
     marginTop:10,
-    height:100
+    height:60
   },
   form: {
     flex:1000,
@@ -261,7 +261,7 @@ export const signUpLight = StyleSheet.create({
   },
   title: {
     color:colorsLight.mainTextColor,
-    fontSize:40,
+    fontSize:35,
     textAlign:'center',
     width:'100%',
     fontFamily:'Poppins'
@@ -4815,28 +4815,20 @@ export const featureBoardLight = StyleSheet.create({
 })
 
 export const forgotPasswordLight = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  main: {
-    flex:1,
-    flexDirection:'row',
-  },
-  scrollView: {
-    paddingTop:20,
-    paddingLeft:20,
-    paddingRight:20
-  },
   body: {
     flex:1,
     borderWidth:0,
+    justifyContent:'center',
+    alignItems:'center',
+    backgroundColor:colorsLight.secondaryBackground
   },
   bodyContainer: {
     backgroundColor:colorsLight.mainBackground,
     borderRadius:10,
     padding:20,
-    marginBottom:20,
-    flex:1
+    width:'40%',
+    marginTop:20,
+    marginBottom:100,
   },
   bodyHeader: {
     flexDirection:'row',
@@ -4860,10 +4852,56 @@ export const forgotPasswordLight = StyleSheet.create({
   },
   bodyDesc: {
     color:colorsLight.darkGray,
-    fontSize:14,
+    fontSize:16,
     lineHeight:14,
     fontFamily:'Poppins'
   },
+  inputLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    marginTop:20,
+    color:colorsLight.secondaryTextColor
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    height:38,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginBottom:20
+  },
+  forgotPasswordButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+  },
+  link: {
+    color:btnColors.primary,
+    fontSize:18,
+    textDecorationLine: 'underline',
+  },
+  subtitle: {
+    color:colorsLight.mainTextColor,
+    fontSize:18,
+    width:'100%',
+    marginBottom:25,
+    marginTop:35,
+    textAlign:'right'
+  },
+  confirmBox: {
+    backgroundColor: boxColors.success,
+    padding:20,
+    borderRadius:10,
+    width:'40%',
+  },
+  confirmBoxText: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    fontSize:18,
+    textAlign:'center'
+  }
 })
 
 export const basic = StyleSheet.create({

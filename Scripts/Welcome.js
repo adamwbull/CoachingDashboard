@@ -105,7 +105,6 @@ export default function Welcome() {
   }
 
   const verifyCallback = async (response) => {
-    console.log(response)
     var check = verifyCaptcha(response);
     if (check) {
       setButtonDisabled(false)
@@ -117,10 +116,6 @@ export default function Welcome() {
   const expiredCallback = () => { console.log('captcha expired') };
 
   return (<View style={welcome.container} onLayout={onLayout}>
-    <Helmet>
-        <meta charSet="utf-8" />
-        <title>Welcome - CoachSync</title>
-    </Helmet>
     <View style={welcome.login}>
       <View style={welcome.logoContainer}>
         <Animated.Image

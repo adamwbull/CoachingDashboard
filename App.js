@@ -101,10 +101,10 @@ export default function App() {
   return (<Provider value={coach}>
     <NavigationContainer linking={linking} theme={MyTheme}>
       <Stack.Navigator headerMode='none'>
-        <Stack.Screen name="Welcome" component={Welcome} options={{title:'Log In - CoachSync'}} />
-        <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="Main" component={Main} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <Stack.Screen name="Welcome" component={Welcome} options={{title:'Welcome - CoachSync'}} />
+        <Stack.Screen name="SignUp" component={SignUp} options={{title:'Sign Up - CoachSync'}} />
+        <Stack.Screen name="Main" component={Main} options={{title:'Home - CoachSync'}} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{title:'Forgot Password - CoachSync'}} />
       </Stack.Navigator>
     </NavigationContainer>
   </Provider>)
