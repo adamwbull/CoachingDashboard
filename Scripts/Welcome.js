@@ -7,7 +7,7 @@ import { Button, Icon } from 'react-native-elements';
 import { useLinkTo, Link } from '@react-navigation/native';
 import { TextInput } from 'react-native-web';
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js';
-import { loginCheck, verifyCaptcha } from '../Scripts/API.js';
+import { captchaKey, loginCheck, verifyCaptcha } from '../Scripts/API.js';
 import Recaptcha from 'react-grecaptcha';
 import { Helmet } from "react-helmet";
 
@@ -161,7 +161,7 @@ export default function Welcome() {
           onChangeText={onChangeTextPassword}
         />
         {showCaptcha && (<Recaptcha
-          sitekey='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+          sitekey={captchaKey}
           callback={verifyCallback}
           expiredCallback={expiredCallback}
         />)}

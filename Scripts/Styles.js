@@ -23,7 +23,7 @@ export const boxColors = {
   primary:'#38A2E8',
   caution:'#FFCF0F',
   danger: '#fb7161',
-  success:'#32D977',
+  success:'#2ecc71',
   info:'#48dbfb',
   default:'#FAFAFA'
 }
@@ -107,7 +107,6 @@ export const welcomeLight = StyleSheet.create({
     paddingBottom:10,
     paddingTop:10,
     height:'100%',
-    width:'100%',
     alignItems:'center',
     justifyContent:'center',
     backgroundColor:colorsLight.mainBackground
@@ -186,10 +185,10 @@ export const signUpLight = StyleSheet.create({
   container: {
     backgroundColor:colorsLight.secondaryBackground,
     alignItems:'center',
-    borderLeftWidth:20,
+    borderLeftWidth:10,
     borderLeftColor:colorsLight.secondaryHighlight,
     borderRightColor:colorsLight.secondaryHighlight,
-    borderRightWidth:20,
+    borderRightWidth:10,
   },
   main: {
     flexDirection:'row',
@@ -4820,7 +4819,17 @@ export const forgotPasswordLight = StyleSheet.create({
     borderWidth:0,
     justifyContent:'center',
     alignItems:'center',
-    backgroundColor:colorsLight.secondaryBackground
+    backgroundColor:colorsLight.secondaryBackground,
+    borderLeftWidth:10,
+    borderLeftColor:colorsLight.secondaryHighlight,
+    borderRightWidth:10,
+    borderRightColor:colorsLight.secondaryHighlight,
+  },
+  logo: {
+    width:240,
+    height:120,
+    marginTop:40,
+    marginBottom:20
   },
   bodyContainer: {
     backgroundColor:colorsLight.mainBackground,
@@ -4848,13 +4857,21 @@ export const forgotPasswordLight = StyleSheet.create({
     color:colorsLight.darkGray,
     fontSize:26,
     marginRight:10,
-    fontFamily:'PoppinsSemiBold'
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center',
   },
   bodyDesc: {
     color:colorsLight.darkGray,
     fontSize:16,
     lineHeight:14,
-    fontFamily:'Poppins'
+    fontFamily:'Poppins',
+    textAlign:'center',
+  },
+  form: {
+    marginLeft:20,
+    marginRight:20,
+    marginTop:0,
+    marginBottom:20
   },
   inputLabel: {
     fontFamily:'PoppinsSemiBold',
@@ -4871,6 +4888,7 @@ export const forgotPasswordLight = StyleSheet.create({
     width:'100%',
     fontFamily:'Poppins',
     fontSize:18,
+    marginTop:5,
     marginBottom:20
   },
   forgotPasswordButton: {
@@ -4886,18 +4904,18 @@ export const forgotPasswordLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     fontSize:18,
     width:'100%',
-    marginBottom:25,
+    marginBottom:15,
     marginTop:35,
     textAlign:'right'
   },
   confirmBox: {
-    backgroundColor: boxColors.success,
+    backgroundColor: colorsLight.secondaryHighlight,
     padding:20,
     borderRadius:10,
     width:'40%',
   },
   confirmBoxText: {
-    color:colorsLight.mainTextColor,
+    color:'#fff',
     fontFamily:'Poppins',
     fontSize:18,
     textAlign:'center'

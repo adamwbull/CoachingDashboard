@@ -7,6 +7,7 @@ import { View, Text, StyleSheet } from 'react-native'
 export const url = 'https://api.coachsync.me'
 export const uploadUrl = 'https://db.coachsync.me'
 export const key = 'c75c8309094b9bcc21fbcabeb17e0f7a1a4c4f547f041376bfdb71826bcc84db'
+export const captchaKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
 
 // Helper functions
 export const monthNames = ["January", "February", "March", "April", "May", "June",
