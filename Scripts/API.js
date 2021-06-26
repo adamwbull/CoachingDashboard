@@ -194,7 +194,7 @@ export async function forgotPasswordRequest(email) {
   var arr = {Email:email, Token:key}
 
   console.log('Requesting email update...')
-  const res = await fetch(url + '/system-email/change-email', {
+  const res = await fetch(url + '/system-email/forgot-email', {
     method:'POST',
     body: JSON.stringify(arr),
     headers: {

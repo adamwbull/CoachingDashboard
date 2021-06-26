@@ -65,10 +65,10 @@ export default function FeatureBoard() {
   const submitInput = async () => {
     setSubmitButtonDisabled(true)
     set('ForgotCheck', true, ttl)
-    var post = true
+    var post = await forgotPasswordRequest(email)
+    window.grecaptcha.reset();
     setShowSuccessBox(true)
     setShowCaptcha(false)
-    window.grecaptcha.reset();
   }
 
   // Main loading functions.
