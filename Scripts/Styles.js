@@ -4922,6 +4922,115 @@ export const forgotPasswordLight = StyleSheet.create({
   }
 })
 
+export const updatePasswordLight = StyleSheet.create({
+  body: {
+    flex:1,
+    borderWidth:0,
+    justifyContent:'center',
+    alignItems:'center',
+    backgroundColor:colorsLight.secondaryBackground,
+    borderLeftWidth:10,
+    borderLeftColor:colorsLight.secondaryHighlight,
+    borderRightWidth:10,
+    borderRightColor:colorsLight.secondaryHighlight,
+  },
+  logo: {
+    width:240,
+    height:120,
+    marginTop:40,
+    marginBottom:20
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    width:'40%',
+    marginTop:20,
+    marginBottom:100,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center',
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:16,
+    lineHeight:14,
+    fontFamily:'Poppins',
+    textAlign:'center',
+  },
+  form: {
+    marginLeft:20,
+    marginRight:20,
+    marginTop:0,
+    marginBottom:20
+  },
+  inputLabel: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:20,
+    marginTop:20,
+    color:colorsLight.secondaryTextColor
+  },
+  inputStyle: {
+    color:colorsLight.mainTextColor,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+    height:38,
+    width:'100%',
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginTop:5,
+    marginBottom:30
+  },
+  forgotPasswordButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+  },
+  link: {
+    color:btnColors.primary,
+    fontSize:18,
+    textDecorationLine: 'underline',
+  },
+  subtitle: {
+    color:colorsLight.mainTextColor,
+    fontSize:18,
+    width:'100%',
+    marginBottom:15,
+    marginTop:35,
+    textAlign:'right'
+  },
+  confirmBox: {
+    backgroundColor: colorsLight.secondaryHighlight,
+    padding:20,
+    borderRadius:10,
+    width:'40%',
+  },
+  confirmBoxText: {
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:18,
+    textAlign:'center'
+  }
+})
+
 export const basic = StyleSheet.create({
   container: {
     flex: 1,

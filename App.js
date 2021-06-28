@@ -17,7 +17,8 @@ const linking = {
     screens: {
       Welcome: 'welcome',
       SignUp: 'sign-up',
-      ForgotPassword:'/forgot-password',
+      ForgotPassword:'forgot-password',
+      UpdatePassword:'update-password/:Token',
       Main: {
         screens: {
           Home: {
@@ -63,6 +64,7 @@ import Main from './Scripts/Drawers/Main.js'
 import Welcome from './Scripts/Welcome.js'
 import SignUp from './Scripts/SignUp.js'
 import ForgotPassword from './Scripts/ForgotPassword.js'
+import UpdatePassword from './Scripts/UpdatePassword.js'
 
 const Stack = createStackNavigator()
 
@@ -77,7 +79,7 @@ export default function App() {
     PoppinsBold: require('./assets/fonts/Poppins-Bold.ttf'),
     OCRA: require('./assets/fonts/OCRA.ttf')
   })
-  
+
   const [colors, setColors] = useState(colorsLight)
 
   const MyTheme = {
@@ -106,6 +108,7 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUp} options={{title:'Sign Up - CoachSync'}} />
         <Stack.Screen name="Main" component={Main} options={{title:'Home - CoachSync'}} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{title:'Forgot Password - CoachSync'}} />
+        <Stack.Screen name="UpdatePassword" component={UpdatePassword} options={{title:'Update Password - CoachSync'}} />
       </Stack.Navigator>
     </NavigationContainer>
   </Provider>)
