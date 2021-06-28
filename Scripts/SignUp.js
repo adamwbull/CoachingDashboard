@@ -225,7 +225,6 @@ export default function SignUp() {
 
   // Media queries.
   const [pricingCardsStyle, setPricingCardsStyle] = useState({flexDirection:'row'})
-  const [scrollStyle, setScrollStyle] = useState({flex:1})
 
   // Stage controls.
   const [opacity, setOpacity] = useState(new Animated.Value(0))
@@ -277,12 +276,7 @@ export default function SignUp() {
       setPricingCardsStyle({flexDirection:'column'})
     } else {
       setPricingCardsStyle({flexDirection:'row'})
-      setScrollStyle({height})
     }
-  }
-
-  const onScroll = (event) => {
-    setScrollStyle({height:event.nativeEvent.contentSize.height})
   }
 
   const discount = async () => {
@@ -565,12 +559,9 @@ export default function SignUp() {
     linkTo('/clients')
   }
 
-  return (<ScrollView contentContainerStyle={[signUp.container,scrollStyle]} scrollEnabled={true} onLayout={onLayout} onScroll={onScroll}>
-    <Helmet>
-        <meta charSet="utf-8" />
-        <title>Sign Up - CoachSync</title>
-    </Helmet>
-    <View style={signUp.logoContainer}><Animated.Image
+  return (<ScrollView contentContainerStyle={signUp.mainContainer}>
+    <View style={signUp.logoContainer}>
+      <Animated.Image
         onLoad={onLoad}
         source={navLogo}
         resizeMode="contain"
@@ -588,247 +579,252 @@ export default function SignUp() {
           },
           signUp.logo
         ]}
-    /></View>
-    <View style={signUp.main}>
-      {showActivityIndicator && (<ActivityIndicatorView />)}
-      {showCongrats && (<View style={signUp.congratsContainer}>
-        <View style={signUp.congratsHeader}></View>
-        <View style={signUp.congratsBody}>
-          <View style={signUp.congratsIcon}>
-          <Icon name='people' size={60} type='ionicon' color={priceStyle}/>
-          </View>
-          <Text style={signUp.congratsTitle}>Congrats {firstName}!</Text>
-          <Text style={signUp.congratsText}>You&apos;ve subscribed to the <Text style={[signUp.congratsTextBold,{color:priceStyle}]}>{priceName}</Text>.{"\n"}A new coaching journey awaits!</Text>
-          <Button
-          title='Get Started'
-          buttonStyle={signUp.congratsButton}
-          containerStyle={signUp.congratsButtonContainer}
-          onPress={dashboard}/>
-        </View>
-      </View>)}
-      {showPaymentForm && (<View style={signUp.paymentFormContainer}>
-        <TouchableOpacity style={signUp.backContainer} onPress={onBackPayment}>
-          <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
-          <Text style={signUp.backText}>Go Back</Text>
-        </TouchableOpacity>
-        <View style={[signUp.paymentForm,pricingCardsStyle]}>
-          <View style={[signUp.paymentInfo]}>
-            <View style={signUp.paymentIcon}>
-              <Icon size={40} color='#fff' name='cart-outline' type='ionicon' />
-            </View>
-            <View style={signUp.paymentItem}>
-              <View style={signUp.paymentItemDetails}>
-                <Text style={signUp.paymentItemTitle}>{priceName}</Text>
-                <Text style={signUp.paymentItemMemo}>{priceMemo}</Text>
+      />
+    </View>
+    <View style={{flex:1,width:'100%'}}>
+      <View style={signUp.container}>
+        <View style={signUp.main}>
+          {showActivityIndicator && (<ActivityIndicatorView />)}
+          {showCongrats && (<View style={signUp.congratsContainer}>
+            <View style={signUp.congratsHeader}></View>
+            <View style={signUp.congratsBody}>
+              <View style={signUp.congratsIcon}>
+              <Icon name='people' size={60} type='ionicon' color={priceStyle}/>
               </View>
-              <View style={signUp.paymentItemAmount}>
-                <Text style={signUp.paymentDiscountAmount}>${activeDiscountExpire && (priceBase)}</Text>
-                <Text style={signUp.paymentPrimaryAmount}>${priceAmount}</Text>
-              </View>
+              <Text style={signUp.congratsTitle}>Congrats {firstName}!</Text>
+              <Text style={signUp.congratsText}>You&apos;ve subscribed to the <Text style={[signUp.congratsTextBold,{color:priceStyle}]}>{priceName}</Text>.{"\n"}A new coaching journey awaits!</Text>
+              <Button
+              title='Get Started'
+              buttonStyle={signUp.congratsButton}
+              containerStyle={signUp.congratsButtonContainer}
+              onPress={dashboard}/>
             </View>
-            <View style={signUp.stripeSection}>
-              <Animated.Image
-                  onLoad={onLoad}
-                  source={require('../assets/stripe.png')}
-                  resizeMode="contain"
-                  style={[
-                    {
-                      opacity: opacity,
-                      transform: [
-                        {
-                          scale: opacity.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0.85, 1],
-                          })
-                        },
-                      ],
-                    },
-                    signUp.paymentStripe
-                  ]}
-              />
-            </View>
-          </View>
-          <View style={signUp.paymentMain}>
-            {false && (<View style={signUp.paymentOptions}>
-              <ButtonGroup
-                onPress={selectPaymentOption}
-                buttons={['Credit Card','PayPal']}
-                selectedIndex={paymentIndex}
-                textStyle={signUp.groupPaymentButton}
-                selectedTextStyle={{backgroundColor:colorsLight.secondaryHighlight}}
-                selectedButtonStyle={{backgroundColor:colorsLight.secondaryHighlight}}
-                style={{margin:0,padding:0}}
-              />
-            </View>)}
-            <Text style={{fontSize:14,textAlign:'center',fontFamily:'Poppins',color:colorsLight.mainTextColor}}>
-              By subscribing you agree to our <a href="https://coachsync.me/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="https://coachsync.me/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
-            </Text>
-            {cardError && (<View style={messageBox.errorBox}>
-                <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
-                <Text style={messageBox.text}>{cardError}</Text>
-              </View>) || (<View></View>)}
-            {paymentIndex == 0 && (<Elements stripe={stripePromise}>
-              <SubscribeForm memo={priceMemo} onFinished={handleFinish} planId={chosenPlan.Type} annual={annual} priceAmount={priceAmount} />
-            </Elements>)}
-          </View>
-        </View>
-      </View>)}
-      {showPricingForm && (<View style={{flexShrink:1}}>
-        <Text style={signUp.pricingTitle}>Welcome to CoachSync, {firstName}!</Text>
-        <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you. You can also upgrade later.</Text>
-        {false && (<Text style={signUp.timeLeft}>Time left on sale: {activeDiscountExpire && (<View style={signUp.countdown}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}</Text>)}
-        {coachCount > 10 && (<Text style={signUp.timeLeft}>Beta Sale lasts for first 50 sign ups! <Text style={signUp.countdown}>{50-coachCount} spaces left</Text></Text>)}
-        {true && (<View style={signUp.toggleAnnual}>
-          <ButtonGroup
-            onPress={selectButton}
-            buttons={['Monthly','Annual']}
-            selectedIndex={selectedIndex}
-            containerStyle={signUp.groupButton}
-            />
-        </View>)}
-        <View style={[signUp.pricingCards,pricingCardsStyle]}>
-        <PricingCard
-          color={btnColors.primary}
-          title={plans[0].Title}
-          price={<View>
-            <Text style={{fontSize:45}}>${plans[0].BasePrice}/{priceUnit}</Text>
-            {activeDiscountExpire && (<Text style={signUp.priceBottomText}>forever</Text>)}
-          </View>}
-          info={plans[0].InfoParsed}
-          button={{ title: 'Select' }}
-          containerStyle={signUp.pricingCardContainer}
-          onButtonPress={() => onPriceSelect(0)}
-        />
-        <View>
-          <Text style={signUp.pricingHighlight}>Most Popular:</Text>
-          <PricingCard
-            color={btnColors.success}
-            title={<View>
-              {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
-                <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
-                <View style={signUp.previousPriceInner}>
-                  <Text style={signUp.previousPrice}>{plans[1].BasePrice*annual}</Text>
-                  <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+          </View>)}
+          {showPaymentForm && (<View style={signUp.paymentFormContainer}>
+            <TouchableOpacity style={signUp.backContainer} onPress={onBackPayment}>
+              <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
+              <Text style={signUp.backText}>Go Back</Text>
+            </TouchableOpacity>
+            <View style={[signUp.paymentForm,pricingCardsStyle]}>
+              <View style={[signUp.paymentInfo]}>
+                <View style={signUp.paymentIcon}>
+                  <Icon size={40} color='#fff' name='cart-outline' type='ionicon' />
                 </View>
-              </View>)}
-              <Text style={{fontSize:50}}>{plans[1].Title}</Text>
-            </View>}
-            price={<View>
-              <Text style={{fontSize:45}}>${(plans[1].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
-              <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
-            </View>}
-            info={plans[1].InfoParsed}
-            button={{ title: 'Select' }}
-            containerStyle={signUp.pricingCardContainerMiddle}
-            onButtonPress={() => onPriceSelect(1)}
-          />
-        </View>
-        <PricingCard
-          color={btnColors.danger}
-          title={<View>
-            {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
-              <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
-              <View style={signUp.previousPriceInner}>
-                <Text style={signUp.previousPrice}>{plans[2].BasePrice*annual}</Text>
-                <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+                <View style={signUp.paymentItem}>
+                  <View style={signUp.paymentItemDetails}>
+                    <Text style={signUp.paymentItemTitle}>{priceName}</Text>
+                    <Text style={signUp.paymentItemMemo}>{priceMemo}</Text>
+                  </View>
+                  <View style={signUp.paymentItemAmount}>
+                    <Text style={signUp.paymentDiscountAmount}>${activeDiscountExpire && (priceBase)}</Text>
+                    <Text style={signUp.paymentPrimaryAmount}>${priceAmount}</Text>
+                  </View>
+                </View>
+                <View style={signUp.stripeSection}>
+                  <Animated.Image
+                      onLoad={onLoad}
+                      source={require('../assets/stripe.png')}
+                      resizeMode="contain"
+                      style={[
+                        {
+                          opacity: opacity,
+                          transform: [
+                            {
+                              scale: opacity.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.85, 1],
+                              })
+                            },
+                          ],
+                        },
+                        signUp.paymentStripe
+                      ]}
+                  />
+                </View>
               </View>
+              <View style={signUp.paymentMain}>
+                {false && (<View style={signUp.paymentOptions}>
+                  <ButtonGroup
+                    onPress={selectPaymentOption}
+                    buttons={['Credit Card','PayPal']}
+                    selectedIndex={paymentIndex}
+                    textStyle={signUp.groupPaymentButton}
+                    selectedTextStyle={{backgroundColor:colorsLight.secondaryHighlight}}
+                    selectedButtonStyle={{backgroundColor:colorsLight.secondaryHighlight}}
+                    style={{margin:0,padding:0}}
+                  />
+                </View>)}
+                <Text style={{fontSize:14,textAlign:'center',fontFamily:'Poppins',color:colorsLight.mainTextColor}}>
+                  By subscribing you agree to our <a href="https://coachsync.me/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="https://coachsync.me/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                </Text>
+                {cardError && (<View style={messageBox.errorBox}>
+                    <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+                    <Text style={messageBox.text}>{cardError}</Text>
+                  </View>) || (<View></View>)}
+                {paymentIndex == 0 && (<Elements stripe={stripePromise}>
+                  <SubscribeForm memo={priceMemo} onFinished={handleFinish} planId={chosenPlan.Type} annual={annual} priceAmount={priceAmount} />
+                </Elements>)}
+              </View>
+            </View>
+          </View>)}
+          {showPricingForm && (<View style={{flexShrink:1}}>
+            <Text style={signUp.pricingTitle}>Welcome to CoachSync, {firstName}!</Text>
+            <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you. You can also upgrade later.</Text>
+            {false && (<Text style={signUp.timeLeft}>Time left on sale: {activeDiscountExpire && (<View style={signUp.countdown}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}</Text>)}
+            {coachCount > 10 && (<Text style={signUp.timeLeft}>Beta Sale lasts for first 50 sign ups! <Text style={signUp.countdown}>{50-coachCount} spaces left</Text></Text>)}
+            {true && (<View style={signUp.toggleAnnual}>
+              <ButtonGroup
+                onPress={selectButton}
+                buttons={['Monthly','Annual']}
+                selectedIndex={selectedIndex}
+                containerStyle={signUp.groupButton}
+                />
             </View>)}
-            <Text>{plans[2].Title}</Text>
-          </View>}
-          price={<View>
-            <Text style={{fontSize:45}}>${(plans[2].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
-            <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
-          </View>}
-          info={plans[2].InfoParsed}
-          button={{ title: 'Select' }}
-          containerStyle={signUp.pricingCardContainer}
-          onButtonPress={() => onPriceSelect(2)}
-        />
+            <View style={[signUp.pricingCards,pricingCardsStyle]}>
+            <PricingCard
+              color={btnColors.primary}
+              title={plans[0].Title}
+              price={<View>
+                <Text style={{fontSize:45}}>${plans[0].BasePrice}/{priceUnit}</Text>
+                {activeDiscountExpire && (<Text style={signUp.priceBottomText}>forever</Text>)}
+              </View>}
+              info={plans[0].InfoParsed}
+              button={{ title: 'Select' }}
+              containerStyle={signUp.pricingCardContainer}
+              onButtonPress={() => onPriceSelect(0)}
+            />
+            <View>
+              <Text style={signUp.pricingHighlight}>Most Popular:</Text>
+              <PricingCard
+                color={btnColors.success}
+                title={<View>
+                  {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+                    <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
+                    <View style={signUp.previousPriceInner}>
+                      <Text style={signUp.previousPrice}>{plans[1].BasePrice*annual}</Text>
+                      <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+                    </View>
+                  </View>)}
+                  <Text style={{fontSize:50}}>{plans[1].Title}</Text>
+                </View>}
+                price={<View>
+                  <Text style={{fontSize:45}}>${(plans[1].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+                  <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
+                </View>}
+                info={plans[1].InfoParsed}
+                button={{ title: 'Select' }}
+                containerStyle={signUp.pricingCardContainerMiddle}
+                onButtonPress={() => onPriceSelect(1)}
+              />
+            </View>
+            <PricingCard
+              color={btnColors.danger}
+              title={<View>
+                {activeDiscountExpire && (<View style={[signUp.previousPriceContainer,signUp.prevPriceHeight]}>
+                  <Text style={signUp.discountDesc}>{activeDiscountDesc}</Text>
+                  <View style={signUp.previousPriceInner}>
+                    <Text style={signUp.previousPrice}>{plans[2].BasePrice*annual}</Text>
+                    <Text style={signUp.previousPriceDiscount}>{activeDiscountPerc}% off</Text>
+                  </View>
+                </View>)}
+                <Text>{plans[2].Title}</Text>
+              </View>}
+              price={<View>
+                <Text style={{fontSize:45}}>${(plans[2].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)}/{priceUnit}</Text>
+                <Text style={signUp.priceBottomText}>{activeDiscountDurText}</Text>
+              </View>}
+              info={plans[2].InfoParsed}
+              button={{ title: 'Select' }}
+              containerStyle={signUp.pricingCardContainer}
+              onButtonPress={() => onPriceSelect(2)}
+            />
+            </View>
+          </View>)}
+          {showRegisterForm && (<View style={{flexShrink:1}}>
+            <View style={signUp.form}>
+              <Text style={signUp.title}>Register Account</Text>
+              <Text style={signUp.pricingIntro}>You&apos;re moments away from bringing your coaching practice to the next level!</Text>
+              {errorText && (<View style={messageBox.errorBox}>
+                  <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+                  <Text style={messageBox.text}>{errorText}</Text>
+                </View>) || (<View></View>)}
+              <View style={[signUp.formRow,pricingCardsStyle]}>
+                <View style={signUp.formColumn}>
+                  <Text style={[signUp.inputLabel,{marginTop:20}]}>Email</Text>
+                  <TextInput
+                    style={signUp.inputStyle}
+                    value={email}
+                    keyboardType='email'
+                    onChangeText={onEmail}
+                  />
+                </View>
+                <View style={signUp.formColumn}>
+                  <Text style={signUp.inputLabel}>Birthday</Text>
+                  <DatePicker
+                    onChange={onDOB}
+                    value={dob}
+                    monthPlaceholder='mm'
+                    dayPlaceholder='dd'
+                    yearPlaceholder='yyyy'
+                    disableCalendar={true}
+                    style={signUp.inputStyle}
+                  />
+                </View>
+              </View>
+              <View style={[signUp.formRow,pricingCardsStyle]}>
+                <View style={signUp.formColumn}>
+                  <Text style={signUp.inputLabel}>First Name</Text>
+                  <TextInput
+                    style={signUp.inputStyle}
+                    value={firstName}
+                    onChangeText={onFirstName}
+                  />
+                </View>
+                <View style={signUp.formColumn}>
+                  <Text style={[signUp.inputLabel]}>Last Name</Text>
+                  <TextInput
+                    style={signUp.inputStyle}
+                    value={lastName}
+                    onChangeText={onLastName}
+                  />
+                </View>
+              </View>
+              <View style={[signUp.formRow,pricingCardsStyle]}>
+                <View style={signUp.formColumn}>
+                <Text style={signUp.inputLabel}>Password</Text>
+                  <TextInput
+                    style={signUp.inputStyle}
+                    value={password}
+                    secureTextEntry={true}
+                    onChangeText={onPassword}
+                  />
+                </View>
+                <View style={signUp.formColumn}>
+                  <Text style={signUp.inputLabel}>Confirm Password</Text>
+                  <TextInput
+                    style={signUp.inputStyle}
+                    value={confirmPassword}
+                    secureTextEntry={true}
+                    onChangeText={onConfirmPassword}
+                  />
+                </View>
+              </View>
+              {(timesFailed > 0) && (<Recaptcha
+                sitekey='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+                callback={verifyCallback}
+                expiredCallback={expiredCallback}
+              />)}
+              <Button
+              title='Create Account'
+              disabled={buttonDisabled}
+              buttonStyle={signUp.submitButton}
+              containerStyle={signUp.submitButtonContainer}
+              onPress={onSubmit} />
+              <Text style={[signUp.subtitle,{marginTop:20}]}><Link to='/welcome' style={signUp.link}>Return to log in.</Link></Text>
+            </View>
+          </View>)}
         </View>
-      </View>)}
-      {showRegisterForm && (<View style={{flexShrink:1}}>
-        <View style={signUp.form}>
-          <Text style={signUp.title}>Register Account</Text>
-          <Text style={signUp.pricingIntro}>You&apos;re moments away from bringing your coaching practice to the next level!</Text>
-          {errorText && (<View style={messageBox.errorBox}>
-              <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
-              <Text style={messageBox.text}>{errorText}</Text>
-            </View>) || (<View></View>)}
-          <View style={[signUp.formRow,pricingCardsStyle]}>
-            <View style={signUp.formColumn}>
-              <Text style={[signUp.inputLabel,{marginTop:20}]}>Email</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={email}
-                keyboardType='email'
-                onChangeText={onEmail}
-              />
-            </View>
-            <View style={signUp.formColumn}>
-              <Text style={signUp.inputLabel}>Birthday</Text>
-              <DatePicker
-                onChange={onDOB}
-                value={dob}
-                monthPlaceholder='mm'
-                dayPlaceholder='dd'
-                yearPlaceholder='yyyy'
-                disableCalendar={true}
-                style={signUp.inputStyle}
-              />
-            </View>
-          </View>
-          <View style={[signUp.formRow,pricingCardsStyle]}>
-            <View style={signUp.formColumn}>
-              <Text style={signUp.inputLabel}>First Name</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={firstName}
-                onChangeText={onFirstName}
-              />
-            </View>
-            <View style={signUp.formColumn}>
-              <Text style={[signUp.inputLabel]}>Last Name</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={lastName}
-                onChangeText={onLastName}
-              />
-            </View>
-          </View>
-          <View style={[signUp.formRow,pricingCardsStyle]}>
-            <View style={signUp.formColumn}>
-            <Text style={signUp.inputLabel}>Password</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={password}
-                secureTextEntry={true}
-                onChangeText={onPassword}
-              />
-            </View>
-            <View style={signUp.formColumn}>
-              <Text style={signUp.inputLabel}>Confirm Password</Text>
-              <TextInput
-                style={signUp.inputStyle}
-                value={confirmPassword}
-                secureTextEntry={true}
-                onChangeText={onConfirmPassword}
-              />
-            </View>
-          </View>
-          {(timesFailed > 0) && (<Recaptcha
-            sitekey='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
-            callback={verifyCallback}
-            expiredCallback={expiredCallback}
-          />)}
-          <Button
-          title='Create Account'
-          disabled={buttonDisabled}
-          buttonStyle={signUp.submitButton}
-          containerStyle={signUp.submitButtonContainer}
-          onPress={onSubmit} />
-          <Text style={[signUp.subtitle,{marginTop:20}]}><Link to='/welcome' style={signUp.link}>Return to log in.</Link></Text>
-        </View>
-      </View>)}
+      </View>
     </View>
   </ScrollView>)
 }

@@ -182,13 +182,22 @@ export const welcomeLight = StyleSheet.create({
 });
 
 export const signUpLight = StyleSheet.create({
-  container: {
-    backgroundColor:colorsLight.secondaryBackground,
+  mainContainer: {
+    justifyContent:'center',
     alignItems:'center',
+    flex:1,
+    width:'100%',
     borderLeftWidth:10,
     borderLeftColor:colorsLight.secondaryHighlight,
     borderRightColor:colorsLight.secondaryHighlight,
     borderRightWidth:10,
+  },
+  container: {
+    backgroundColor:colorsLight.secondaryBackground,
+    alignItems:'center',
+    justifyContent:'center',
+    flex:1,
+    width:'100%',
   },
   main: {
     flexDirection:'row',
