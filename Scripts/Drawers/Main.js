@@ -65,6 +65,8 @@ export default function Main() {
         setMain(true)
       })
     } else {
+      console.log('sending to welcome from main')
+      console.log('main coach:',coach)
       linkTo('/welcome')
       setFromWelcome(true)
     }
@@ -96,7 +98,9 @@ export default function Main() {
     console.log('Log out...')
     setFromWelcome(false)
     set('Coach',null,ttl)
+    setCoach(null)
     linkTo('/welcome')
+    window.location.reload();
   }
 
   return (<>{showMain && (<ReactFullscreen>

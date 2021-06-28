@@ -8,8 +8,8 @@ import { useLinkTo, Link } from '@react-navigation/native';
 import { TextInput } from 'react-native-web';
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js';
 import { captchaKey, loginCheck, verifyCaptcha } from '../Scripts/API.js';
-import Recaptcha from 'react-grecaptcha';
-import { Helmet } from "react-helmet";
+import Recaptcha from 'react-grecaptcha'
+import { Helmet } from "react-helmet"
 
 export default function Welcome() {
   const linkTo = useLinkTo();
@@ -96,7 +96,7 @@ export default function Welcome() {
       } else {
         set('Coach', success, ttl)
         linkTo('/clients')
-        window.location.reload(true); 
+        window.location.reload(); 
       }
     } else {
       var errorText = `Too many failed attempts. ${'\n'}Please try again in ` + parseInt(getTTL('LoginLocked')/60) + ` mins.`;

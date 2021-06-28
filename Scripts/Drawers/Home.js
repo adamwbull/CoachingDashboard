@@ -22,7 +22,6 @@ import InviteClients from '../InviteClients.js'
 import FeatureBoard from '../FeatureBoard.js'
 
 export default function Home() {
-  const linkTo = useLinkTo();
   const [refreshing, setRefreshing] = useState(true);
   const [styles, setStyles] = useState(homeLight);
   const [colors, setColors] = useState(colorsLight)

@@ -11,6 +11,8 @@ import { set, get, getTTL, ttl } from './Scripts/Storage.js'
 import { refreshCoach } from './Scripts/API.js'
 import { Provider } from './Scripts/Context.js'
 
+import userContext from './Scripts/Context.js'
+
 const linking = {
   prefixes: ['https://dashboard.coachsync.me', 'coachsync://'],
   config: {
@@ -70,8 +72,8 @@ const Stack = createStackNavigator()
 
 export default function App() {
   const linkTo = useLinkTo()
-
-  const [coach, setCoach] = useState(get('Coach'))
+  const user = useContext(userContext)
+  const [coach, setCoach] = useState(user)
 
   const [loaded] = useFonts({
     Poppins: require('./assets/fonts/Poppins.ttf'),
