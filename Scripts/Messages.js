@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { parseSimpleDateText, sqlToJsDate, getClientsData, getNotes, insertNote, updateNote, currentDate } from './API.js'
+import { getChatList, parseSimpleDateText, sqlToJsDate } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -43,21 +43,35 @@ export default function AllClients() {
   const [chatMessages, setChatMessages] = useState([])
   const [currentMessage, setCurrentMessage] = useState('')
 
+  // Main functions.
+  const refreshChatList = async () => {
+    var get = await getChatList(coach.Id, coach.Token)
+    console.log(get)
+    setUserList(get)
+    setUserListLoading(false)
+  }
+
   useEffect(() => {
+    refreshChatList()
     console.log('Welcome to messages.')
     if (coach != null) {
       //
     }
   }, [])
 
-  return (<View style={styles.container}>
+  return (<View style={styles.container}  >
     <View style={styles.userListContainer}>
       <Text style={styles.userListTitle}>Messages</Text>
-      {userListLoading && (<View style={{paddingTop:20}}>
+      {userListLoading && (<View style={{paddingTop:10}}>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
         {userList.length == 0 && (<View>
+          <Text style={styles.userListNone}>No conversations yet.</Text>
         </View>) || (<View>
+          {userList.map((chat, index) => {
+            return (<View key={'chat_'+index}>
+            </View>)
+          })}
         </View>)}
       </View>)}
     </View>

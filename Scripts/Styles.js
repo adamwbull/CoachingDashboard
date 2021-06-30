@@ -5219,6 +5219,13 @@ export const messagesLight = StyleSheet.create({
     flex:1,
     justifyContent:'center',
     alignItems:'center'
+  },
+  userListNone: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    paddingTop:10,
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
   }
 })
 
