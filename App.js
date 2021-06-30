@@ -32,6 +32,7 @@ const linking = {
               FeatureBoard: 'features'
             }
           },
+          Messages: 'messages',
           MobileApp: {
             screens: {
               BrandDesign: 'brand',

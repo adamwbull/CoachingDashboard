@@ -15,6 +15,7 @@ import { refreshCoach } from '../API.js'
 
 // Sub Drawers.
 import Home from './Home.js'
+import Messages from '../Messages.js'
 import MobileApp from './MobileApp.js'
 import Programs from './Programs.js'
 import Settings from './Settings.js'
@@ -185,14 +186,7 @@ export default function Main() {
 
         </View>
       </View>
-      <View style={styles.messagesContainer}>
-      <Icon
-        name='chatbubbles-outline'
-        type='ionicon'
-        size={30}
-        color={colors.mainTextColor}
-      />
-      </View>
+      
     </View>
     <Drawer.Navigator
       drawerType='permanent'
@@ -223,6 +217,19 @@ export default function Main() {
           drawerIcon: ({focused, size}) => (
             <Icon
               name='home'
+              type='ionicon'
+              size={30}
+              color={focused ? coach.SecondaryHighlight : colors.mainBackground}
+            />
+          )
+        }}
+      />
+      <Drawer.Screen name="Messages" component={Messages}
+        options={{
+          title:'Messages - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='chatbubbles'
               type='ionicon'
               size={30}
               color={focused ? coach.SecondaryHighlight : colors.mainBackground}

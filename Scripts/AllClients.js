@@ -544,6 +544,7 @@ export default function AllClients() {
                     <DatePicker
                       onChange={selectCreated}
                       value={created}
+                      className={'react-date-picker-clients'}
                       monthPlaceholder='mm'
                       dayPlaceholder='dd'
                       yearPlaceholder='yyyy'

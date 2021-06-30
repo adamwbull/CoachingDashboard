@@ -685,7 +685,7 @@ export const drawerLight = StyleSheet.create({
   dropdownBox: {
     padding:15,
     position:'absolute',
-    right:80,
+    right:20,
     top:70,
     width:200,
     borderRadius:10,
@@ -5146,6 +5146,79 @@ export const updateEmailLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:18,
     textAlign:'center'
+  }
+})
+
+export const messagesLight = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection:'row',
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20,
+    flex:1
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  userListContainer: {
+    width:200,
+    backgroundColor:colorsLight.mainBackground,
+    height:'100%',
+  },
+  userListTitle: {
+    fontSize:22,
+    marginLeft:20,
+    marginRight:20,
+    marginTop:23,
+    fontFamily:'PoppinsSemiBold',
+    borderBottomWidth:2,
+    color:colorsLight.mainTextColor,
+    borderBottomColor:colorsLight.mainTextColor
+  },
+  chatContainer: {
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
   }
 })
 

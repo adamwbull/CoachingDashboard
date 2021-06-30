@@ -9,6 +9,12 @@
   border-radius: 10px !important;
   padding: 23px !important;
 }
+.react-date-picker-clients {
+  background:#ebeef6 !important;
+  border-radius:20px !important;
+  padding:19px 10px 12px 10px !important;
+  color:#23272a !important;
+}
 .react-date-picker,
 .react-date-picker *,
 .react-date-picker *:before,
