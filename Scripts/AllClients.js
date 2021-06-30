@@ -21,7 +21,7 @@ import { useSpring, animated } from 'react-spring';
 import userContext from './Context.js'
 
 export default function AllClients() {
-
+  
   const linkTo = useLinkTo()
   const user = useContext(userContext)
 

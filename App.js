@@ -21,6 +21,7 @@ const linking = {
       SignUp: 'sign-up',
       ForgotPassword:'forgot-password',
       UpdatePassword:'update-password/:Token',
+      UpdateEmail:'update-email/:Token',
       Main: {
         screens: {
           Home: {
@@ -67,6 +68,7 @@ import Welcome from './Scripts/Welcome.js'
 import SignUp from './Scripts/SignUp.js'
 import ForgotPassword from './Scripts/ForgotPassword.js'
 import UpdatePassword from './Scripts/UpdatePassword.js'
+import UpdateEmail from './Scripts/UpdateEmail.js'
 
 const Stack = createStackNavigator()
 
@@ -111,6 +113,7 @@ export default function App() {
         <Stack.Screen name="Main" component={Main} options={{title:'Home - CoachSync'}} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{title:'Forgot Password - CoachSync'}} />
         <Stack.Screen name="UpdatePassword" component={UpdatePassword} options={{title:'Update Password - CoachSync'}} />
+        <Stack.Screen name="UpdateEmail" component={UpdateEmail} options={{title:'Update Email - CoachSync'}} />
       </Stack.Navigator>
     </NavigationContainer>
   </Provider>)

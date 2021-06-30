@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { ScrollView, StyleSheet, Text, View, Animated, Image, TouchableOpacity } from 'react-native'
-import { updatePasswordLight, colorsLight, innerDrawerLight, btnColors, boxColors, messageBox } from '../Scripts/Styles.js'
+import { updateEmailLight, colorsLight, innerDrawerLight, btnColors, boxColors, messageBox } from '../Scripts/Styles.js'
 import { forgotPasswordDark, colorsDark, innerDrawerDark, navLogo } from '../Scripts/Styles.js'
 import { Link, useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -9,26 +9,25 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
-import { changePasswordRequest, checkUpdatePasswordToken } from './API.js'
+import { changeEmailRequest, checkUpdateEmailToken } from './API.js'
 import { Popup } from 'semantic-ui-react'
 import { useRoute } from '@react-navigation/native';
 
 import userContext from './Context.js'
 
-export default function UpdatePassword() {
+export default function UpdateEmail() {
 
   const linkTo = useLinkTo()
   const user = useContext(userContext)
 
   const [coach, setCoach] = useState(user)
 
-  const [password, setPassword] = useState('')
-  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [email, setEmail] = useState('')
 
   const route = useRoute();
   const token = route.params.Token
 
-  const [styles, setStyles] = useState(updatePasswordLight)
+  const [styles, setStyles] = useState(updateEmailLight)
   const [colors, setColors] = useState(colorsLight)
   const [opacity, setOpacity] = useState(new Animated.Value(0))
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState(true)
@@ -39,45 +38,22 @@ export default function UpdatePassword() {
   const [showForm, setShowForm] = useState(false)
 
   // Update password functions.
-  const validatePass = (p) => {
-    var ret = true
-    // Check length, uppercase, and special.
-    var containsSpecial = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    var doesntContainUppercase = (p === p.toLowerCase);
-    if (p.length < 9 || !containsSpecial.test(p) || doesntContainUppercase) {
-      ret = false
-    }
-    return ret
+  function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
   }
 
-  const validateInput = (text, type) => {
+  const validateInput = (text) => {
 
-    // Save to var.
-    var other = false
-    var otherPass = ''
-    if (type == 0) {
-      setPassword(text)
-      other = validatePass(passwordConfirm)
-      otherPass = passwordConfirm
-    } else {
-      setPasswordConfirm(text)
-      other = validatePass(password)
-      otherPass = password
-    }
+    setEmail(text)
 
-    // Validation checks.
-    if (validatePass(text) && other) {
-      console.log('')
-      if (text === otherPass) {
-        setSubmitButtonDisabled(false)
-      } else {
-        setRequiredMessage('Passwords must match.')
-        setSubmitButtonDisabled(true)
-      }
+    if (validateEmail(text)) {
+      setSubmitButtonDisabled(false)
     } else {
-      setRequiredMessage('Ensure password follows requirements.')
+      setRequiredMessage('Provide a valid email.')
       setSubmitButtonDisabled(true)
     }
+
     setShowSuccessBox(false)
 
   }
@@ -86,11 +62,13 @@ export default function UpdatePassword() {
     setSubmitButtonDisabled(true)
     setShowForm(false)
     setShowActivityIndicator(true)
-    var post = await changePasswordRequest(password, token)
+    var post = await changeEmailRequest(email, token)
     setShowActivityIndicator(false)
     setShowSuccessBox(true)
-    setPassword('')
-    setPasswordConfirm('')
+    var c = JSON.parse(JSON.stringify(coach))
+    c.Email = email
+    set('Coach',c,ttl)
+    setEmail('')
   }
 
   // Main loading functions.
@@ -103,7 +81,7 @@ export default function UpdatePassword() {
   };
 
   const checkToken = async () => {
-    var check = await checkUpdatePasswordToken(token)
+    var check = await checkUpdateEmailToken(token)
     setShowActivityIndicator(false)
     if (check) {
       setShowForm(true)
@@ -112,10 +90,7 @@ export default function UpdatePassword() {
 
   useEffect(() => {
     checkToken()
-    console.log('Welcome to forgot password.')
-    if (coach != null) {
-      linkTo('/clients')
-    }
+    console.log('Welcome to update email.')
   }, [])
 
   return (<ScrollView contentContainerStyle={styles.body}>
@@ -140,30 +115,21 @@ export default function UpdatePassword() {
     />
 
     {showSuccessBox && (<View style={styles.confirmBox}>
-      <Text style={styles.confirmBoxText}>Success! Your password has been updated.</Text>
+      <Text style={styles.confirmBoxText}>Success! Your email has been updated.</Text>
     </View>)}
 
     {showActivityIndicator && (<ActivityIndicatorView />) || (<>
       {showForm && (<View style={styles.bodyContainer}>
         <Icon name='lock-closed' size={50} type='ionicon' color={styles.mainTextColor}/>
-        <Text style={styles.bodyTitle}>Update Password</Text>
-        <Text style={styles.bodyDesc}>Enter something memorable and secure:{"\n"}9+ chars, one uppercase, one special character.</Text>
+        <Text style={styles.bodyTitle}>Update Email</Text>
+        <Text style={styles.bodyDesc}>Specify a new account email.</Text>
         <View style={styles.form}>
-          <Text style={styles.inputLabel}>New Password</Text>
+          <Text style={styles.inputLabel}>New Email</Text>
           <TextInput
-            style={[styles.inputStyle,{marginBottom:0}]}
-            value={password}
-            secureTextEntry={true}
-            placeholder='Enter password...'
-            onChangeText={(text) => validateInput(text, 0)}
-          />
-          <Text style={styles.inputLabel}>Confirm Password</Text>
-          <TextInput
-            style={styles.inputStyle}
-            value={passwordConfirm}
-            secureTextEntry={true}
-            placeholder='Confirm password...'
-            onChangeText={(text) => validateInput(text, 1)}
+            style={[styles.inputStyle,{marginBottom:30}]}
+            value={email}
+            placeholder='Enter email...'
+            onChangeText={(text) => validateInput(text)}
           />
           {submitButtonDisabled && (<Popup 
             position='bottom center'
@@ -190,7 +156,7 @@ export default function UpdatePassword() {
       </View>) || (<View style={styles.bodyContainer}>
         <Text style={styles.bodyTitle}>Link Expired</Text>
         <Text style={[styles.bodyDesc,{fontSize:18}]}>This link is expired or invalid.</Text>
-        <Text style={[styles.bodyDesc,{fontSize:18,marginTop:5,marginBottom:10}]}>Request another reset attempt on the <Link to='/forgot-password' style={styles.link}>Forgot Password</Link> page.</Text>
+        <Text style={[styles.bodyDesc,{fontSize:18,marginTop:5,marginBottom:10}]}>Request another reset attempt on the <Link to='/account' style={styles.link}>Account</Link> page.</Text>
       </View>)}
     </>)}
     

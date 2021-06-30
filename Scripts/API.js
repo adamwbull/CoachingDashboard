@@ -188,6 +188,67 @@ export async function check() {
 
 */
 
+export async function checkUpdateEmailToken(token) {
+
+  var ret = false
+  var arr = {Token:token, Key:key}
+
+  console.log('Checking update email token')
+  const res = await fetch(url + '/update-email-token/check', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+
+
+  const payload = await res.json()
+
+  console.log('payload:',payload)
+
+  if (payload.length > 0) {
+    console.log('Token passed!')
+    ret = true
+  } else {
+    console.log('Token expired')
+  }
+
+  return ret
+
+}
+
+export async function changeEmailRequest(email, token) {
+
+  var ret = false
+
+  var arr = {Email:email, Token:token}
+
+  console.log('Updating email...')
+  const res = await fetch(url + '/system-email/update-email', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success == true) {
+    console.log('Password updated!')
+    ret = true
+  } else {
+    console.log('Password updated.')
+  }
+
+  return ret
+
+}
+
 export async function checkUpdatePasswordToken(token) {
 
   var ret = false
