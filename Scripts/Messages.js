@@ -62,23 +62,61 @@ export default function AllClients() {
   return (<View style={styles.container}  >
     <View style={styles.userListContainer}>
       <Text style={styles.userListTitle}>Messages</Text>
-      {userListLoading && (<View style={{paddingTop:10}}>
+      {userListLoading && (<View>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
         {userList.length == 0 && (<View>
           <Text style={styles.userListNone}>No conversations yet.</Text>
         </View>) || (<View>
           {userList.map((chat, index) => {
-            return (<View key={'chat_'+index}>
-            </View>)
+
+            // Generate chat name.
+            var name = ''
+            if (chat.ClientData.length > 1) {
+              // Generate list of names string.
+            } else {
+              name = chat.ClientData[0].FirstName + ' ' + chat.ClientData[0].LastName
+            }
+
+            // Generate message.
+            var message = chat.LastSenderMessage
+            if (message.length > 14) {
+              message = message.splice(0, 14) + '...'
+            } else if (message.length == 0) {
+              message = 'No messages yet.'
+            }
+
+            // Add bottom border.
+            var borderBottom = {}
+            if (index == userList.length-1) {
+              borderBottom = {
+                borderBottomColor:colorsLight.headerBorder,
+                borderBottomWidth:2,
+              }
+            }
+
+            console.log(chat.ClientData[0].Avatar)
+
+            return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom]}>
+              <View style={styles.chatListAvatar}>
+                <Image
+                  source={{ uri: chat.ClientData[0].Avatar }}
+                  style={styles.chatListAvatarImage}
+                />
+              </View>
+              <View style={styles.chatListText}>
+                <Text style={styles.chatListTextClient}>{name}</Text>
+                <Text style={styles.chatListTextMessage}>{message}</Text>
+              </View>
+            </TouchableOpacity>)
           })}
         </View>)}
       </View>)}
     </View>
     <View style={styles.chatContainer}>
-      {chatLoading && (<>
+      {chatLoading && (<View>
         <ActivityIndicatorView />
-      </>) || (<View>
+      </View>) || (<View>
         {userList.length == 0 && (<View>
         </View>) || (<View>
         </View>)}

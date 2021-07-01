@@ -5210,6 +5210,7 @@ export const messagesLight = StyleSheet.create({
     marginLeft:20,
     marginRight:20,
     marginTop:23,
+    marginBottom:15,
     fontFamily:'PoppinsSemiBold',
     borderBottomWidth:2,
     color:colorsLight.mainTextColor,
@@ -5226,6 +5227,36 @@ export const messagesLight = StyleSheet.create({
     paddingTop:10,
     color:colorsLight.mainTextColor,
     textAlign:'center'
+  },
+  chatListContainer: {
+    padding:20,
+    borderTopColor:colorsLight.headerBorder,
+    borderTopWidth:2,
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  chatListAvatar: {
+    width:30,
+    height:30,
+  },
+  chatListAvatarImage: {
+    width:30,
+    height:30,
+    borderRadius:20
+  },
+  chatListText: {
+    flex:1,
+    marginLeft:10
+  },
+  chatListTextClient: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    lineHeight:14,
+  },
+  chatListTextMessage: {
+    fontFamily:'Poppins',
+    fontSize:12,
   }
 })
 
