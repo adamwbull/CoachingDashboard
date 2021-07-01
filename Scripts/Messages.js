@@ -41,20 +41,41 @@ export default function AllClients() {
   // Create group variables.
   const [showCreateGroup, setShowCreateGroup] = useState(false)
 
+  // Add template variables.
+  const [showAddTemplate, setShowAddTemplate] = useState(false)
+  const [templateMessage, setTemplateMessage] = useState('')
+  
   // Chat variables.
   const [chatLoading, setChatLoading] = useState(true)
   const [chatIndex, setChatIndex] = useState(-1)
+  const [message, setMessage] = useState('')
+
+  // Reaction variables.
+  const [showReactionMenu, setShowReactionMenu] = useState(false)
+  const [chosenReaction, setChosenReaction] = useState('')
+
+  // User list functions. 
+  const openChat = (index) => {
+    setChatIndex(index)
+  }
 
   // Create group functions.
-  const showCreateGroupChat = () => {
-
-  }
 
   // Add template functions.
-  const showAddTemplate = () => {
+
+  // Chat functions.
+  const checkMessage = (t) => {
+    if (t.length < 1000) {
+      setMessage(t)
+    }
+  }
+
+  const sendMessage = () => {
     
   }
-  
+
+  // Reaction functions.
+
   // Main functions.
   const refreshChatList = async () => {
     var get = await getChatList(coach.Id, coach.Token)
@@ -108,7 +129,9 @@ export default function AllClients() {
               }
             }
 
-            return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom]}>
+            return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom]}
+              onPress={() => openChat(index)}
+            >
               <View style={styles.chatListAvatar}>
                 <Image
                   source={{ uri: chat.ClientData[0].Avatar }}
@@ -145,7 +168,7 @@ export default function AllClients() {
                 }}
                 buttonStyle={styles.createGroupChatButton}
                 titleStyle={styles.infoButtonTitle}
-                onPress={() => showCreateGroupChat()}
+                onPress={() => setShowCreateGroup(true)}
               />
               <Button 
                 title='Add Templates'
@@ -160,10 +183,39 @@ export default function AllClients() {
                 }}
                 buttonStyle={styles.addDMTemplatesButton}
                 titleStyle={styles.infoButtonTitle}
-                onPress={() => showAddTemplate()}
+                onPress={() => setShowAddTemplate(true)}
               />
               </View>
-          </View>) || (<View>
+          </View>) || (<View style={styles.chatMainContainer}>
+            <View style={styles.chatMain}>
+            </View>
+            <View style={styles.chatInputContainer}>
+              <View style={styles.chatInputAttachIconContainer}>
+                <Icon
+                  name='document-attach'
+                  type='ionicon'
+                  size={30}
+                  color={colors.mainTextColor}
+                  style={{}}
+                />
+              </View>
+              <View style={styles.chatMessageBoxContainer}>
+                <TextInput 
+                  style={styles.chatMessageBox}
+                  placeholder='Message...'
+                  onChangeText={(t) => checkMessage(t)}
+                  value={message}
+                />
+              </View>
+              <View style={styles.chatMessageSubmitButtonContainer}>
+                <Button 
+                  title='Send'
+                  buttonStyle={styles.chatMessageSubmitButton}
+                  titleStyle={styles.chatMessageSubmitButtonTitle}
+                  onPress={() => sendMessage()}
+                />
+              </View>
+            </View>
           </View>)}
         </>) || (<View>
           <Text style={styles.infoTitle}>Add clients to message.</Text>

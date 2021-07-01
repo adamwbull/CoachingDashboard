@@ -5288,7 +5288,29 @@ export const messagesLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:22,
     color:'#fff'
-  }
+  },
+  chatMainContainer: {
+    flex:1,
+  },
+  chatMain: {
+    flex:1
+  },
+  chatInputContainer: {
+    flexDirection:'row',
+    alignItems:'center',
+    backgroundColor:colorsLight.mainBackground,
+    padding:20,
+    borderTopWidth:2,
+    borderTopColor:colorsLight.headerBorder,
+    width:'100%',
+  },
+  chatInputAttachIconContainer: {
+    width:40,
+    height:40,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+
 })
 
 export const basic = StyleSheet.create({
