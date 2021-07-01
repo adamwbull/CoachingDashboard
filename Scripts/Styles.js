@@ -5257,6 +5257,37 @@ export const messagesLight = StyleSheet.create({
   chatListTextMessage: {
     fontFamily:'Poppins',
     fontSize:12,
+  },
+  infoTitle: {
+    textAlign:'center',
+    color:colorsLight.mainTextColor,
+    fontSize:26,
+    padding:20
+  },
+  infoButtonRow: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    flex:1
+  },
+  createGroupChatButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+    padding:10,
+    alignSelf:'flex-start',
+    marginRight:10
+  },
+  addDMTemplatesButton: {
+    backgroundColor:btnColors.success,
+    borderRadius:10,
+    padding:10,
+    alignSelf:'flex-start',
+    marginLeft:10
+  },
+  infoButtonTitle: {
+    fontFamily:'Poppins',
+    fontSize:22,
+    color:'#fff'
   }
 })
 

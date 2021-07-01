@@ -38,17 +38,30 @@ export default function AllClients() {
   const [userListLoading, setUserListLoading] = useState(true)
   const [userList, setUserList] = useState([])
 
+  // Create group variables.
+  const [showCreateGroup, setShowCreateGroup] = useState(false)
+
   // Chat variables.
   const [chatLoading, setChatLoading] = useState(true)
-  const [chatMessages, setChatMessages] = useState([])
-  const [currentMessage, setCurrentMessage] = useState('')
+  const [chatIndex, setChatIndex] = useState(-1)
 
+  // Create group functions.
+  const showCreateGroupChat = () => {
+
+  }
+
+  // Add template functions.
+  const showAddTemplate = () => {
+    
+  }
+  
   // Main functions.
   const refreshChatList = async () => {
     var get = await getChatList(coach.Id, coach.Token)
     console.log(get)
     setUserList(get)
     setUserListLoading(false)
+    setChatLoading(false)
   }
 
   useEffect(() => {
@@ -59,7 +72,7 @@ export default function AllClients() {
     }
   }, [])
 
-  return (<View style={styles.container}  >
+  return (<View style={styles.container}>
     <View style={styles.userListContainer}>
       <Text style={styles.userListTitle}>Messages</Text>
       {userListLoading && (<View>
@@ -73,7 +86,7 @@ export default function AllClients() {
             // Generate chat name.
             var name = ''
             if (chat.ClientData.length > 1) {
-              // Generate list of names string.
+              // TODO: Generate list of names string.
             } else {
               name = chat.ClientData[0].FirstName + ' ' + chat.ClientData[0].LastName
             }
@@ -95,8 +108,6 @@ export default function AllClients() {
               }
             }
 
-            console.log(chat.ClientData[0].Avatar)
-
             return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom]}>
               <View style={styles.chatListAvatar}>
                 <Image
@@ -117,8 +128,45 @@ export default function AllClients() {
       {chatLoading && (<View>
         <ActivityIndicatorView />
       </View>) || (<View>
-        {userList.length == 0 && (<View>
-        </View>) || (<View>
+        {userList.length > 0 && (<>
+          {chatIndex == -1 && (<View>
+            <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
+            <View style={styles.infoButtonRow}>
+              <Button 
+                title='Create Group'
+                icon={{
+                  name: 'people',
+                  size: 26,
+                  type: 'ionicon',
+                  color:'#fff',
+                  style: {
+                    marginTop:0
+                  }
+                }}
+                buttonStyle={styles.createGroupChatButton}
+                titleStyle={styles.infoButtonTitle}
+                onPress={() => showCreateGroupChat()}
+              />
+              <Button 
+                title='Add Templates'
+                icon={{
+                  name: 'chatbubble',
+                  size: 26,
+                  type: 'ionicon',
+                  color:'#fff',
+                  style: {
+                    marginTop:-1
+                  }
+                }}
+                buttonStyle={styles.addDMTemplatesButton}
+                titleStyle={styles.infoButtonTitle}
+                onPress={() => showAddTemplate()}
+              />
+              </View>
+          </View>) || (<View>
+          </View>)}
+        </>) || (<View>
+          <Text style={styles.infoTitle}>Add clients to message.</Text>
         </View>)}
       </View>)}
     </View>
