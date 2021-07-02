@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { getChatList, parseSimpleDateText, sqlToJsDate } from './API.js'
+import { getMessageInfo, parseSimpleDateText, sqlToJsDate } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -82,13 +82,15 @@ export default function AllClients() {
 
   // Main functions.
   const refreshChatList = async () => {
-    var get = await getChatList(coach.Id, coach.Token)
-    setUserList(get)
+    var get = await getMessageInfo(coach.Id, coach.Token)
+    console.log(get)
+    setUserList(get[0])
+    setTemplates(get[1])
     setUserListLoading(false)
     setChatLoading(false)
     // Build message arrays.
     var ms = []
-    for (var i = 0; i < get.length; i++) {
+    for (var i = 0; i < get[0].length; i++) {
       ms.push('')
     }
     setMessages(ms)

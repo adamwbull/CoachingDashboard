@@ -188,11 +188,11 @@ export async function check() {
 
 */
 
-export async function getChatList(id, token) {  
+export async function getMessageInfo(id, token) {  
 
   var ret = false
 
-  console.log('Getting chat list...')
+  console.log('Getting chat list and templates...')
   const res = await fetch(url + '/coach-conversations/'+id+'/'+token, {
     method:'GET'
   })
@@ -200,10 +200,10 @@ export async function getChatList(id, token) {
   const payload = await res.json()
 
   if (payload.length > 0) {
-    console.log('Chats found!')
+    console.log('Data found!')
     ret = payload
   } else {
-    console.log('No chats found!')
+    console.log('No data found!')
     ret = []
   }
 
