@@ -794,7 +794,7 @@ export default function AllClients() {
                   <Button 
                     title='Profile'
                     icon={{
-                      name: 'Create GRoup',
+                      name: 'person',
                       size: 16,
                       type: 'ionicon',
                       color:'#fff',

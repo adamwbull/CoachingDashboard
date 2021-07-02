@@ -48,7 +48,9 @@ export default function AllClients() {
   // Chat variables.
   const [chatLoading, setChatLoading] = useState(true)
   const [chatIndex, setChatIndex] = useState(-1)
-  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState([])
+  const [scrollHeight, setScrollHeight] = useState(null)
+  const [templates, setTemplates] = useState([])
 
   // Reaction variables.
   const [showReactionMenu, setShowReactionMenu] = useState(false)
@@ -66,12 +68,14 @@ export default function AllClients() {
   // Chat functions.
   const checkMessage = (t) => {
     if (t.length < 1000) {
-      setMessage(t)
+      var newMs = JSON.parse(JSON.stringify(messages))
+      newMs[chatIndex] = t
+      setMessages(newMs)
     }
   }
 
   const sendMessage = () => {
-    
+
   }
 
   // Reaction functions.
@@ -79,10 +83,15 @@ export default function AllClients() {
   // Main functions.
   const refreshChatList = async () => {
     var get = await getChatList(coach.Id, coach.Token)
-    console.log(get)
     setUserList(get)
     setUserListLoading(false)
     setChatLoading(false)
+    // Build message arrays.
+    var ms = []
+    for (var i = 0; i < get.length; i++) {
+      ms.push('')
+    }
+    setMessages(ms)
   }
 
   useEffect(() => {
@@ -95,7 +104,7 @@ export default function AllClients() {
 
   return (<View style={styles.container}>
     <View style={styles.userListContainer}>
-      <Text style={styles.userListTitle}>Messages</Text>
+      <Text style={styles.userListTitle} onPress={() => setChatIndex(-1)}>Messages</Text>
       {userListLoading && (<View>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
@@ -150,7 +159,7 @@ export default function AllClients() {
     <View style={styles.chatContainer}>
       {chatLoading && (<View>
         <ActivityIndicatorView />
-      </View>) || (<View>
+      </View>) || (<View style={styles.chatContainer}>
         {userList.length > 0 && (<>
           {chatIndex == -1 && (<View>
             <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
@@ -186,35 +195,57 @@ export default function AllClients() {
                 onPress={() => setShowAddTemplate(true)}
               />
               </View>
-          </View>) || (<View style={styles.chatMainContainer}>
-            <View style={styles.chatMain}>
+          </View>) || (<View style={styles.chatArea}>
+            <View style={styles.chatMainContainer}>
+              {userList[chatIndex].Messages.length > 0 && (<View style={styles.chatMain}>
+              
+              </View>) || (<View style={styles.chatMain}>
+                <Text style={styles.chatInfoText}>No messages yet.</Text>
+              </View>)}
+              <View style={styles.chatInputContainer}>
+                <TouchableOpacity style={styles.chatInputAttachIconContainer}>
+                  <Icon
+                    name='document-attach'
+                    type='ionicon'
+                    size={28}
+                    color={colors.mainTextColor}
+                    style={{}}
+                  />
+                </TouchableOpacity>
+                <View style={styles.chatMessageBoxContainer}>
+                  <TextInput 
+                    style={[styles.chatMessageBox,{ height: scrollHeight }]}
+                    placeholder='Message...'
+                    multiline={true}
+                    numberOfLines={1}
+                    onChangeText={(t) => checkMessage(t)}
+                    value={messages[chatIndex]}
+                    onChange={(e) => {
+                      if (e.currentTarget.value.length < 100) {
+                        setScrollHeight(null)
+                      } else {
+                        setScrollHeight(e.target.scrollHeight)
+                      }
+                    }}
+                  />
+                </View>
+                <View style={styles.chatMessageSubmitButtonContainer}>
+                  <Button 
+                    title='Send'
+                    buttonStyle={styles.chatMessageSubmitButton}
+                    titleStyle={styles.chatMessageSubmitButtonTitle}
+                    onPress={() => sendMessage()}
+                  />
+                </View>
+              </View>
             </View>
-            <View style={styles.chatInputContainer}>
-              <View style={styles.chatInputAttachIconContainer}>
-                <Icon
-                  name='document-attach'
-                  type='ionicon'
-                  size={30}
-                  color={colors.mainTextColor}
-                  style={{}}
-                />
-              </View>
-              <View style={styles.chatMessageBoxContainer}>
-                <TextInput 
-                  style={styles.chatMessageBox}
-                  placeholder='Message...'
-                  onChangeText={(t) => checkMessage(t)}
-                  value={message}
-                />
-              </View>
-              <View style={styles.chatMessageSubmitButtonContainer}>
-                <Button 
-                  title='Send'
-                  buttonStyle={styles.chatMessageSubmitButton}
-                  titleStyle={styles.chatMessageSubmitButtonTitle}
-                  onPress={() => sendMessage()}
-                />
-              </View>
+            <View style={styles.templateList}>
+              <Text style={styles.templateTextTitle}>Templates</Text>
+              {templates.length > 0 && (<ScrollView>
+              
+              </ScrollView>) || (<View>
+              <Text style={styles.chatInfoText}>No templates yet.</Text>
+              </View>)}
             </View>
           </View>)}
         </>) || (<View>

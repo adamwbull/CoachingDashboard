@@ -5219,7 +5219,10 @@ export const messagesLight = StyleSheet.create({
   chatContainer: {
     flex:1,
     justifyContent:'center',
-    alignItems:'center'
+    alignItems:'center',
+    width:'100%',
+    flexDirection:'row',
+    height:'100%'
   },
   userListNone: {
     fontFamily:'Poppins',
@@ -5289,28 +5292,89 @@ export const messagesLight = StyleSheet.create({
     fontSize:22,
     color:'#fff'
   },
+  chatArea: {
+    flex:1,
+    width:'100%',
+    alignItems:'flex-end',
+    flexDirection:'row',
+    height:'100%'
+  },
   chatMainContainer: {
     flex:1,
+    width:'100%',
+    justifyContent:'flex-end',
+    height:'100%'
   },
   chatMain: {
-    flex:1
+    flex:1,
+    width:'100%',
+    justifyContent:'flex-start',
+    alignItems:'center',
+    padding:20,
+    height:'100%'
+  },
+  chatInfoText: {
+    textAlign:'center',
+    fontSize:16,
+    color:colorsLight.secondaryTextColor
   },
   chatInputContainer: {
     flexDirection:'row',
     alignItems:'center',
-    backgroundColor:colorsLight.mainBackground,
+    backgroundColor:colorsLight.header,
     padding:20,
     borderTopWidth:2,
     borderTopColor:colorsLight.headerBorder,
     width:'100%',
   },
   chatInputAttachIconContainer: {
-    width:40,
-    height:40,
+    width:28,
+    height:28,
+    marginRight:10,
     justifyContent:'center',
     alignItems:'center'
   },
-
+  chatMessageBoxContainer: {
+    flex:1
+  },
+  chatMessageBox: {
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    padding:10,
+  },
+  chatMessageSubmitButtonContainer: {
+    paddingLeft:20,
+  },
+  chatMessageSubmitButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+    paddingLeft:10,
+    paddingRight:10,
+    paddingTop:4,
+    paddingBottom:4
+  },
+  chatMessageSubmitButtonTitle: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:'#fff'
+  },
+  templateList: {
+    width:280,
+    height:'100%',
+    backgroundColor:colorsLight.mainBackground,
+    padding:20
+  },
+  templateTextTitle: {
+    fontSize:22,
+    marginLeft:20,
+    marginRight:20,
+    marginTop:3,
+    marginBottom:15,
+    fontFamily:'PoppinsSemiBold',
+    borderBottomWidth:2,
+    color:colorsLight.mainTextColor,
+    borderBottomColor:colorsLight.mainTextColor
+  }
 })
 
 export const basic = StyleSheet.create({
