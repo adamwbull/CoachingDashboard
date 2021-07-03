@@ -17,8 +17,11 @@ import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
 import JoditEditor from "jodit-react";
 import { useSpring, animated } from 'react-spring';
+const io = require('socket.io-client');
 
 import userContext from './Context.js'
+
+var socket = io("https://messages.coachsync.me/")
 
 export default function AllClients() {
   
@@ -74,8 +77,11 @@ export default function AllClients() {
     }
   }
 
-  const sendMessage = () => {
-
+  const sendMessage = async () => {
+    //var posted = await postMessage(message, coach.Id, coach.Token)
+    // Send test emission.
+    console.log('Sending socket emit...')
+    socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
   }
 
   // Reaction functions.
@@ -83,7 +89,7 @@ export default function AllClients() {
   // Main functions.
   const refreshChatList = async () => {
     var get = await getMessageInfo(coach.Id, coach.Token)
-    console.log(get)
+    console.log('data:', get)
     setUserList(get[0])
     setTemplates(get[1])
     setUserListLoading(false)
@@ -96,11 +102,34 @@ export default function AllClients() {
     setMessages(ms)
   }
 
+  const configureSocket = () => {
+
+    // Mount primary socket.
+    console.log('Loading socket...')
+
+    socket.on('connect', () => {
+      console.log('Socket connected.')
+    })
+
+    socket.on('get-conversations', (data) => {
+      console.log('Received socket emission...')
+      refreshChatList()
+    })
+
+    // For when the window closes.
+    window.addEventListener('beforeunload', (event) => {
+      event.preventDefault()
+      console.log('Closing socket...')
+      socket.disconnect()
+    })
+
+  }
+
   useEffect(() => {
-    refreshChatList()
     console.log('Welcome to messages.')
     if (coach != null) {
-      //
+      configureSocket()
+      refreshChatList()
     }
   }, [])
 
