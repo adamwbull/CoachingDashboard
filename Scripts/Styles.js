@@ -19,6 +19,11 @@ export const btnColors = {
   lightBackground: '#FAFAFA',
 }
 
+export const messageColorsLight = {
+  me:'#3498db',
+  them:'#ffffff'
+}
+
 export const boxColors = {
   primary:'#38A2E8',
   caution:'#FFCF0F',
@@ -5374,6 +5379,30 @@ export const messagesLight = StyleSheet.create({
     borderBottomWidth:2,
     color:colorsLight.mainTextColor,
     borderBottomColor:colorsLight.mainTextColor
+  },
+  messageContainerMe: {
+    width:'100%',
+    alignItems:'flex-end'
+  },
+  messageMe: {
+    padding:10,
+    color:'#fff',
+    backgroundColor:messageColorsLight.me,
+    borderTopLeftRadius:25,
+    borderBottomLeftRadius:25,
+    borderBottomRightRadius:25,
+    justifyContent:'flex-start',
+    alignItems:'center',
+    alignSelf:'flex-end',
+    marginTop:5,
+  },
+  messageTextMe: {
+    color:'#fff',
+    fontFamily:'Poppins'
+  },
+  messageContainerYou: {
+    width:'100%',
+    alignItems:'flex-start'
   }
 })
 

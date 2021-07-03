@@ -192,8 +192,8 @@ export async function check() {
 export async function postMessage(conversationId, message, id, token) {
 
   var ret = false
-  var arr = {Token:token, CovnersationId:conversationId, UserId:id, Text:message}
-
+  var arr = {Token:token, ConversationId:conversationId, UserId:id, Text:message}
+  console.log('arr:', arr)
   console.log('Posting message...')
   const res = await fetch(url + '/message/create', {
     method:'POST',

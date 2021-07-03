@@ -78,7 +78,7 @@ export default function Messages() {
   }
 
   const sendMessage = async () => {
-    var posted = await postMessage(userList[chatIndex].ConversationId, messages[chatIndex], coach.Id, coach.Token)
+    var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token)
     if (posted) {
       // Send test emission.
       console.log('Sending socket emit...')
@@ -89,16 +89,17 @@ export default function Messages() {
       conversation.LastSenderId = coach.Id
       var date = dateToSql(new Date())
       conversation.LastSenderCreated = date
+      conversation.LastSenderMessage = messages[chatIndex]
       // TODO: Add Image
       var m = {
-        Text: message,
+        Text: messages[chatIndex],
         UserId: coach.Id,
         Image: '',
         Created: date,
         Sent:1,
         ConversationId: userList[chatIndex].ConversationId
       }
-      conversation.Messages.push(m)
+      conversation.Messages.unshift(m)
       newUserList[chatIndex] = conversation
       setUserList(newUserList)
     } 
@@ -120,6 +121,7 @@ export default function Messages() {
       ms.push('')
     }
     setMessages(ms)
+    setChatIndex(0)
   }
 
   const configureSocket = () => {
@@ -173,9 +175,9 @@ export default function Messages() {
             }
 
             // Generate message.
-            var message = chat.LastSenderMessage
-            if (message.length > 14) {
-              message = message.splice(0, 14) + '...'
+            var message = ''
+            if (chat.LastSenderMessage.length > 14) {
+              message = chat.LastSenderMessage.slice(0, 14) + '...'
             } else if (message.length == 0) {
               message = 'No messages yet.'
             }
@@ -248,8 +250,59 @@ export default function Messages() {
               </View>
           </View>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
-              {userList[chatIndex].Messages.length > 0 && (<View style={styles.chatMain}>
-              
+              {userList[chatIndex].Messages.length > 0 && (<View style={[styles.chatMain,{justifyContent:'flex-end'}]}>
+                {userList[chatIndex].Messages.slice(0).reverse().map((message, index) => {
+
+                  // Determine if to put date above.
+
+                  if (message.UserId == coach.Id) {
+                    // Me.
+                    return (<View key={'messages_'+message.Id} style={styles.messageContainerMe}>
+                      <View style={styles.messageMe}>
+                        <View style={styles.messageInfoMe}>
+                          
+                        </View>
+                        <View style={styles.messageContainerMe}>
+                          <Text style={styles.messageTextMe}>{message.Text}</Text>
+                        </View>
+                        <View style={styles.messageReactionsMe}>
+
+                        </View>
+                      </View>
+                    </View>)
+                  } else {
+                    // Determine if to put their name above.
+                    var matchFound = false;
+                    if (index-1 > 0) {
+                      if (userList[chatIndex].Messages[index-1].UserId != userList[chatIndex].Messages[index].UserId) {
+                        matchFound = true;
+                      }
+                    }
+                    var theirHeaderText = ''
+                    if (index == 0 || matchFound) {
+                      for (var i = 0; i < userList[chatIndex].ClientData.length; i++) {
+                        if (userList[chatIndex].ClientData[i].Id == userList[chatIndex].Messages[index].UserId) {
+                          theirHeaderText = userList[chatIndex].ClientData[i].FirstName + ' ' + userList[chatIndex].ClientData[i].LastName
+                        }
+                      }
+                    }
+                    // Not me.
+                    return (<View key={'messages_'+message.Id} style={styles.messageContainerYou}>
+                      <View style={styles.messageYou}>
+                        <View style={styles.messageInfoYou}>
+                          <Text style={styles.messageNameYou}>{theirHeaderText}</Text>
+                        </View>
+                        <View style={styles.messageContainerYou}>
+                          <Text style={styles.messageTextYou}>{message.Text}</Text>
+                        </View>
+                        <View style={styles.messageReactionsYou}>
+
+                        </View>
+                      </View>
+                    </View>)
+                  }
+
+                })}
               </View>) || (<View style={styles.chatMain}>
                 <Text style={styles.chatInfoText}>No messages yet.</Text>
               </View>)}
