@@ -159,12 +159,12 @@ export function lightenHex(col, amt) {
 
 /* Example
 
-method:'POST',
-body: JSON.stringify(arr),
-headers: {
-  'Accept': 'application/json',
-  'Content-Type': 'application/json',
-}
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
 
 export async function check() {
 
@@ -187,6 +187,33 @@ export async function check() {
 }
 
 */
+
+
+export async function postMessage(conversationId, message, id, token) {
+
+  var ret = false
+  var arr = {Token:token, CovnersationId:conversationId, UserId:id, Text:message}
+
+  console.log('Posting message...')
+  const res = await fetch(url + '/message/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Message posted!')
+    ret = true
+  }
+
+  return ret
+
+}
 
 export async function getMessageInfo(id, token) {  
 

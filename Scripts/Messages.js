@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { getMessageInfo, parseSimpleDateText, sqlToJsDate } from './API.js'
+import { postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -23,7 +23,7 @@ import userContext from './Context.js'
 
 var socket = io("https://messages.coachsync.me/")
 
-export default function AllClients() {
+export default function Messages() {
   
   const linkTo = useLinkTo()
   const user = useContext(userContext)
@@ -78,10 +78,30 @@ export default function AllClients() {
   }
 
   const sendMessage = async () => {
-    //var posted = await postMessage(message, coach.Id, coach.Token)
-    // Send test emission.
-    console.log('Sending socket emit...')
-    socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
+    var posted = await postMessage(userList[chatIndex].ConversationId, messages[chatIndex], coach.Id, coach.Token)
+    if (posted) {
+      // Send test emission.
+      console.log('Sending socket emit...')
+      socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
+      // Add message locally.
+      var newUserList = JSON.parse(JSON.stringify(userList))
+      var conversation = newUserList[chatIndex]
+      conversation.LastSenderId = coach.Id
+      var date = dateToSql(new Date())
+      conversation.LastSenderCreated = date
+      // TODO: Add Image
+      var m = {
+        Text: message,
+        UserId: coach.Id,
+        Image: '',
+        Created: date,
+        Sent:1,
+        ConversationId: userList[chatIndex].ConversationId
+      }
+      conversation.Messages.push(m)
+      newUserList[chatIndex] = conversation
+      setUserList(newUserList)
+    } 
   }
 
   // Reaction functions.
@@ -266,6 +286,7 @@ export default function AllClients() {
                     buttonStyle={styles.chatMessageSubmitButton}
                     titleStyle={styles.chatMessageSubmitButtonTitle}
                     onPress={() => sendMessage()}
+                    disabled={messages[chatIndex].length == 0}
                   />
                 </View>
               </View>
