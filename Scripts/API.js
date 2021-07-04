@@ -189,10 +189,10 @@ export async function check() {
 */
 
 
-export async function postMessage(conversationId, message, id, token) {
+export async function postMessage(conversationId, message, id, token, title) {
 
   var ret = false
-  var arr = {Token:token, ConversationId:conversationId, UserId:id, Text:message}
+  var arr = {Token:token, ConversationId:conversationId, UserId:id, Title:title, Text:message}
   console.log('arr:', arr)
   console.log('Posting message...')
   const res = await fetch(url + '/message/create', {

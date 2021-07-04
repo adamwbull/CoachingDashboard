@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql } from './API.js'
+import { postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -33,7 +33,7 @@ export default function Messages() {
 
   // Main stage controls.
   const [showUserList, setShowUserList] = useState(false)
-
+  const [scrollWidth, setScrollWidth] = useState(0)
   // Main variables.
   const [coach, setCoach] = useState(user)
 
@@ -59,6 +59,19 @@ export default function Messages() {
   const [showReactionMenu, setShowReactionMenu] = useState(false)
   const [chosenReaction, setChosenReaction] = useState('')
 
+  // Helper functions.
+  const generateChatName = (list, index) => {
+    // Generate chat name.
+    var name = ''
+    if (list.length > 2) {
+      // TODO: Generate list of names string.
+    } else {
+      name = list[index].FirstName + ' ' + list[index].LastName
+    }
+    return name
+  }
+
+
   // User list functions. 
   const openChat = (index) => {
     setChatIndex(index)
@@ -78,7 +91,7 @@ export default function Messages() {
   }
 
   const sendMessage = async () => {
-    var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token)
+    var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token, 'Message from Coach')
     if (posted) {
       // Send test emission.
       console.log('Sending socket emit...')
@@ -166,20 +179,20 @@ export default function Messages() {
         </View>) || (<View>
           {userList.map((chat, index) => {
 
-            // Generate chat name.
-            var name = ''
-            if (chat.ClientData.length > 1) {
-              // TODO: Generate list of names string.
-            } else {
-              name = chat.ClientData[0].FirstName + ' ' + chat.ClientData[0].LastName
-            }
+            var name = generateChatName(chat.ClientData, 0)
 
             // Generate message.
-            var message = ''
-            if (chat.LastSenderMessage.length > 14) {
+            var message = chat.LastSenderMessage
+            if (message.length > 14) {
               message = chat.LastSenderMessage.slice(0, 14) + '...'
             } else if (message.length == 0) {
               message = 'No messages yet.'
+            }
+
+            // Add current message highlighting.
+            var currentHighlight = {}
+            if (index == chatIndex) {
+              currentHighlight = {backgroundColor:colorsLight.secondaryBackground}
             }
 
             // Add bottom border.
@@ -191,7 +204,7 @@ export default function Messages() {
               }
             }
 
-            return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom]}
+            return (<TouchableOpacity key={'chat_'+index} style={[styles.chatListContainer,borderBottom,currentHighlight]}
               onPress={() => openChat(index)}
             >
               <View style={styles.chatListAvatar}>
@@ -250,60 +263,99 @@ export default function Messages() {
               </View>
           </View>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
-              {userList[chatIndex].Messages.length > 0 && (<View style={[styles.chatMain,{justifyContent:'flex-end'}]}>
+              {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end'}]}
+              onContentSizeChange={(width, height) => {
+                setScrollWidth((width-20)-(width/5))
+              }}>
                 {userList[chatIndex].Messages.slice(0).reverse().map((message, index) => {
 
                   // Determine if to put date above.
+                  var putTimeAbove = false
+                  var time = sqlToJsDate(message.Created)
+
+                  if (index == 0) {
+                    putTimeAbove = true
+                  } else {
+                    if ((new Date() - time) < (60 * 60 * 1000) && userList[chatIndex].Messages[index-1].UserId != userList[chatIndex].Messages[index].UserId) {
+                      putTimeAbove = true
+                    }
+                  }
+
+                  if (putTimeAbove) {
+                    time = parseDateText(time)
+                  }
 
                   if (message.UserId == coach.Id) {
                     // Me.
-                    return (<View key={'messages_'+message.Id} style={styles.messageContainerMe}>
-                      <View style={styles.messageMe}>
-                        <View style={styles.messageInfoMe}>
-                          
-                        </View>
-                        <View style={styles.messageContainerMe}>
-                          <Text style={styles.messageTextMe}>{message.Text}</Text>
-                        </View>
-                        <View style={styles.messageReactionsMe}>
+                    return (<View key={'messages_'+message.Id} style={{width:'100%',flexWrap:'wrap',flexShrink:1}}>
+                      {putTimeAbove && (<View style={styles.timeContainer}>
+                        <Text style={styles.timeText}>{time}</Text>
+                      </View>)}
+                      <View key={'messages_'+message.Id} style={styles.messageContainerMe}>
+                        <View style={styles.messageMe}>
+                          <View style={styles.messageInfoMe}>
+                            
+                          </View>
+                          <View style={[styles.mainMessageMe,{maxWidth:scrollWidth}]}>
+                            <Text style={styles.messageTextMe}>{message.Text}</Text>
+                          </View>
+                          <View style={styles.messageReactionsMe}>
 
+                          </View>
                         </View>
                       </View>
                     </View>)
                   } else {
+
                     // Determine if to put their name above.
                     var matchFound = false;
                     if (index-1 > 0) {
+                      // Is this message from a different user?
                       if (userList[chatIndex].Messages[index-1].UserId != userList[chatIndex].Messages[index].UserId) {
                         matchFound = true;
                       }
                     }
                     var theirHeaderText = ''
+                    var theirAvatar = ''
+                    var showAvatar = false
                     if (index == 0 || matchFound) {
                       for (var i = 0; i < userList[chatIndex].ClientData.length; i++) {
                         if (userList[chatIndex].ClientData[i].Id == userList[chatIndex].Messages[index].UserId) {
                           theirHeaderText = userList[chatIndex].ClientData[i].FirstName + ' ' + userList[chatIndex].ClientData[i].LastName
+                          theirAvatar = userList[chatIndex].ClientData[i].Avatar
+                          showAvatar = true
                         }
                       }
                     }
                     // Not me.
-                    return (<View key={'messages_'+message.Id} style={styles.messageContainerYou}>
-                      <View style={styles.messageYou}>
-                        <View style={styles.messageInfoYou}>
-                          <Text style={styles.messageNameYou}>{theirHeaderText}</Text>
+                    return (<View key={'messages_'+message.Id} style={{width:'100%'}}>
+                      {putTimeAbove && (<View style={styles.timeContainer}>
+                        <Text style={styles.timeText}>{time}</Text>
+                      </View>)}
+                      <View style={styles.messageContainerYou}>
+                        <View style={styles.showAvatarYou}>
+                          {showAvatar && (<Image 
+                            source={{ uri: theirAvatar }}
+                            style={styles.avatarYou}
+                          />)}
                         </View>
-                        <View style={styles.messageContainerYou}>
-                          <Text style={styles.messageTextYou}>{message.Text}</Text>
-                        </View>
-                        <View style={styles.messageReactionsYou}>
+                        <View style={styles.messageYou}>
+                          <View style={styles.messageInfoYou}>
+                            <Text style={styles.messageNameYou}>{theirHeaderText}</Text>
+                          </View>
+                          <View style={styles.mainMessageYou}>
+                            <Text style={styles.messageTextYou}>{message.Text}</Text>
+                          </View>
+                          <View style={styles.messageReactionsYou}>
 
+                          </View>
                         </View>
                       </View>
                     </View>)
                   }
 
                 })}
-              </View>) || (<View style={styles.chatMain}>
+              </ScrollView>) || (<View style={styles.chatMain}>
                 <Text style={styles.chatInfoText}>No messages yet.</Text>
               </View>)}
               <View style={styles.chatInputContainer}>

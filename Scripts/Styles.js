@@ -5315,7 +5315,10 @@ export const messagesLight = StyleSheet.create({
     width:'100%',
     justifyContent:'flex-start',
     alignItems:'center',
-    padding:20,
+    paddingRight:10,
+    paddingTop:20,
+    paddingBottom:20,
+    paddingLeft:10,
     height:'100%'
   },
   chatInfoText: {
@@ -5381,28 +5384,73 @@ export const messagesLight = StyleSheet.create({
     borderBottomColor:colorsLight.mainTextColor
   },
   messageContainerMe: {
-    width:'100%',
-    alignItems:'flex-end'
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'flex-end',
   },
-  messageMe: {
+  mainMessageMe: {
     padding:10,
     color:'#fff',
     backgroundColor:messageColorsLight.me,
     borderTopLeftRadius:25,
     borderBottomLeftRadius:25,
     borderBottomRightRadius:25,
-    justifyContent:'flex-start',
-    alignItems:'center',
+    flexDirection:'row',
+    alignItems:'flex-start',
+    justifyContent:'center',
     alignSelf:'flex-end',
     marginTop:5,
   },
   messageTextMe: {
     color:'#fff',
-    fontFamily:'Poppins'
+    fontFamily:'Poppins',
   },
   messageContainerYou: {
     width:'100%',
-    alignItems:'flex-start'
+    justifyContent:'flex-start',
+    flexDirection:'row'
+  },
+  mainMessageYou: {
+    padding:10,
+    color:'#fff',
+    backgroundColor:colorsLight.mainBackground,
+    borderTopRightRadius:25,
+    borderBottomLeftRadius:25,
+    borderBottomRightRadius:25,
+    justifyContent:'flex-start',
+    alignItems:'center',
+    alignSelf:'flex-start',
+    marginTop:5,
+    flexWrap:'wrap',flexShrink:1
+  },
+  messageNameYou: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.mainTextColor
+  },
+  messageTextYou: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    flexWrap:'wrap',flexShrink:1
+  },
+  showAvatarYou: {
+    width:40,
+    height:40,
+    marginRight:10
+  },
+  avatarYou: {
+    width:40,
+    height:40,
+    borderRadius:20
+  },
+  timeContainer: {
+    padding:10,
+    alignItems:'center'
+  },
+  timeText: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    textAlign:'center'
   }
 })
 
