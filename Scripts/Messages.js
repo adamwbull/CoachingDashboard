@@ -115,6 +115,11 @@ export default function Messages() {
 
       // Calculate TimeAbove if applicable.
       var prevDate = sqlToJsDate(userList[chatIndex].Messages[userList[chatIndex].Messages.length-1].Created)
+      var now = new Date()
+      var timeAbove = ''
+      if ((now - prevDate) > (60*60*1000)) {
+        timeAbove = parseDateText(now)
+      }
       var m = {
         Text: messages[chatIndex],
         UserId: coach.Id,
@@ -122,14 +127,13 @@ export default function Messages() {
         Created: date,
         Sent:1,
         ConversationId: userList[chatIndex].ConversationId,
-        TimeAbove: ''
+        TimeAbove: timeAbove
       }
       conversation.Messages.unshift(m)
       newUserList[chatIndex] = conversation
       setUserList(newUserList)
       messagesEnd.current.scrollIntoView({ behavior: "smooth" });
       setIsSending(false)
-
     } 
   }
 
