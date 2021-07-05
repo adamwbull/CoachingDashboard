@@ -24,16 +24,22 @@ import userContext from './Context.js'
 var socket = io("https://messages.coachsync.me/")
 
 export default function Messages() {
-  
+
+
+  // Hooks.
   const linkTo = useLinkTo()
   const user = useContext(userContext)
+  const scrollViewRef = useRef();
+  var messagesEnd = useRef();
 
+  // Styles.
   const [styles, setStyles] = useState(messagesLight)
   const [colors, setColors] = useState(colorsLight)
 
   // Main stage controls.
   const [showUserList, setShowUserList] = useState(false)
   const [scrollWidth, setScrollWidth] = useState(0)
+
   // Main variables.
   const [coach, setCoach] = useState(user)
 
@@ -54,7 +60,8 @@ export default function Messages() {
   const [messages, setMessages] = useState([])
   const [scrollHeight, setScrollHeight] = useState(null)
   const [templates, setTemplates] = useState([])
-
+  const [isSending, setIsSending] = useState(false)
+  
   // Reaction variables.
   const [showReactionMenu, setShowReactionMenu] = useState(false)
   const [chosenReaction, setChosenReaction] = useState('')
@@ -91,6 +98,7 @@ export default function Messages() {
   }
 
   const sendMessage = async () => {
+    setIsSending(true)
     var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token, 'Message from Coach')
     if (posted) {
       // Send test emission.
@@ -104,17 +112,24 @@ export default function Messages() {
       conversation.LastSenderCreated = date
       conversation.LastSenderMessage = messages[chatIndex]
       // TODO: Add Image
+
+      // Calculate TimeAbove if applicable.
+      var prevDate = sqlToJsDate(userList[chatIndex].Messages[userList[chatIndex].Messages.length-1].Created)
       var m = {
         Text: messages[chatIndex],
         UserId: coach.Id,
         Image: '',
         Created: date,
         Sent:1,
-        ConversationId: userList[chatIndex].ConversationId
+        ConversationId: userList[chatIndex].ConversationId,
+        TimeAbove: ''
       }
       conversation.Messages.unshift(m)
       newUserList[chatIndex] = conversation
       setUserList(newUserList)
+      messagesEnd.current.scrollIntoView({ behavior: "smooth" });
+      setIsSending(false)
+
     } 
   }
 
@@ -263,33 +278,22 @@ export default function Messages() {
               </View>
           </View>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
-              {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end'}]}
+              {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end',flexGrow:1}]}
+              ref={scrollViewRef}
               onContentSizeChange={(width, height) => {
                 setScrollWidth((width-20)-(width/5))
+                setTimeout(() => {
+                  scrollViewRef.current.scrollToEnd({animated: true})
+                }, 50)
               }}>
-                {userList[chatIndex].Messages.slice(0).reverse().map((message, index) => {
-
-                  // Determine if to put date above.
-                  var putTimeAbove = false
-                  var time = sqlToJsDate(message.Created)
-
-                  if (index == 0) {
-                    putTimeAbove = true
-                  } else {
-                    if ((new Date() - time) < (60 * 60 * 1000) && userList[chatIndex].Messages[index-1].UserId != userList[chatIndex].Messages[index].UserId) {
-                      putTimeAbove = true
-                    }
-                  }
-
-                  if (putTimeAbove) {
-                    time = parseDateText(time)
-                  }
+                {userList[chatIndex].Messages.map((message, index) => {
 
                   if (message.UserId == coach.Id) {
+
                     // Me.
-                    return (<View key={'messages_'+message.Id} style={{width:'100%',flexWrap:'wrap',flexShrink:1}}>
-                      {putTimeAbove && (<View style={styles.timeContainer}>
-                        <Text style={styles.timeText}>{time}</Text>
+                    return (<View key={'messages_'+message.Id} style={styles.messageMain}>
+                      {message.TimeAbove.length > 0 && (<View style={styles.timeContainer}>
+                        <Text style={styles.timeText}>{message.TimeAbove}</Text>
                       </View>)}
                       <View key={'messages_'+message.Id} style={styles.messageContainerMe}>
                         <View style={styles.messageMe}>
@@ -305,45 +309,26 @@ export default function Messages() {
                         </View>
                       </View>
                     </View>)
+
                   } else {
 
-                    // Determine if to put their name above.
-                    var matchFound = false;
-                    if (index-1 > 0) {
-                      // Is this message from a different user?
-                      if (userList[chatIndex].Messages[index-1].UserId != userList[chatIndex].Messages[index].UserId) {
-                        matchFound = true;
-                      }
-                    }
-                    var theirHeaderText = ''
-                    var theirAvatar = ''
-                    var showAvatar = false
-                    if (index == 0 || matchFound) {
-                      for (var i = 0; i < userList[chatIndex].ClientData.length; i++) {
-                        if (userList[chatIndex].ClientData[i].Id == userList[chatIndex].Messages[index].UserId) {
-                          theirHeaderText = userList[chatIndex].ClientData[i].FirstName + ' ' + userList[chatIndex].ClientData[i].LastName
-                          theirAvatar = userList[chatIndex].ClientData[i].Avatar
-                          showAvatar = true
-                        }
-                      }
-                    }
                     // Not me.
-                    return (<View key={'messages_'+message.Id} style={{width:'100%'}}>
-                      {putTimeAbove && (<View style={styles.timeContainer}>
-                        <Text style={styles.timeText}>{time}</Text>
+                    return (<View key={'messages_'+message.Id} style={styles.messageMain}>
+                      {message.TimeAbove.length > 0 && (<View style={styles.timeContainer}>
+                        <Text style={styles.timeText}>{message.TimeAbove}</Text>
                       </View>)}
                       <View style={styles.messageContainerYou}>
                         <View style={styles.showAvatarYou}>
-                          {showAvatar && (<Image 
-                            source={{ uri: theirAvatar }}
+                          {message.ShowAvatar && (<Image 
+                            source={{ uri: message.TheirAvatar }}
                             style={styles.avatarYou}
                           />)}
                         </View>
                         <View style={styles.messageYou}>
-                          <View style={styles.messageInfoYou}>
-                            <Text style={styles.messageNameYou}>{theirHeaderText}</Text>
-                          </View>
-                          <View style={styles.mainMessageYou}>
+                          {message.ShowAvatar && (<View>
+                            <Text style={styles.messageNameYou}>{message.TheirHeaderText}</Text>
+                          </View>)}
+                          <View style={[styles.mainMessageYou,{maxWidth:scrollWidth}]}>
                             <Text style={styles.messageTextYou}>{message.Text}</Text>
                           </View>
                           <View style={styles.messageReactionsYou}>
@@ -352,10 +337,15 @@ export default function Messages() {
                         </View>
                       </View>
                     </View>)
+
                   }
 
                 })}
-              </ScrollView>) || (<View style={styles.chatMain}>
+                {isSending && (<ActivityIndicatorView />)}
+                <div style={{ float:"left", clear: "both" }}
+                  ref={messagesEnd}>
+                </div>
+              </ScrollView>) || (<View style={[styles.chatMain,{paddingTop:20}]}>
                 <Text style={styles.chatInfoText}>No messages yet.</Text>
               </View>)}
               <View style={styles.chatInputContainer}>
@@ -379,7 +369,7 @@ export default function Messages() {
                     onChange={(e) => {
                       if (e.currentTarget.value.length < 100) {
                         setScrollHeight(null)
-                      } else {
+                      } else if (e.target.scrollHeight - scrollHeight > 50) {
                         setScrollHeight(e.target.scrollHeight)
                       }
                     }}
@@ -391,7 +381,7 @@ export default function Messages() {
                     buttonStyle={styles.chatMessageSubmitButton}
                     titleStyle={styles.chatMessageSubmitButtonTitle}
                     onPress={() => sendMessage()}
-                    disabled={messages[chatIndex].length == 0}
+                    disabled={isSending}
                   />
                 </View>
               </View>

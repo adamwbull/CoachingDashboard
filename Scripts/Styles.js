@@ -5306,20 +5306,18 @@ export const messagesLight = StyleSheet.create({
   },
   chatMainContainer: {
     flex:1,
+    flexGrow:1,
     width:'100%',
+    height:'100%',
     justifyContent:'flex-end',
-    height:'100%'
   },
   chatMain: {
-    flex:1,
-    width:'100%',
+    flexGrow:1,
     justifyContent:'flex-start',
     alignItems:'center',
     paddingRight:10,
-    paddingTop:20,
     paddingBottom:20,
     paddingLeft:10,
-    height:'100%'
   },
   chatInfoText: {
     textAlign:'center',
@@ -5383,6 +5381,10 @@ export const messagesLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     borderBottomColor:colorsLight.mainTextColor
   },
+  messageMain: {
+    width:'100%',
+    marginTop:5,
+  },
   messageContainerMe: {
     flex:1,
     flexDirection:'row',
@@ -5399,7 +5401,6 @@ export const messagesLight = StyleSheet.create({
     alignItems:'flex-start',
     justifyContent:'center',
     alignSelf:'flex-end',
-    marginTop:5,
   },
   messageTextMe: {
     color:'#fff',
@@ -5420,8 +5421,6 @@ export const messagesLight = StyleSheet.create({
     justifyContent:'flex-start',
     alignItems:'center',
     alignSelf:'flex-start',
-    marginTop:5,
-    flexWrap:'wrap',flexShrink:1
   },
   messageNameYou: {
     fontFamily:'PoppinsSemiBold',
@@ -5431,7 +5430,6 @@ export const messagesLight = StyleSheet.create({
   messageTextYou: {
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
-    flexWrap:'wrap',flexShrink:1
   },
   showAvatarYou: {
     width:40,
