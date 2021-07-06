@@ -5329,8 +5329,6 @@ export const messagesLight = StyleSheet.create({
     alignItems:'center',
     backgroundColor:colorsLight.header,
     padding:20,
-    borderTopWidth:2,
-    borderTopColor:colorsLight.headerBorder,
     width:'100%',
   },
   chatInputAttachIconContainer: {
@@ -5449,6 +5447,31 @@ export const messagesLight = StyleSheet.create({
     fontSize:14,
     fontFamily:'Poppins',
     textAlign:'center'
+  },
+  attachmentField: {
+    backgroundColor:colorsLight.header,
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20,
+    flexDirection:'row',
+    justifyContent:'space-between'
+  },
+  attachButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+    flex:1,
+  },
+  attachButtonContainer: {
+    flex:1,
+    paddingRight:10
+  },
+  moreComingButton: {
+    borderRadius:10,
+    flex:1,
+  },
+  moreComingButtonContainer: {
+    paddingLeft:10,
+    flex:1
   }
 })
 

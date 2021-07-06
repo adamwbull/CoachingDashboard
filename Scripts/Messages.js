@@ -61,7 +61,15 @@ export default function Messages() {
   const [scrollHeight, setScrollHeight] = useState(null)
   const [templates, setTemplates] = useState([])
   const [isSending, setIsSending] = useState(false)
+  const [sendButtonDisabled, setSendButtonDisabled] = useState(false)
+
+  // Attachment variables.
+  const hiddenFileInput = React.useRef(null)
   const [showAttachmentField, setShowAttachmentField] = useState(false)
+  const [showAttachIndicator, setShowAttachIndicator] = useState(false)
+  const [showAttachButton, setShowAttachButton] = useState(true)
+  const [attachment, setAttachment] = useState('')
+  const [attachError, setAttachError] = useState('')
 
   // Reaction variables.
   const [showReactionMenu, setShowReactionMenu] = useState(false)
@@ -139,11 +147,52 @@ export default function Messages() {
   }
 
   const attachImage = () => {
+    setShowAttachmentField(true)
 
   }
 
-  const removeImage = () => {
-    
+  const cancelAttach = () => {
+    setShowAttachmentField(false)
+    setShowAttachIndicator(false)
+    setAttachment('')
+    setAttachError('')
+  }
+
+  const handleClick = event => {
+    hiddenFileInput.current.click()
+    window.addEventListener('focus', handleFocusBack)
+    setShowAttachIndicator(true)
+    setAttachError('')
+  }
+
+  const handleFocusBack = () => {
+    window.removeEventListener('focus', handleFocusBack)
+    setShowAttachIndicator(false)
+  }
+
+  const handleFile = async () => {
+    setSendButtonDisabled(true)
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['jpeg','jpg','png']
+      var fileType = fileArr[1]
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 20000000) {
+          setShowAttachIndicator(false)
+          setSendButtonDisabled(true)
+          var url = URL.createObjectURL(file)
+          setAttachment(url)
+        } else {
+          setAttachError('File size should be less than 20 MB.')
+        }
+      } else {
+        setAttachError('File type should be png, jpg, or jpeg.')
+      }
+    } else {
+      setShowAttachIndicator(false)
+    }
+
   }
 
   // Reaction functions.
@@ -362,31 +411,45 @@ export default function Messages() {
                 <Text style={styles.chatInfoText}>No messages yet.</Text>
               </View>)}
               {showAttachmentField && (<View style={styles.attachmentField}>
-                <View style={styles.attachmentFieldRemoveIcon}>
-                  <Icon
+                {showAttachButton && (<>
+                <Button 
+                  title='Attach Image'
+                  onPress={() => handleClick()}
+                  buttonStyle={styles.attachButton}
+                  containerStyle={styles.attachButtonContainer}
+                />
+                <Button 
+                  title='More coming soon!'
+                  disabled={true}
+                  buttonStyle={styles.moreComingButton}
+                  containerStyle={styles.moreComingButtonContainer}
+                />
+                </>) ||
+                (<>
+                  {showAttachIndicator && (<ActivityIndicatorView />) ||
+                  (<View style={styles.attachmentFieldImagePreview}>
+                  
+                  </View>)}
+                </>)}
+              </View>)}
+              <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
+              <View style={styles.chatInputContainer}>
+                <TouchableOpacity style={styles.chatInputAttachIconContainer}>
+                  {showAttachmentField && (<Icon
                     name='close'
                     type='ionicon'
                     size={28}
                     color={btnColors.danger}
                     style={{}}
-                    onPress={() => removeImage()}
-                  />
-                </View>
-                <View style={styles.attachmentFieldImagePreview}>
-                  
-                </View>
-              </View>)}
-              <View style={styles.chatInputContainer}>
-                <TouchableOpacity style={styles.chatInputAttachIconContainer}>
-                  <Icon
+                    onPress={() => cancelAttach()}
+                  />) || (<Icon
                     name='document-attach'
                     type='ionicon'
                     size={28}
                     color={colors.mainTextColor}
                     style={{}}
-                    disabled={showAttachmentField}
                     onPress={() => attachImage()}
-                  />
+                  />)}
                 </TouchableOpacity>
                 <View style={styles.chatMessageBoxContainer}>
                   <TextInput 
@@ -412,7 +475,7 @@ export default function Messages() {
                     buttonStyle={styles.chatMessageSubmitButton}
                     titleStyle={styles.chatMessageSubmitButtonTitle}
                     onPress={() => sendMessage()}
-                    disabled={isSending}
+                    disabled={isSending || sendButtonDisabled}
                   />
                 </View>
               </View>
