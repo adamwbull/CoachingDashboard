@@ -61,7 +61,8 @@ export default function Messages() {
   const [scrollHeight, setScrollHeight] = useState(null)
   const [templates, setTemplates] = useState([])
   const [isSending, setIsSending] = useState(false)
-  
+  const [showAttachmentField, setShowAttachmentField] = useState(false)
+
   // Reaction variables.
   const [showReactionMenu, setShowReactionMenu] = useState(false)
   const [chosenReaction, setChosenReaction] = useState('')
@@ -135,6 +136,14 @@ export default function Messages() {
       messagesEnd.current.scrollIntoView({ behavior: "smooth" });
       setIsSending(false)
     } 
+  }
+
+  const attachImage = () => {
+
+  }
+
+  const removeImage = () => {
+    
   }
 
   // Reaction functions.
@@ -352,6 +361,21 @@ export default function Messages() {
               </ScrollView>) || (<View style={[styles.chatMain,{paddingTop:20}]}>
                 <Text style={styles.chatInfoText}>No messages yet.</Text>
               </View>)}
+              {showAttachmentField && (<View style={styles.attachmentField}>
+                <View style={styles.attachmentFieldRemoveIcon}>
+                  <Icon
+                    name='close'
+                    type='ionicon'
+                    size={28}
+                    color={btnColors.danger}
+                    style={{}}
+                    onPress={() => removeImage()}
+                  />
+                </View>
+                <View style={styles.attachmentFieldImagePreview}>
+                  
+                </View>
+              </View>)}
               <View style={styles.chatInputContainer}>
                 <TouchableOpacity style={styles.chatInputAttachIconContainer}>
                   <Icon
@@ -360,6 +384,8 @@ export default function Messages() {
                     size={28}
                     color={colors.mainTextColor}
                     style={{}}
+                    disabled={showAttachmentField}
+                    onPress={() => attachImage()}
                   />
                 </TouchableOpacity>
                 <View style={styles.chatMessageBoxContainer}>
@@ -371,7 +397,8 @@ export default function Messages() {
                     onChangeText={(t) => checkMessage(t)}
                     value={messages[chatIndex]}
                     onChange={(e) => {
-                      if (e.currentTarget.value.length < 100) {
+                      console.log(e.currentTarget.value.length)
+                      if (e.currentTarget.value.length < 4) {
                         setScrollHeight(null)
                       } else if (e.target.scrollHeight - scrollHeight > 50) {
                         setScrollHeight(e.target.scrollHeight)
