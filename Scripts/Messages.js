@@ -11,7 +11,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
+import { uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -25,11 +25,11 @@ var socket = io("https://messages.coachsync.me/")
 
 export default function Messages() {
 
-
   // Hooks.
   const linkTo = useLinkTo()
   const user = useContext(userContext)
   const scrollViewRef = useRef();
+  const textInput = useRef();
   var messagesEnd = useRef();
 
   // Styles.
@@ -66,10 +66,12 @@ export default function Messages() {
   // Attachment variables.
   const hiddenFileInput = React.useRef(null)
   const [showAttachmentField, setShowAttachmentField] = useState(false)
-  const [showAttachIndicator, setShowAttachIndicator] = useState(false)
   const [showAttachButton, setShowAttachButton] = useState(true)
+  const [showAttachIndicator, setShowAttachIndicator] = useState(false)
   const [attachment, setAttachment] = useState('')
-  const [attachError, setAttachError] = useState('')
+  const [attachmentLink, setAttachmentLink] = useState('')
+  const [attachmentType, setAttachmentType] = useState('')
+  const [attachError, setAttachError] = useState('Test.')
 
   // Reaction variables.
   const [showReactionMenu, setShowReactionMenu] = useState(false)
@@ -91,6 +93,7 @@ export default function Messages() {
   // User list functions. 
   const openChat = (index) => {
     setChatIndex(index)
+    textInput.current.value = messages[index]
   }
 
   // Create group functions.
@@ -98,6 +101,10 @@ export default function Messages() {
   // Add template functions.
 
   // Chat functions.
+  const handleBlur = (e) => {
+    console.log(e.target.value)
+    checkMessage(e.target.value)
+  }
   const checkMessage = (t) => {
     if (t.length < 1000) {
       var newMs = JSON.parse(JSON.stringify(messages))
@@ -109,7 +116,11 @@ export default function Messages() {
   const sendMessage = async () => {
     setIsSending(true)
     var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token, 'Message from Coach')
-    if (posted) {
+    if (posted > 1) {
+      // Check if image upload is necessary.
+      if (attachmentLink.length > 0) {
+        var upload = await uploadMessageImage(attachment, attachmentType, coach.Token, posted)
+      }
       // Send test emission.
       console.log('Sending socket emit...')
       socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
@@ -120,59 +131,60 @@ export default function Messages() {
       var date = dateToSql(new Date())
       conversation.LastSenderCreated = date
       conversation.LastSenderMessage = messages[chatIndex]
-      // TODO: Add Image
+      
+      refreshMessages()
+      discardAttach()
 
-      // Calculate TimeAbove if applicable.
-      var prevDate = sqlToJsDate(userList[chatIndex].Messages[userList[chatIndex].Messages.length-1].Created)
-      var now = new Date()
-      var timeAbove = ''
-      if ((now - prevDate) > (60*60*1000)) {
-        timeAbove = parseDateText(now)
-      }
-      var m = {
-        Text: messages[chatIndex],
-        UserId: coach.Id,
-        Image: '',
-        Created: date,
-        Sent:1,
-        ConversationId: userList[chatIndex].ConversationId,
-        TimeAbove: timeAbove
-      }
-      conversation.Messages.unshift(m)
-      newUserList[chatIndex] = conversation
-      setUserList(newUserList)
       messagesEnd.current.scrollIntoView({ behavior: "smooth" });
       setIsSending(false)
+
     } 
   }
 
   const attachImage = () => {
     setShowAttachmentField(true)
-
   }
 
-  const cancelAttach = () => {
-    setShowAttachmentField(false)
-    setShowAttachIndicator(false)
-    setAttachment('')
+  const resetAttach = () => {
+    setShowAttachButton(true)
     setAttachError('')
   }
 
+  const discardAttach = () => {
+    setShowAttachmentField(false)
+    setShowAttachButton(true)
+    setShowAttachIndicator(false)
+    setAttachment('')
+    setAttachError('')
+    hiddenFileInput.current.value = null
+  }
+
   const handleClick = event => {
+    console.log('Handling click...')
     hiddenFileInput.current.click()
     window.addEventListener('focus', handleFocusBack)
-    setShowAttachIndicator(true)
     setAttachError('')
   }
 
   const handleFocusBack = () => {
+    console.log('Focusing back...')
     window.removeEventListener('focus', handleFocusBack)
-    setShowAttachIndicator(false)
   }
 
+  const fileToDataUri = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resolve(event.target.result)
+    };
+    reader.readAsDataURL(file);
+  })
+
   const handleFile = async () => {
+    console.log('Handling file...')
     setSendButtonDisabled(true)
+    setShowAttachButton(false)
     var file = event.target.files[0]
+    console.log('file upload:',file)
     if (file !== undefined) {
       var fileArr = file.name.split('.')
       var fileOptions = ['jpeg','jpg','png']
@@ -180,9 +192,11 @@ export default function Messages() {
       if (fileOptions.includes(fileType)) {
         if (file.size <= 20000000) {
           setShowAttachIndicator(false)
-          setSendButtonDisabled(true)
+          setSendButtonDisabled(false)
           var url = URL.createObjectURL(file)
-          setAttachment(url)
+          setAttachmentLink(url)
+          setAttachment(file)
+          setAttachmentType(fileType)
         } else {
           setAttachError('File size should be less than 20 MB.')
         }
@@ -198,6 +212,10 @@ export default function Messages() {
   // Reaction functions.
 
   // Main functions.
+  const refreshMessages = () => {
+    refreshMessageInfo(coach.Id, coach.Token)
+  }
+
   const refreshChatList = async () => {
     var get = await getMessageInfo(coach.Id, coach.Token)
     console.log('data:', get)
@@ -344,9 +362,7 @@ export default function Messages() {
               ref={scrollViewRef}
               onContentSizeChange={(width, height) => {
                 setScrollWidth((width-20)-(width/5))
-                setTimeout(() => {
-                  scrollViewRef.current.scrollToEnd({animated: true})
-                }, 50)
+                scrollViewRef.current.scrollToEnd({animated: true})
               }}>
                 {userList[chatIndex].Messages.map((message, index) => {
 
@@ -419,7 +435,7 @@ export default function Messages() {
                   containerStyle={styles.attachButtonContainer}
                 />
                 <Button 
-                  title='More coming soon!'
+                  title='More options coming soon!'
                   disabled={true}
                   buttonStyle={styles.moreComingButton}
                   containerStyle={styles.moreComingButtonContainer}
@@ -428,7 +444,21 @@ export default function Messages() {
                 (<>
                   {showAttachIndicator && (<ActivityIndicatorView />) ||
                   (<View style={styles.attachmentFieldImagePreview}>
-                  
+                    {attachmentLink.length > 0 && (<View style={{justifyContent:'center'}}>
+                      <Image
+                        source={{uri:attachmentLink}}
+                        style={styles.attachmentImagePreview}
+                      />
+                    </View>)}
+                    {attachError.length > 0 && (<View style={styles.attachErrorContainer}>
+                      <Text style={styles.attachError}>{attachError}</Text>
+                      <Button 
+                        title='Try Again'
+                        buttonStyle={styles.resetAttachButton}
+                        titleStyle={styles.resetAttachButtonTitle}
+                        onPress={() => resetAttach()}
+                      />
+                    </View>)}
                   </View>)}
                 </>)}
               </View>)}
@@ -441,7 +471,7 @@ export default function Messages() {
                     size={28}
                     color={btnColors.danger}
                     style={{}}
-                    onPress={() => cancelAttach()}
+                    onPress={() => discardAttach()}
                   />) || (<Icon
                     name='document-attach'
                     type='ionicon'
@@ -453,20 +483,19 @@ export default function Messages() {
                 </TouchableOpacity>
                 <View style={styles.chatMessageBoxContainer}>
                   <TextInput 
+                    ref={textInput}
                     style={[styles.chatMessageBox,{ height: scrollHeight }]}
                     placeholder='Message...'
                     multiline={true}
                     numberOfLines={1}
-                    onChangeText={(t) => checkMessage(t)}
-                    value={messages[chatIndex]}
                     onChange={(e) => {
-                      console.log(e.currentTarget.value.length)
                       if (e.currentTarget.value.length < 4) {
                         setScrollHeight(null)
                       } else if (e.target.scrollHeight - scrollHeight > 50) {
                         setScrollHeight(e.target.scrollHeight)
                       }
                     }}
+                    onBlur={handleBlur}
                   />
                 </View>
                 <View style={styles.chatMessageSubmitButtonContainer}>

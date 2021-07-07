@@ -188,6 +188,33 @@ export async function check() {
 
 */
 
+export async function uploadMessageImage(uri, fileType, token, id) {
+  
+  console.log('sending:', uri, fileType, token, id);
+  var ret = false;
+  let formData = new FormData();
+  formData.append('photo', uri, `${token}_${id}.${fileType}`);
+
+  console.log('formData:', formData)
+
+  console.log('Attempting message attachment upload...');
+  const res = await fetch(uploadUrl + '/api/message-attachment', {
+    method:'POST',
+    body: formData,
+  });
+
+  const payload = await res.json();
+
+  console.log('payload:',payload)
+
+  if (payload.affectedRows == 1) {
+    console.log('Upload complete!');
+    ret = true;
+  }
+
+  return ret;
+
+}
 
 export async function postMessage(conversationId, message, id, token, title) {
 
@@ -208,7 +235,30 @@ export async function postMessage(conversationId, message, id, token, title) {
 
   if (payload.affectedRows > 0) {
     console.log('Message posted!')
-    ret = true
+    ret = payload.insertId
+  }
+
+  return ret
+
+}
+
+export async function refreshMessageInfo(id, token) {  
+
+  var ret = false
+
+  console.log('Getting chat list and templates...')
+  const res = await fetch(url + '/coach-conversations/'+id+'/'+token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Data found!')
+    ret = payload
+  } else {
+    console.log('No data found!')
+    ret = []
   }
 
   return ret
@@ -220,7 +270,7 @@ export async function getMessageInfo(id, token) {
   var ret = false
 
   console.log('Getting chat list and templates...')
-  const res = await fetch(url + '/coach-conversations/'+id+'/'+token, {
+  const res = await fetch(url + '/coach-conversations-templates/'+id+'/'+token, {
     method:'GET'
   })
 

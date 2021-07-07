@@ -5472,6 +5472,34 @@ export const messagesLight = StyleSheet.create({
   moreComingButtonContainer: {
     paddingLeft:10,
     flex:1
+  },
+  attachErrorContainer:{
+    height:39,
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  attachError: {
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+    fontSize:16,
+  },
+  resetAttachButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:10,
+    padding:8,
+    marginLeft:10
+  },
+  resetAttachButtonTitle: {
+    fontSize:16
+  },
+  attachmentFieldImageText: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:16,
+  },
+  attachmentImagePreview: {
+    width:100,
+    height:100
   }
 })
 
