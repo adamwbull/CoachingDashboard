@@ -5403,6 +5403,8 @@ export const messagesLight = StyleSheet.create({
   messageTextMe: {
     color:'#fff',
     fontFamily:'Poppins',
+    width:'100%',
+    textAlign:'left'
   },
   messageContainerYou: {
     width:'100%',
@@ -5428,6 +5430,8 @@ export const messagesLight = StyleSheet.create({
   messageTextYou: {
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
+    width:'100%',
+    textAlign:'left'
   },
   showAvatarYou: {
     width:40,
@@ -5500,6 +5504,11 @@ export const messagesLight = StyleSheet.create({
   attachmentImagePreview: {
     width:100,
     height:100
+  },
+  photoOverlay: {
+    flex:1,
+    height:'100%',
+    width:'100%',
   }
 })
 

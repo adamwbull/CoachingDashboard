@@ -1,6 +1,8 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useRef, useContext } from 'react'
-import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
 import { messagesLight, colorsLight, innerDrawerLight, btnColors, boxColors } from '../Scripts/Styles.js'
 import { allClientsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -105,6 +107,7 @@ export default function Messages() {
     console.log(e.target.value)
     checkMessage(e.target.value)
   }
+
   const checkMessage = (t) => {
     if (t.length < 1000) {
       var newMs = JSON.parse(JSON.stringify(messages))
@@ -114,31 +117,42 @@ export default function Messages() {
   }
 
   const sendMessage = async () => {
-    setIsSending(true)
-    var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token, 'Message from Coach')
-    if (posted > 1) {
-      // Check if image upload is necessary.
-      if (attachmentLink.length > 0) {
-        var upload = await uploadMessageImage(attachment, attachmentType, coach.Token, posted)
-      }
-      // Send test emission.
-      console.log('Sending socket emit...')
-      socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
-      // Add message locally.
-      var newUserList = JSON.parse(JSON.stringify(userList))
-      var conversation = newUserList[chatIndex]
-      conversation.LastSenderId = coach.Id
-      var date = dateToSql(new Date())
-      conversation.LastSenderCreated = date
-      conversation.LastSenderMessage = messages[chatIndex]
-      
-      refreshMessages()
-      discardAttach()
+    
+    // Check if we are good to send a message.
+    if (messages[chatIndex].length > 0 || attachmentLink.length > 0) {
+      setIsSending(true)
+      var posted = await postMessage(userList[chatIndex].Id, messages[chatIndex], coach.Id, coach.Token, 'Message from Coach')
+      if (posted > 1) {
+        // Check if image upload is necessary.
+        if (attachmentLink.length > 0) {
+          var upload = await uploadMessageImage(attachment, attachmentType, coach.Token, posted)
+        }
+        // Send test emission.
+        console.log('Sending socket emit...')
+        socket.emit('sent-message', { recepients:'[3,6]', conversationId:'3' })
+        // Add message locally.
+        var newUserList = JSON.parse(JSON.stringify(userList))
+        var conversation = newUserList[chatIndex]
+        conversation.LastSenderId = coach.Id
+        var date = dateToSql(new Date())
+        conversation.LastSenderCreated = date
+        conversation.LastSenderMessage = messages[chatIndex]
+        refreshMessages()
 
-      messagesEnd.current.scrollIntoView({ behavior: "smooth" });
-      setIsSending(false)
+        // Clear text input.
+        discardAttach()
+        var newMs = JSON.parse(JSON.stringify(messages))
+        newMs[chatIndex] = ''
+        setMessages(newMs)
+        textInput.current.value = ''
 
-    } 
+        // 
+        messagesEnd.current.scrollIntoView({ behavior: "smooth" });
+        setIsSending(false)
+
+      } 
+    }
+
   }
 
   const attachImage = () => {
@@ -155,6 +169,7 @@ export default function Messages() {
     setShowAttachButton(true)
     setShowAttachIndicator(false)
     setAttachment('')
+    setAttachmentLink('')
     setAttachError('')
     hiddenFileInput.current.value = null
   }
@@ -169,6 +184,9 @@ export default function Messages() {
   const handleFocusBack = () => {
     console.log('Focusing back...')
     window.removeEventListener('focus', handleFocusBack)
+    setAttachmentLink('')
+    hiddenFileInput.current.value = null
+
   }
 
   const fileToDataUri = (file) => new Promise((resolve, reject) => {
@@ -184,11 +202,10 @@ export default function Messages() {
     setSendButtonDisabled(true)
     setShowAttachButton(false)
     var file = event.target.files[0]
-    console.log('file upload:',file)
     if (file !== undefined) {
       var fileArr = file.name.split('.')
       var fileOptions = ['jpeg','jpg','png']
-      var fileType = fileArr[1]
+      var fileType = fileArr[fileArr.length-1]
       if (fileOptions.includes(fileType)) {
         if (file.size <= 20000000) {
           setShowAttachIndicator(false)
@@ -212,6 +229,33 @@ export default function Messages() {
   // Reaction functions.
 
   // Main functions.
+  const viewImage = (url) => {
+
+    Image.getSize(url, (width, height) => {
+      var wWidth = window.screen.width
+      var wHeight = window.screen.height
+      var cHeight = 0.6*wHeight
+      var cWidth = cHeight*(width/height)
+      var imStyle = {
+        width:cWidth,
+        height:cHeight
+      }
+      confirmAlert({
+        customUI: ({ onClose }) => {
+          return (<TouchableWithoutFeedback onPress={onClose}>
+            <View style={styles.photoOverlay}>
+              <Image 
+                source={{uri:url}}
+                style={imStyle}
+              />
+            </View>
+          </TouchableWithoutFeedback>)
+        }
+      })  
+    });
+    
+  }
+  
   const refreshMessages = () => {
     refreshMessageInfo(coach.Id, coach.Token)
   }
@@ -366,6 +410,22 @@ export default function Messages() {
               }}>
                 {userList[chatIndex].Messages.map((message, index) => {
 
+                  var image = message.Image
+                  var messageStyle = {}
+                  var calcHeight = 0
+                  if (image.length > 0) {
+                    messageStyle = {
+                      borderBottomLeftRadius:0,
+                      borderBottomRightRadius:0,
+                      width:300,
+                      paddingLeft:12,
+                      paddingTop:12
+                    }
+                    Image.getSize(image, (width, height) => {
+                      calcHeight = 400*(height/width)
+                    })
+                  }
+
                   if (message.UserId == coach.Id) {
 
                     // Me.
@@ -378,9 +438,21 @@ export default function Messages() {
                           <View style={styles.messageInfoMe}>
                             
                           </View>
-                          <View style={[styles.mainMessageMe,{maxWidth:scrollWidth}]}>
+                          <View style={[styles.mainMessageMe,{maxWidth:scrollWidth},messageStyle]}>
                             <Text style={styles.messageTextMe}>{message.Text}</Text>
                           </View>
+                          {image.length > 0 && (<TouchableOpacity onPress={() => viewImage(image)}>
+                            <Image 
+                              source={{ uri: image }}
+                              style={{
+                                width:300,
+                                height:300,
+                                aspectRatio:1,
+                                borderBottomLeftRadius:25,
+                                borderBottomRightRadius:25,
+                              }}
+                            />
+                          </TouchableOpacity>)}
                           <View style={styles.messageReactionsMe}>
 
                           </View>
@@ -406,9 +478,21 @@ export default function Messages() {
                           {message.ShowAvatar && (<View>
                             <Text style={styles.messageNameYou}>{message.TheirHeaderText}</Text>
                           </View>)}
-                          <View style={[styles.mainMessageYou,{maxWidth:scrollWidth}]}>
+                          <View style={[styles.mainMessageYou,{maxWidth:scrollWidth},messageStyle]}>
                             <Text style={styles.messageTextYou}>{message.Text}</Text>
                           </View>
+                          {image.length > 0 && (<TouchableOpacity onPress={() => viewImage(image)}>
+                            <Image 
+                              source={{ uri: image }}
+                              style={{
+                                width:300,
+                                height:300,
+                                aspectRatio:1,
+                                borderBottomLeftRadius:25,
+                                borderBottomRightRadius:25,
+                              }}
+                            />
+                          </TouchableOpacity>)}
                           <View style={styles.messageReactionsYou}>
 
                           </View>
@@ -445,10 +529,12 @@ export default function Messages() {
                   {showAttachIndicator && (<ActivityIndicatorView />) ||
                   (<View style={styles.attachmentFieldImagePreview}>
                     {attachmentLink.length > 0 && (<View style={{justifyContent:'center'}}>
-                      <Image
-                        source={{uri:attachmentLink}}
-                        style={styles.attachmentImagePreview}
-                      />
+                      <TouchableOpacity onPress={() => viewImage(attachmentLink)}>
+                        <Image
+                          source={{uri:attachmentLink}}
+                          style={styles.attachmentImagePreview}
+                        />
+                      </TouchableOpacity>
                     </View>)}
                     {attachError.length > 0 && (<View style={styles.attachErrorContainer}>
                       <Text style={styles.attachError}>{attachError}</Text>
