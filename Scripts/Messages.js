@@ -39,6 +39,7 @@ export default function Messages() {
   const [colors, setColors] = useState(colorsLight)
 
   // Main stage controls.
+  const [firstLoad, setFirstLoad] = useState(true)
   const [showUserList, setShowUserList] = useState(false)
   const [scrollWidth, setScrollWidth] = useState(0)
 
@@ -93,14 +94,25 @@ export default function Messages() {
 
 
   // User list functions. 
+  const openMain = () => {
+    setChatIndex(-1)
+  }
+
   const openChat = (index) => {
     setChatIndex(index)
-    textInput.current.value = messages[index]
+    console.log(messages[index])
   }
 
   // Create group functions.
 
   // Add template functions.
+  const openAddTemplate = () => {
+
+  }
+
+  const submitTemplate = () => {
+    
+  }
 
   // Chat functions.
   const handleBlur = (e) => {
@@ -300,16 +312,25 @@ export default function Messages() {
   }
 
   useEffect(() => {
-    console.log('Welcome to messages.')
-    if (coach != null) {
-      configureSocket()
-      refreshChatList()
+    if (firstLoad) {
+      console.log('Welcome to messages.')
+      if (coach != null) {
+        configureSocket()
+        refreshChatList()
+        setFirstLoad(false)
+      } else {
+        linkTo('/welcome')
+      }
+    } else {
+      if (chatIndex != -1) {
+        textInput.current.value = messages[chatIndex]
+      }
     }
-  }, [])
+  }, [chatIndex])
 
   return (<View style={styles.container}>
     <View style={styles.userListContainer}>
-      <Text style={styles.userListTitle} onPress={() => setChatIndex(-1)}>Messages</Text>
+      <Text style={styles.userListTitle} onPress={() => openMain()}>Messages</Text>
       {userListLoading && (<View>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
@@ -366,41 +387,49 @@ export default function Messages() {
         <ActivityIndicatorView />
       </View>) || (<View style={styles.chatContainer}>
         {userList.length > 0 && (<>
-          {chatIndex == -1 && (<View>
-            <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
-            <View style={styles.infoButtonRow}>
-              <Button 
-                title='Create Group'
-                icon={{
-                  name: 'people',
-                  size: 26,
-                  type: 'ionicon',
-                  color:'#fff',
-                  style: {
-                    marginTop:0
-                  }
-                }}
-                buttonStyle={styles.createGroupChatButton}
-                titleStyle={styles.infoButtonTitle}
-                onPress={() => setShowCreateGroup(true)}
-              />
-              <Button 
-                title='Add Templates'
-                icon={{
-                  name: 'chatbubble',
-                  size: 26,
-                  type: 'ionicon',
-                  color:'#fff',
-                  style: {
-                    marginTop:-1
-                  }
-                }}
-                buttonStyle={styles.addDMTemplatesButton}
-                titleStyle={styles.infoButtonTitle}
-                onPress={() => setShowAddTemplate(true)}
-              />
-              </View>
-          </View>) || (<View style={styles.chatArea}>
+          {chatIndex == -1 && (<>
+            {showAddTemplate && (<View style={styles.addTemplateContainer}>
+            
+            </View>) || (<>
+              {showCreateGroup && (<View style={styles.createGroupContainer}>
+              
+              </View>) || (<View>
+                <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
+                <View style={styles.infoButtonRow}>
+                  <Button 
+                    title='Create Group'
+                    icon={{
+                      name: 'people',
+                      size: 26,
+                      type: 'ionicon',
+                      color:'#fff',
+                      style: {
+                        marginTop:0
+                      }
+                    }}
+                    buttonStyle={styles.createGroupChatButton}
+                    titleStyle={styles.infoButtonTitle}
+                    onPress={() => setShowCreateGroup(true)}
+                  />
+                  <Button 
+                    title='Add Templates'
+                    icon={{
+                      name: 'chatbubble',
+                      size: 26,
+                      type: 'ionicon',
+                      color:'#fff',
+                      style: {
+                        marginTop:-1
+                      }
+                    }}
+                    buttonStyle={styles.addDMTemplatesButton}
+                    titleStyle={styles.infoButtonTitle}
+                    onPress={() => setShowAddTemplate(true)}
+                  />
+                  </View>
+              </View>)}
+            </>)}
+          </>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
               {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end',flexGrow:1}]}
               ref={scrollViewRef}
@@ -410,6 +439,7 @@ export default function Messages() {
               }}>
                 {userList[chatIndex].Messages.map((message, index) => {
 
+                  // Check whether to put image.
                   var image = message.Image
                   var messageStyle = {}
                   var calcHeight = 0
@@ -425,6 +455,20 @@ export default function Messages() {
                       calcHeight = 400*(height/width)
                     })
                   }
+
+                  // Check if image is on it's own.
+                  var imageExtraStyle = {}
+                  if (message.Text.length == 0) {
+                    messageStyle = {
+                      height:0,
+                      padding:0
+                    }
+                    imageExtraStyle = {
+                      borderTopLeftRadius:25,
+                      borderTopRightRadius:25,
+                    }
+                  }
+                  
 
                   if (message.UserId == coach.Id) {
 
@@ -444,13 +488,16 @@ export default function Messages() {
                           {image.length > 0 && (<TouchableOpacity onPress={() => viewImage(image)}>
                             <Image 
                               source={{ uri: image }}
-                              style={{
-                                width:300,
-                                height:300,
-                                aspectRatio:1,
-                                borderBottomLeftRadius:25,
-                                borderBottomRightRadius:25,
-                              }}
+                              style={[
+                                imageExtraStyle,
+                                {
+                                  width:300,
+                                  height:300,
+                                  aspectRatio:1,
+                                  borderBottomLeftRadius:25,
+                                  borderBottomRightRadius:25,
+                                }
+                              ]}
                             />
                           </TouchableOpacity>)}
                           <View style={styles.messageReactionsMe}>
@@ -484,13 +531,16 @@ export default function Messages() {
                           {image.length > 0 && (<TouchableOpacity onPress={() => viewImage(image)}>
                             <Image 
                               source={{ uri: image }}
-                              style={{
-                                width:300,
-                                height:300,
-                                aspectRatio:1,
-                                borderBottomLeftRadius:25,
-                                borderBottomRightRadius:25,
-                              }}
+                              style={[
+                                imageExtraStyle,
+                                {
+                                  width:300,
+                                  height:300,
+                                  aspectRatio:1,
+                                  borderBottomLeftRadius:25,
+                                  borderBottomRightRadius:25,
+                                }
+                              ]}d
                             />
                           </TouchableOpacity>)}
                           <View style={styles.messageReactionsYou}>
