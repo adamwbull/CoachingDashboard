@@ -5210,16 +5210,18 @@ export const messagesLight = StyleSheet.create({
     backgroundColor:colorsLight.mainBackground,
     height:'100%',
   },
+  userListTitleContainer: {
+    borderBottomWidth:2,
+    borderBottomColor:colorsLight.mainTextColor,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+  },
   userListTitle: {
     fontSize:22,
-    marginLeft:20,
-    marginRight:20,
-    marginTop:23,
-    marginBottom:15,
     fontFamily:'PoppinsSemiBold',
-    borderBottomWidth:2,
     color:colorsLight.mainTextColor,
-    borderBottomColor:colorsLight.mainTextColor
   },
   chatContainer: {
     flex:1,
@@ -5366,7 +5368,6 @@ export const messagesLight = StyleSheet.create({
     width:280,
     height:'100%',
     backgroundColor:colorsLight.mainBackground,
-    padding:20
   },
   templateTextTitle: {
     fontSize:22,
@@ -5434,14 +5435,14 @@ export const messagesLight = StyleSheet.create({
     textAlign:'left'
   },
   showAvatarYou: {
-    width:40,
-    height:40,
+    width:50,
+    height:50,
     marginRight:10
   },
   avatarYou: {
-    width:40,
-    height:40,
-    borderRadius:20
+    width:50,
+    height:50,
+    borderRadius:60
   },
   timeContainer: {
     padding:10,

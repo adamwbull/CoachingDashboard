@@ -94,29 +94,27 @@ export default function Messages() {
 
 
   // User list functions. 
-  const openMain = () => {
-    setChatIndex(-1)
-  }
-
   const openChat = (index) => {
     setChatIndex(index)
-    console.log(messages[index])
   }
 
   // Create group functions.
-
+  const openCreateGroup = () => {
+    setChatIndex(-1)
+    setShowCreateGroup(true)
+  }
   // Add template functions.
   const openAddTemplate = () => {
-
+    setChatIndex(-1)
+    setShowAddTemplate(true)
   }
 
   const submitTemplate = () => {
-    
+
   }
 
   // Chat functions.
   const handleBlur = (e) => {
-    console.log(e.target.value)
     checkMessage(e.target.value)
   }
 
@@ -330,7 +328,18 @@ export default function Messages() {
 
   return (<View style={styles.container}>
     <View style={styles.userListContainer}>
-      <Text style={styles.userListTitle} onPress={() => openMain()}>Messages</Text>
+      <TouchableOpacity style={styles.userListTitleContainer}
+        onPress={() => openCreateGroup()}
+      >
+        <Text style={styles.userListTitle}>Messages</Text>
+        <Icon
+          name='add'
+          type='ionicon'
+          size={28}
+          color={colors.mainTextColor}
+          style={{}}
+        />
+      </TouchableOpacity>
       {userListLoading && (<View>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
@@ -646,10 +655,21 @@ export default function Messages() {
               </View>
             </View>
             <View style={styles.templateList}>
-              <Text style={styles.templateTextTitle}>Templates</Text>
+              <TouchableOpacity style={styles.userListTitleContainer}
+                onPress={() => openAddTemplate()}
+              >
+                <Text style={styles.userListTitle}>Templates</Text>
+                <Icon
+                  name='add'
+                  type='ionicon'
+                  size={28}
+                  color={colors.mainTextColor}
+                  style={{}}
+                />
+              </TouchableOpacity>
               {templates.length > 0 && (<ScrollView>
               
-              </ScrollView>) || (<View>
+              </ScrollView>) || (<View style={{paddingTop:10}}>
               <Text style={styles.chatInfoText}>No templates yet.</Text>
               </View>)}
             </View>
