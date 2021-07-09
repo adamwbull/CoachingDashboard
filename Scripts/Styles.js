@@ -5280,20 +5280,6 @@ export const messagesLight = StyleSheet.create({
     alignItems:'center',
     flex:1
   },
-  createGroupChatButton: {
-    backgroundColor:btnColors.primary,
-    borderRadius:10,
-    padding:10,
-    alignSelf:'flex-start',
-    marginRight:10
-  },
-  addDMTemplatesButton: {
-    backgroundColor:btnColors.success,
-    borderRadius:10,
-    padding:10,
-    alignSelf:'flex-start',
-    marginLeft:10
-  },
   infoButtonTitle: {
     fontFamily:'Poppins',
     fontSize:22,
@@ -5510,6 +5496,58 @@ export const messagesLight = StyleSheet.create({
     flex:1,
     height:'100%',
     width:'100%',
+  },
+  createGroupContainer: {
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  createGroupMain: {
+    backgroundColor:colorsLight.mainBackground,
+    padding:20,
+    borderRadius:25,
+    width:'60%',
+  },
+  createGroupHeader: {
+    textAlign:'center',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  createGroupNameInput: {
+    marginTop:15,
+    marginBottom:20,
+    backgroundColor:colorsLight.secondaryBackground,
+    padding:10,
+    borderRadius:10,
+    fontSize:18
+  },
+  createGroupAddHeader: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    borderBottomWidth:2,
+    borderBottomColor:colorsLight.secondaryTextColor,
+  },
+  createGroupAddInput: {
+    flex:1,
+    marginLeft:4,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    outline:'none',
+    padding:5
+  },
+  createGroupAddIcon: {
+    width:34,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  createGroupClient: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    padding:10,
+    borderTopWidth:2,
+    borderTopColor:colorsLight.headerBorder
   }
 })
 

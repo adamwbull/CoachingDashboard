@@ -2,7 +2,7 @@
 /* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useRef, useContext } from 'react'
-import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
+import { Dimensions, ScrollView, StyleSheet, Text, View, Image, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
 import { messagesLight, colorsLight, innerDrawerLight, btnColors, boxColors } from '../Scripts/Styles.js'
 import { allClientsDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -45,11 +45,12 @@ export default function Messages() {
 
   // Main variables.
   const [coach, setCoach] = useState(user)
+  const [windowDims, setWindowDims] = useState(Dimensions.get('window'))
 
   // User list variables.
   const [userListLoading, setUserListLoading] = useState(true)
   const [userList, setUserList] = useState([])
-
+  const [clients, setClients] = useState([])
   // Create group variables.
   const [showCreateGroup, setShowCreateGroup] = useState(false)
 
@@ -99,9 +100,71 @@ export default function Messages() {
   }
 
   // Create group functions.
-  const openCreateGroup = () => {
-    setChatIndex(-1)
-    setShowCreateGroup(true)
+  const openCreateGroup = async () => {
+
+    confirmAlert({
+      overlayClassName:'confirmUIBasic',
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+      customUI: ({ onClose }) => {
+        return (<View style={[styles.createGroupContainer]}>
+          <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.6)}]}>
+            <Text style={styles.createGroupHeader}>Create Group</Text>
+            <TextInput 
+              placeholder='Group name...'
+              style={styles.createGroupNameInput}
+            />
+            <View style={styles.createGroupAddContainer}>
+              <View style={styles.createGroupAddHeader}>
+                <View style={styles.createGroupAddIcon}>
+                  <Icon
+                    name='search'
+                    type='ionicon'
+                    size={28}
+                    color={colors.secondaryTextColor}
+                    style={{}}
+                  />
+                </View>
+                <TextInput 
+                  placeholder='Find clients...'
+                  style={styles.createGroupAddInput}
+                  
+                />
+              </View>
+              {clients.map((client, index) => {
+
+                var last = {}
+                if (index == clients.length-1) {
+                  last = {
+                    borderBottomWidth:2,
+                    borderBottomColor:colors.headerBorder  
+                  }
+                }
+                return (<View key={'client_'+client.Id} style={[styles.createGroupClient,last]}>
+                 <View>
+                   <Image 
+                     source={{uri:client.Avatar}}
+                     style={{width:40,height:40}}
+                   />
+                 </View>
+                 <View>
+                   <Text style={styles.createGroupClientName}>
+                     {client.FirstName + ' ' + client.LastName}
+                   </Text>
+                 </View>
+                 <View>
+                   <Button 
+                     title='Add'
+                   />
+                 </View>
+               </View>)
+              })}
+            </View>
+          </View>
+        </View>)
+      }
+    })
+
   }
   // Add template functions.
   const openAddTemplate = () => {
@@ -251,6 +314,7 @@ export default function Messages() {
         height:cHeight
       }
       confirmAlert({
+        overlayClassName:'confirmUIBasic',
         customUI: ({ onClose }) => {
           return (<TouchableWithoutFeedback onPress={onClose}>
             <View style={styles.photoOverlay}>
@@ -277,11 +341,34 @@ export default function Messages() {
     setTemplates(get[1])
     setUserListLoading(false)
     setChatLoading(false)
-    // Build message arrays.
+    // Build message array and client array.
     var ms = []
+    var clients = []
+    // For each convo...
     for (var i = 0; i < get[0].length; i++) {
+      console.log('processing convo')
+      // Create an empty input message.
       ms.push('')
+
+      // Get client data.
+      for (var j = 0; j < get[0][i].ClientData.length; j++) {
+        
+        var user = JSON.parse(JSON.stringify(get[0][i].ClientData))
+        console.log('processing user', user)
+        // Check list so far.
+        if (clients.length == 0) {
+          clients.push(user)
+        } else {
+          for (var k = 0; k < clients.length; i++) {
+            if (user.Id != clients[k].Id) {
+              clients.push(user)
+              break
+            }
+          }
+        }
+      }
     }
+    setClients(clients)
     setMessages(ms)
     setChatIndex(0)
   }
@@ -340,7 +427,7 @@ export default function Messages() {
           style={{}}
         />
       </TouchableOpacity>
-      {userListLoading && (<View>
+      {userListLoading && (<View style={{paddingTop:10}}>
         <ActivityIndicatorView size={'small'} />
       </View>) || (<View>
         {userList.length == 0 && (<View>
@@ -400,9 +487,7 @@ export default function Messages() {
             {showAddTemplate && (<View style={styles.addTemplateContainer}>
             
             </View>) || (<>
-              {showCreateGroup && (<View style={styles.createGroupContainer}>
-              
-              </View>) || (<View>
+              {showCreateGroup && (<></>) || (<View>
                 <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
                 <View style={styles.infoButtonRow}>
                   <Button 

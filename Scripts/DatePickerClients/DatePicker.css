@@ -24,7 +24,9 @@
   line-height:20px !important;
 
 }
-
+.confirmUIBasic {
+  background-color: rgba(0,0,0,0.5)
+}
 .tags {
   background-color: #ebeef6 !important;
   padding:10px !important;
