@@ -11,7 +11,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
-import { confirmAlert } from 'react-confirm-alert' // Import
+import { ReactConfirmAlert, confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import { uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
@@ -51,8 +51,11 @@ export default function Messages() {
   const [userListLoading, setUserListLoading] = useState(true)
   const [userList, setUserList] = useState([])
   const [clients, setClients] = useState([])
+
   // Create group variables.
   const [showCreateGroup, setShowCreateGroup] = useState(false)
+  const [hasContents, setHasContents] = useState(false)
+  const [selectedClients, setSelectedClients] = useState([])
 
   // Add template variables.
   const [showAddTemplate, setShowAddTemplate] = useState(false)
@@ -100,72 +103,53 @@ export default function Messages() {
   }
 
   // Create group functions.
-  const openCreateGroup = async () => {
-
-    confirmAlert({
-      overlayClassName:'confirmUIBasic',
-      closeOnEscape: true,
-      closeOnClickOutside: true,
-      customUI: ({ onClose }) => {
-        return (<View style={[styles.createGroupContainer]}>
-          <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.6)}]}>
-            <Text style={styles.createGroupHeader}>Create Group</Text>
-            <TextInput 
-              placeholder='Group name...'
-              style={styles.createGroupNameInput}
-            />
-            <View style={styles.createGroupAddContainer}>
-              <View style={styles.createGroupAddHeader}>
-                <View style={styles.createGroupAddIcon}>
-                  <Icon
-                    name='search'
-                    type='ionicon'
-                    size={28}
-                    color={colors.secondaryTextColor}
-                    style={{}}
-                  />
-                </View>
-                <TextInput 
-                  placeholder='Find clients...'
-                  style={styles.createGroupAddInput}
-                  
-                />
-              </View>
-              {clients.map((client, index) => {
-
-                var last = {}
-                if (index == clients.length-1) {
-                  last = {
-                    borderBottomWidth:2,
-                    borderBottomColor:colors.headerBorder  
-                  }
-                }
-                return (<View key={'client_'+client.Id} style={[styles.createGroupClient,last]}>
-                 <View>
-                   <Image 
-                     source={{uri:client.Avatar}}
-                     style={{width:40,height:40}}
-                   />
-                 </View>
-                 <View>
-                   <Text style={styles.createGroupClientName}>
-                     {client.FirstName + ' ' + client.LastName}
-                   </Text>
-                 </View>
-                 <View>
-                   <Button 
-                     title='Add'
-                   />
-                 </View>
-               </View>)
-              })}
-            </View>
-          </View>
-        </View>)
-      }
-    })
-
+  const addClient = (index) => {
+    console.log('adding client', index)
+    var c = JSON.parse(JSON.stringify(clients))
+    c[index].Checked = true
+    setClients(c)
+    // Add to selected clients arr.
+    var s = JSON.parse(JSON.stringify(selectedClients))
+    s.push(c[index])
+    setSelectedClients(s)
+    console.log(s)
   }
+
+  const removeClient = (index) => {
+    var c = JSON.parse(JSON.stringify(clients))
+    c[index].Checked = false
+    setClients(c)
+    // Remove from selected clients arr.
+    var s = JSON.parse(JSON.stringify(selectedClients))
+    for (var i = 0; i < s.length; i++) {
+      if (s[i].Id == c[index].Id) {
+        s.splice(i, 1)
+      }
+    }
+    setSelectedClients(s)
+    console.log(s)
+  }
+
+  const openCreateGroup = () => {
+    setChatIndex(-1)
+    setShowCreateGroup(true)
+  }
+
+  const searchCreateGroup = (text) => {
+    var cs = JSON.parse(JSON.stringify(clients))
+    for (var i = 0; i < cs.length; i++) {
+      var str = cs[i].FirstName + ' ' + cs[i].LastName
+      if (str.includes(text) || text.length == 0) {
+        if (cs[i].Id != coach.Id) {
+          cs[i].Visible = true
+        }
+      } else {
+        cs[i].Visible = false
+      }
+    }
+    setClients(cs)
+  } 
+
   // Add template functions.
   const openAddTemplate = () => {
     setChatIndex(-1)
@@ -346,31 +330,39 @@ export default function Messages() {
     var clients = []
     // For each convo...
     for (var i = 0; i < get[0].length; i++) {
-      console.log('processing convo')
+
       // Create an empty input message.
       ms.push('')
 
       // Get client data.
       for (var j = 0; j < get[0][i].ClientData.length; j++) {
         
-        var user = JSON.parse(JSON.stringify(get[0][i].ClientData))
-        console.log('processing user', user)
-        // Check list so far.
-        if (clients.length == 0) {
-          clients.push(user)
-        } else {
-          for (var k = 0; k < clients.length; i++) {
-            if (user.Id != clients[k].Id) {
-              clients.push(user)
-              break
-            }
+        var user = JSON.parse(JSON.stringify(get[0][i].ClientData[j]))
+        if (user.Id != coach.Id) {
+          user.Visible = true
+        }
+        // Ensure we haven't added this person yet.
+        var found = false;
+        for (var k = 0; k < clients.length; k++) {
+          if (user.Id == clients[k].Id) {
+            found = true;
+            break
           }
         }
+
+        if (found == false) {
+          user.Checked = false
+          clients.push(user)
+        }
+
       }
+
     }
+
     setClients(clients)
     setMessages(ms)
     setChatIndex(0)
+
   }
 
   const configureSocket = () => {
@@ -487,40 +479,120 @@ export default function Messages() {
             {showAddTemplate && (<View style={styles.addTemplateContainer}>
             
             </View>) || (<>
-              {showCreateGroup && (<></>) || (<View>
-                <Text style={styles.infoTitle}>Select a chat to the left, or:</Text>
-                <View style={styles.infoButtonRow}>
-                  <Button 
-                    title='Create Group'
-                    icon={{
-                      name: 'people',
-                      size: 26,
-                      type: 'ionicon',
-                      color:'#fff',
-                      style: {
-                        marginTop:0
-                      }
-                    }}
-                    buttonStyle={styles.createGroupChatButton}
-                    titleStyle={styles.infoButtonTitle}
-                    onPress={() => setShowCreateGroup(true)}
+              {showCreateGroup && (<View style={[styles.createGroupContainer]}>
+                <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
+                  <Text style={styles.createGroupHeader}>Create Group</Text>
+                  <View style={styles.createGroupSpacer}></View>
+                  <TextInput 
+                    placeholder='Set group name...'
+                    style={styles.createGroupNameInput}
                   />
-                  <Button 
-                    title='Add Templates'
-                    icon={{
-                      name: 'chatbubble',
-                      size: 26,
-                      type: 'ionicon',
-                      color:'#fff',
-                      style: {
-                        marginTop:-1
+                  {selectedClients.length > 0 && (<View style={styles.createGroupAdded}>
+                    {selectedClients.map((client, index) => {
+
+                      var side = ((windowDims.width*0.3)/6.5)
+                      var avStyle = {
+                        width:side,
+                        height:side
                       }
-                    }}
-                    buttonStyle={styles.addDMTemplatesButton}
-                    titleStyle={styles.infoButtonTitle}
-                    onPress={() => setShowAddTemplate(true)}
-                  />
+                      
+                      if (index < 3) {
+                        // Show user.
+                        return (<View key={'clientAdded_'+index} style={styles.createGroupAddedBubbleContainer}>
+                          <Image 
+                            source={{uri:client.Avatar}}
+                            style={[styles.createGroupAddedBubbleUser,
+                            avStyle]}
+                          />
+                          <Text style={styles.createGroupAddedBubbleTextBottom}>{client.FirstName} {client.LastName.charAt(0)}.</Text>
+                        </View>)
+                      } else if (index == clients.length-1) {
+                        // Show +x more bubble.
+                        var x = index - 2
+                        return (<View key={'clientAdded_'+index} style={styles.createGroupAddedBubbleContainer}>
+                          <View style={[styles.createGroupAddedBubbleUser,avStyle]}>
+                            <Text style={styles.createGroupAddedBubbleTextInner}>+{x}</Text>
+                          </View>
+                          <Text style={styles.createGroupAddedBubbleTextBottom}>others</Text>
+                        </View>)
+                      }
+
+                    })}
+                  </View>) || (<View style={styles.createGroupAdded}>
+                    <Text style={styles.noClientsSelected}>Select clients below.</Text>
+                  </View>)}
+                  <View style={styles.createGroupSpacer}></View>
+                  <View style={styles.createGroupAddContainer}>
+                    <View style={hasContents && styles.createGroupAddHeaderHighlight || styles.createGroupAddHeader}>
+                      <View style={styles.createGroupAddIcon}>
+                        <Icon
+                          name='search'
+                          type='ionicon'
+                          size={28}
+                          color={hasContents && colors.mainTextColor || colors.headerBorder}
+                          style={[{marginLeft:5,marginTop:2}]}
+                        />
+                      </View>
+                      <TextInput 
+                        placeholder='Find clients...'
+                        style={styles.createGroupAddInput}
+                        onChange={(e) => {
+                          searchCreateGroup(e.currentTarget.value)
+                          setHasContents((e.currentTarget.value.length > 0))
+                        }}
+                        className='custom-textinput'
+                      />
+                    </View>
+                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}>
+                      {clients.map((client, index) => {
+
+                        if (client.Visible) {
+
+                          return (<View key={'client_'+client.Id} style={[styles.createGroupClient]}>
+                            <View>
+                              <Image 
+                                source={{uri:client.Avatar}}
+                                style={styles.createGroupClientAvatar}
+                              />
+                            </View>
+                            <View style={styles.createGroupClientNameContainer}>
+                              <Text style={styles.createGroupClientName}>
+                                {client.FirstName + ' ' + client.LastName}
+                              </Text>
+                            </View>
+                            <View>
+                              {client.Checked && (<Icon
+                                name='checkbox'
+                                type='ionicon'
+                                size={28}
+                                color={btnColors.success}
+                                style={{}}
+                                onPress={() => {
+                                  removeClient(index)
+                                }}
+                              />) || (<Icon
+                                name='square-outline'
+                                type='ionicon'
+                                size={28}
+                                color={colors.mainTextColor}
+                                style={{}}
+                                onPress={() => {
+                                  addClient(index)
+                                }}
+                              />)}
+                            </View>
+                          </View>)
+
+                        } else {
+
+                          return (<></>)
+
+                        }
+
+                      })}
+                    </ScrollView>
                   </View>
+                </View>
               </View>)}
             </>)}
           </>) || (<View style={styles.chatArea}>

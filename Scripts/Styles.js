@@ -5506,27 +5506,89 @@ export const messagesLight = StyleSheet.create({
     padding:20,
     borderRadius:25,
     width:'60%',
+    alignItems:'center'
   },
   createGroupHeader: {
     textAlign:'center',
     fontSize:20,
     color:colorsLight.mainTextColor,
-    fontFamily:'PoppinsSemiBold'
+    fontFamily:'PoppinsSemiBold',
+    marginBottom:20
   },
   createGroupNameInput: {
-    marginTop:15,
     marginBottom:20,
     backgroundColor:colorsLight.secondaryBackground,
     padding:10,
     borderRadius:10,
-    fontSize:18
+    fontSize:18,
+    outlineWidth:0,
+    width:'80%'
+  },
+  createGroupSpacer: {
+    width:'80%',
+    height:2,
+    marginBottom:20,
+    backgroundColor:colorsLight.mainTextColor
+  },
+  createGroupAdded: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center',
+    height:120,
+    width:'100%',
+    paddingBottom:20
+  },
+  createGroupAddedBubbleContainer: {
+    paddingLeft:5,
+    paddingRight:5
+  },
+  createGroupAddedBubbleUser: {
+    backgroundColor:colorsLight.mainTextColor,
+    borderRadius:100,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  createGroupAddedBubbleTextInner: {
+    color:colorsLight.mainBackground,
+    fontFamily:'Poppins',
+    fontSize:22,
+    textAlign:'center'
+  },
+  createGroupAddedBubbleTextBottom: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    textAlign:'center',
+    fontFamily:'PoppinsSemiBold'
+  },
+  noClientsSelected: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  createGroupAddContainer: {
+    width:'100%',
+    flex:1
   },
   createGroupAddHeader: {
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center',
-    borderBottomWidth:2,
-    borderBottomColor:colorsLight.secondaryTextColor,
+    borderWidth:2,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:25,
+    paddingRight:10,
+    marginBottom:10
+  },
+  createGroupAddHeaderHighlight: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    borderWidth:2,
+    borderColor:colorsLight.mainTextColor,
+    borderRadius:25,
+    paddingRight:10,
+    marginBottom:10
   },
   createGroupAddInput: {
     flex:1,
@@ -5534,7 +5596,11 @@ export const messagesLight = StyleSheet.create({
     fontSize:16,
     color:colorsLight.mainTextColor,
     outline:'none',
-    padding:5
+    paddingLeft:5,
+    paddingTop:5,
+    paddingBottom:5,
+    outlineWidth:0,
+    width:'100%'
   },
   createGroupAddIcon: {
     width:34,
@@ -5543,11 +5609,41 @@ export const messagesLight = StyleSheet.create({
   },
   createGroupClient: {
     flexDirection:'row',
-    justifyContent:'center',
+    justifyContent:'space-between',
     alignItems:'center',
     padding:10,
-    borderTopWidth:2,
-    borderTopColor:colorsLight.headerBorder
+    borderBottomWidth:2,
+    borderBottomColor:colorsLight.headerBorder  
+  },
+  createGroupList: {
+    paddingTop:0,
+  },
+  createGroupClientAvatar: {
+    width:50,
+    height:50,
+    borderRadius:50
+  },
+  createGroupClientNameContainer: {
+    flex:1,
+    marginLeft:10,
+  },
+  createGroupClientName: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  createGroupClientButton: {
+    borderRadius:25,
+    backgroundColor:btnColors.success,
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:3
+  },
+  createGroupClientButtonTitle: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:'#fff'
   }
 })
 

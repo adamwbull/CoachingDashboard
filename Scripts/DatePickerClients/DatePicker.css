@@ -27,6 +27,10 @@
 .confirmUIBasic {
   background-color: rgba(0,0,0,0.5)
 }
+
+.custom-textinput {
+  outline: none!important;
+}
 .tags {
   background-color: #ebeef6 !important;
   padding:10px !important;
