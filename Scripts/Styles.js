@@ -5210,19 +5210,7 @@ export const messagesLight = StyleSheet.create({
     backgroundColor:colorsLight.mainBackground,
     height:'100%',
   },
-  userListTitleContainer: {
-    borderBottomWidth:2,
-    borderBottomColor:colorsLight.mainTextColor,
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',
-    padding:20,
-  },
-  userListTitle: {
-    fontSize:22,
-    fontFamily:'PoppinsSemiBold',
-    color:colorsLight.mainTextColor,
-  },
+  
   chatContainer: {
     flex:1,
     justifyContent:'center',
@@ -5300,26 +5288,9 @@ export const messagesLight = StyleSheet.create({
     borderBottomWidth:2,
     borderBottomColor:colorsLight.mainTextColor,
     flexDirection:'row',
-    justifyContent:'flex-start',
+    justifyContent:'space-between',
     alignItems:'center',
     
-  },
-  chatAreaHeaderAvatars: {
-    flexDirection:'row',
-    alignItems:'center',
-    marginLeft:5
-  },
-  chatAreaHeaderAvatar: {
-    width:35,
-    height:35,
-    borderRadius:50,
-    marginLeft:5,
-  },
-  chatAreaHeaderMoreText: {
-    color:colorsLight.mainTextColor,
-    fontFamily:'Poppins',
-    fontSize:16,
-    marginLeft:5
   },
   chatAreaHeaderText: {
     fontSize:22,
@@ -5327,9 +5298,9 @@ export const messagesLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
   },
   chatAreaHeaderRight: {
-    flex:1,
-    alignItems:'flex-end',
-    justifyContent:'center'
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'flex-end',
   },
   chatAreaHeaderManageButton: {
     backgroundColor:btnColors.primary,
@@ -5368,8 +5339,12 @@ export const messagesLight = StyleSheet.create({
     flexDirection:'row',
     alignItems:'center',
     backgroundColor:colorsLight.header,
-    padding:20,
-    width:'100%',
+    paddingLeft:20,
+    paddingRight:20,
+    paddingBottom:15,
+    paddingTop:15,
+    marginRight:0,
+    borderTopRightRadius:10
   },
   chatInputAttachIconContainer: {
     width:28,
@@ -5385,6 +5360,7 @@ export const messagesLight = StyleSheet.create({
     backgroundColor:colorsLight.secondaryBackground,
     borderRadius:10,
     padding:10,
+    outlineWidth:0
   },
   chatMessageSubmitButtonContainer: {
     paddingLeft:20,
@@ -5395,28 +5371,13 @@ export const messagesLight = StyleSheet.create({
     paddingLeft:10,
     paddingRight:10,
     paddingTop:4,
-    paddingBottom:4
+    paddingBottom:4,
+
   },
   chatMessageSubmitButtonTitle: {
     fontSize:18,
     fontFamily:'Poppins',
     color:'#fff'
-  },
-  templateList: {
-    width:280,
-    height:'100%',
-    backgroundColor:colorsLight.mainBackground,
-  },
-  templateTextTitle: {
-    fontSize:22,
-    marginLeft:20,
-    marginRight:20,
-    marginTop:3,
-    marginBottom:15,
-    fontFamily:'PoppinsSemiBold',
-    borderBottomWidth:2,
-    color:colorsLight.mainTextColor,
-    borderBottomColor:colorsLight.mainTextColor
   },
   messageMain: {
     width:'100%',
@@ -5431,9 +5392,7 @@ export const messagesLight = StyleSheet.create({
     padding:10,
     color:'#fff',
     backgroundColor:messageColorsLight.me,
-    borderTopLeftRadius:25,
-    borderBottomLeftRadius:25,
-    borderBottomRightRadius:25,
+    borderRadius:25,
     flexDirection:'row',
     alignItems:'flex-start',
     justifyContent:'center',
@@ -5703,7 +5662,95 @@ export const messagesLight = StyleSheet.create({
     fontFamily:'Poppins',
     textAlign:'center',
     padding:5
-  }
+  },
+  chatSummary: {
+    width:320,
+    height:'95%',
+    backgroundColor:colorsLight.mainBackground,
+    marginLeft:20,
+    marginRight:20,
+    borderTopLeftRadius:25,
+    borderTopRightRadius:25,
+    padding:20
+  },
+  groupMembers: {
+    flexDirection:'row',
+    alignItems:'flex-start',
+    justifyContent:'space-between',
+    paddingTop:20
+  },
+  groupMembersTitle: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    borderBottomColor:colorsLight.mainTextColor,
+    borderBottomWidth:2,
+    textAlign:'center',
+    width:'100%',
+    marginBottom:5,
+  },
+  groupOwner: {
+    alignItems:'center',
+  },
+  groupOwnerTitle: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  groupOwnerAvatarContainer: {
+    borderRadius:100,
+    padding:5,
+    backgroundColor:colorsLight.mainTextColor
+  },
+  groupOwnerAvatar: {
+    width:90,
+    height:90,
+    borderRadius:100,
+  },
+  chatSummaryTitle: {
+    fontSize:25,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  templateTextTitle: {
+    fontSize:22,
+    marginLeft:20,
+    marginRight:20,
+    marginTop:3,
+    marginBottom:15,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  chatAreaHeaderAvatars: {
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  chatAreaHeaderAvatar: {
+    width:45,
+    height:45,
+    borderRadius:50,
+    marginRight:5,
+  },
+  chatAreaHeaderMoreText: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    fontSize:18,
+    textAlign:'right',
+    marginRight:5
+  },
+  userListTitleContainer: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+  },
+  userListTitle: {
+    fontSize:22,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
 })
 
 export const basic = StyleSheet.create({

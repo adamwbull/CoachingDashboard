@@ -27,23 +27,27 @@ var socket = io("https://messages.coachsync.me/")
 
 export function ChatAvatars({ clientData, coachId, styles }) {
 
-  return (<View style={styles.chatAreaHeaderAvatars}>
+  return (<View style={{justifyContent:'center',alignItems:'flex-end'}}>
+  <Text style={styles.groupMembersTitle}>Members</Text>
+  <View style={styles.chatAreaHeaderAvatars}>
     {clientData.map((client, index) => {
-      if (index < 2) {
-        return (<View key={'av_'+index}>
-          <Image
-            source={{uri:client.Avatar}}
-            style={styles.chatAreaHeaderAvatar}
-          />
-        </View>)
-      } else if (index == 2) {
-        return (<Text key={'av_'+index} style={styles.chatAreaHeaderMoreText}>
-          +{clientData.length-3} more
-        </Text>)
-      } else {
-        return (<View key={'av_'+index}></View>)
+      if (coachId != client.Id) {
+        if (index < 3) {
+          return (<View key={'av1_'+index}>
+            <Image
+              source={{uri:client.Avatar}}
+              style={styles.chatAreaHeaderAvatar}
+            />
+          </View>)
+        } else {
+          return (<View key={'av1_'+index}></View>)
+        }
       }
     })}
+    </View>
+    {clientData.length > 4 && (<Text style={styles.chatAreaHeaderMoreText}>
+      +{clientData.length-4} more
+    </Text>)}
   </View>)
 }
 export default function Messages() {
@@ -94,13 +98,14 @@ export default function Messages() {
   const [isSending, setIsSending] = useState(false)
   const [sendButtonDisabled, setSendButtonDisabled] = useState(false)
 
-  // Group variables.
+  // Manage group variables.
   const [showManageGroup, setShowManageGroup] = useState(false)
   const [manageHasContents, setManageHasContents] = useState(false)
   const [manageSelectedClients, setManageSelectedClients] = useState([])
   const [manageGroupTitle, setManageGroupTitle] = useState('')
   const [showManageGroupIndicator, setShowManageGroupIndicator] = useState(false)
   const [manageGroupError, setManageGroupError] = useState('')
+  const [group, setGroup] = useState(-1)
 
   // Attachment variables.
   const hiddenFileInput = React.useRef(null)
@@ -146,6 +151,8 @@ export default function Messages() {
   // User list functions. 
   const openChat = (index) => {
     setChatIndex(index)
+    setShowCreateGroup(false)
+    setShowManageGroup(false)
   }
 
   // Create group functions.
@@ -178,7 +185,13 @@ export default function Messages() {
 
   const openCreateGroup = () => {
     setChatIndex(-1)
+    setShowManageGroup(false)
     setShowCreateGroup(true)
+    var c = JSON.parse(JSON.stringify(clients))
+    for (var i = 0; i < clients.length; i++) {
+      c[i].Checked = false
+    }
+    setClients(c)
   }
 
   const searchCreateGroup = (text) => {
@@ -227,11 +240,6 @@ export default function Messages() {
   }
 
   // Chat functions.
-  const manageGroupTrigger = () => {
-    // Import chat variables into manage group vars.
-
-  }
-
   const handleBlur = (e) => {
     checkMessage(e.target.value)
   }
@@ -352,6 +360,91 @@ export default function Messages() {
       setShowAttachIndicator(false)
     }
 
+  }
+
+  // Manage group functions.
+   const addManageGroupClient = (index) => {
+    console.log('adding client', index)
+    var c = JSON.parse(JSON.stringify(clients))
+    c[index].Checked = true
+    setClients(c)
+    // Add to selected clients arr.
+    var s = JSON.parse(JSON.stringify(manageSelectedClients))
+    s.push(c[index])
+    setManageSelectedClients(s)
+    console.log(s)
+  }
+
+  const removeManageGroupClient = (index) => {
+    var c = JSON.parse(JSON.stringify(clients))
+    c[index].Checked = false
+    setClients(c)
+    // Remove from selected clients arr.
+    var s = JSON.parse(JSON.stringify(manageSelectedClients))
+    for (var i = 0; i < s.length; i++) {
+      if (s[i].Id == c[index].Id) {
+        s.splice(i, 1)
+      }
+    }
+    setManageSelectedClients(s)
+    console.log(s)
+  }
+
+  const openManageGroup = () => {
+    var x = chatIndex
+    var arr = userList[x].Clients.split(',')
+    console.log('arrrr:',arr)
+    setGroup(chatIndex)
+    setChatIndex(-1)
+    setShowManageGroup(true)
+    var selected = []
+    var c = JSON.parse(JSON.stringify(clients))
+    for (var i = 0; i < clients.length; i++) {
+      if (arr.includes(c[i].Id.toString())) {
+        c[i].Checked = true
+        selected.push(c[i])
+      } else {
+        c[i].Checked = false
+      }
+    }
+    setManageGroupTitle(userList[x].Title)
+    setManageSelectedClients(selected)
+    setClients(c)
+  }
+
+  const searchManageGroup = (text) => {
+    var cs = JSON.parse(JSON.stringify(clients))
+    for (var i = 0; i < cs.length; i++) {
+      var str = cs[i].FirstName + ' ' + cs[i].LastName
+      if (str.includes(text) || text.length == 0) {
+        if (cs[i].Id != coach.Id) {
+          cs[i].Visible = true
+        }
+      } else {
+        cs[i].Visible = false
+      }
+    }
+    setClients(cs)
+  } 
+
+  const updateGroupTrigger = async () => {
+    setShowManageGroupIndicator(true)
+    var ids = []
+    for (var i = 0; i < manageSelectedClients.length; i++) {
+      ids.push(manageSelectedClients[i].Id)
+    }
+    var clientsStr = ids.join()
+    var post = await createGroup(coach.Token, coach.Id, groupTitle, clientsStr)
+    if (post) {
+      refreshChatList()
+      setManageGroupTitle('')
+      setManageSelectedClients([])
+      searchManageGroup('')
+      setShowManageGroup(false)
+    } else {
+      setManageGroupError('Error creating. Please try again.')
+    }
+    setShowManageGroupIndicator(false)
   }
 
   // Reaction functions.
@@ -685,27 +778,147 @@ export default function Messages() {
                   </View>
                 </View>
               </View>)}
+              {showManageGroup && (<View style={[styles.createGroupContainer]}>
+                <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
+                  <Text style={styles.createGroupHeader}>Manage Group</Text>
+                  <View style={styles.createGroupSpacer}></View>
+                  <TextInput 
+                    placeholder='Set group name...'
+                    style={styles.createGroupNameInput}
+                    value={manageGroupTitle}
+                    onChangeText={(text) => {
+                      if (text.length < 255) {
+                        setManageGroupTitle(text)
+                      }
+                    }}
+                  />
+                  {manageSelectedClients.length > 0 && (<View style={styles.createGroupAdded}>
+                    {manageSelectedClients.map((client, index) => {
+
+                      var side = ((windowDims.width*0.3)/6.5)
+                      var avStyle = {
+                        width:side,
+                        height:side
+                      }
+                      
+                      if (index < 3) {
+                        // Show user.
+                        return (<View key={'clientAdded_'+index} style={styles.createGroupAddedBubbleContainer}>
+                          <Image 
+                            source={{uri:client.Avatar}}
+                            style={[styles.createGroupAddedBubbleUser,
+                            avStyle]}
+                          />
+                          <Text style={styles.createGroupAddedBubbleTextBottom}>{client.FirstName} {client.LastName.charAt(0)}.</Text>
+                        </View>)
+
+                      } else if (index == clients.length-1) {
+                        // Show +x more bubble.
+                        var x = index - 2
+                        return (<View key={'clientAdded_'+index} style={styles.createGroupAddedBubbleContainer}>
+                          <View style={[styles.createGroupAddedBubbleUser,avStyle]}>
+                            <Text style={styles.createGroupAddedBubbleTextInner}>+{x}</Text>
+                          </View>
+                          <Text style={styles.createGroupAddedBubbleTextBottom}>others</Text>
+                        </View>)
+
+                      } else {
+                        return (<></>)
+                      }
+
+                    })}
+                  </View>) || (<View style={styles.createGroupAdded}>
+                    <Text style={styles.noClientsSelected}>Select clients below.</Text>
+                  </View>)}
+                  <View style={styles.createGroupSpacer}></View>
+                  <View style={styles.createGroupAddContainer}>
+                    <View style={hasContents && styles.createGroupAddHeaderHighlight || styles.createGroupAddHeader}>
+                      <View style={styles.createGroupAddIcon}>
+                        <Icon
+                          name='search'
+                          type='ionicon'
+                          size={28}
+                          color={hasContents && colors.mainTextColor || colors.headerBorder}
+                          style={[{marginLeft:5,marginTop:2}]}
+                        />
+                      </View>
+                      <TextInput 
+                        placeholder='Find clients...'
+                        style={styles.createGroupAddInput}
+                        onChange={(e) => {
+                          searchManageGroup(e.currentTarget.value)
+                          setManageHasContents((e.currentTarget.value.length > 0))
+                        }}
+                        className='custom-textinput'
+                      />
+                    </View>
+                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}>
+                      {clients.map((client, index) => {
+
+                        if (client.Visible) {
+
+                          return (<View key={'client_'+client.Id} style={[styles.createGroupClient]}>
+                            <View>
+                              <Image 
+                                source={{uri:client.Avatar}}
+                                style={styles.createGroupClientAvatar}
+                              />
+                            </View>
+                            <View style={styles.createGroupClientNameContainer}>
+                              <Text style={styles.createGroupClientName}>
+                                {client.FirstName + ' ' + client.LastName}
+                              </Text>
+                            </View>
+                            <View>
+                              {client.Checked && (<Icon
+                                name='checkbox'
+                                type='ionicon'
+                                size={28}
+                                color={btnColors.success}
+                                style={{}}
+                                onPress={() => {
+                                  removeManageGroupClient(index)
+                                }}
+                              />) || (<Icon
+                                name='square-outline'
+                                type='ionicon'
+                                size={28}
+                                color={colors.mainTextColor}
+                                style={{}}
+                                onPress={() => {
+                                  addManageGroupClient(index)
+                                }}
+                              />)}
+                            </View>
+                          </View>)
+
+                        } else {
+
+                          return (<View key={'client_'+client.Id}></View>)
+
+                        }
+
+                      })}
+                    </ScrollView>
+                    <View>
+                      <Text style={styles.createGroupError}>{createGroupError}</Text>
+                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
+                        title='Update'
+                        buttonStyle={styles.createGroupButton}
+                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
+                        onPress={() => updateGroupTrigger()}
+                        disabled={manageSelectedClients.length < 2}
+                      />)}
+                    </View>
+                  </View>
+                </View>
+              </View>)}
             </>)}
           </>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
-              <View style={styles.chatAreaHeader}>
-                <Text style={styles.chatAreaHeaderText}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0)}</Text>
-                <ChatAvatars 
-                  clientData={userList[chatIndex].ClientData}
-                  coachId={coach.Id}
-                  styles={styles}
-                />
-                <View style={styles.chatAreaHeaderRight}>
-                  <Button 
-                    title={'Manage'}
-                    buttonStyle={styles.chatAreaHeaderManageButton}
-                    titleStyle={styles.chatAreaHeaderManageButtonTitle}
-                    onPress={() => manageGroupTrigger(this, manageGroup)}
-                  />
-                </View>
-              </View>
               {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end',flexGrow:1}]}
               ref={scrollViewRef}
+              showsHorizontalScrollIndicator={false}
               onContentSizeChange={(width, height) => {
                 setScrollWidth((width-20)-(width/5))
                 scrollViewRef.current.scrollToEnd({animated: true})
@@ -918,11 +1131,30 @@ export default function Messages() {
                 </View>
               </View>
             </View>
-            <View style={styles.templateList}>
+            <View style={styles.chatSummary}>
+              <Text style={styles.chatSummaryTitle}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0)}</Text>
+              {userList[chatIndex].ClientData.length > 2 && (<View style={styles.groupMembers}>
+                <View style={styles.groupOwner}>
+                  <View style={styles.groupOwnerAvatarContainer}>
+                    <Image 
+                      source={{uri:coach.Avatar}}
+                      style={styles.groupOwnerAvatar}
+                    />
+                  </View>
+                  <Text style={styles.groupOwnerTitle}>
+                    Owner
+                  </Text>
+                </View>
+                <ChatAvatars 
+                  clientData={userList[chatIndex].ClientData}
+                  coachId={coach.Id}
+                  styles={styles}
+                />
+              </View>)}
               <TouchableOpacity style={styles.userListTitleContainer}
                 onPress={() => openAddTemplate()}
               >
-                <Text style={styles.userListTitle}>Templates</Text>
+                <Text style={styles.templateTextTitle}>Templates</Text>
                 <Icon
                   name='add'
                   type='ionicon'
