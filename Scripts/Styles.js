@@ -5292,6 +5292,58 @@ export const messagesLight = StyleSheet.create({
     flexDirection:'row',
     height:'100%'
   },
+  chatAreaHeader: {
+    padding:20,
+    width:'100%',
+    height:75,
+    backgroundColor:colorsLight.mainBackground,
+    borderBottomWidth:2,
+    borderBottomColor:colorsLight.mainTextColor,
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
+    
+  },
+  chatAreaHeaderAvatars: {
+    flexDirection:'row',
+    alignItems:'center',
+    marginLeft:5
+  },
+  chatAreaHeaderAvatar: {
+    width:35,
+    height:35,
+    borderRadius:50,
+    marginLeft:5,
+  },
+  chatAreaHeaderMoreText: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    fontSize:16,
+    marginLeft:5
+  },
+  chatAreaHeaderText: {
+    fontSize:22,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  chatAreaHeaderRight: {
+    flex:1,
+    alignItems:'flex-end',
+    justifyContent:'center'
+  },
+  chatAreaHeaderManageButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:25,
+    paddingLeft:10,
+    paddingRight:10,
+    paddingTop:5,
+    paddingBottom:5
+  },
+  chatAreaHeaderManageButtonTitle: {
+    fontSize:16,
+    color:'#fff',
+    fontFamily:'Poppins'
+  },
   chatMainContainer: {
     flex:1,
     flexGrow:1,
@@ -5567,7 +5619,7 @@ export const messagesLight = StyleSheet.create({
     textAlign:'center'
   },
   createGroupAddContainer: {
-    width:'100%',
+    width:'80%',
     flex:1
   },
   createGroupAddHeader: {
@@ -5644,6 +5696,13 @@ export const messagesLight = StyleSheet.create({
     fontSize:14,
     fontFamily:'Poppins',
     color:'#fff'
+  },
+  createGroupError: {
+    fontSize:16,
+    color:btnColors.danger,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    padding:5
   }
 })
 

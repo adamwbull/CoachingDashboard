@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { ReactConfirmAlert, confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
+import { createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -25,6 +25,27 @@ import userContext from './Context.js'
 
 var socket = io("https://messages.coachsync.me/")
 
+export function ChatAvatars({ clientData, coachId, styles }) {
+
+  return (<View style={styles.chatAreaHeaderAvatars}>
+    {clientData.map((client, index) => {
+      if (index < 2) {
+        return (<View key={'av_'+index}>
+          <Image
+            source={{uri:client.Avatar}}
+            style={styles.chatAreaHeaderAvatar}
+          />
+        </View>)
+      } else if (index == 2) {
+        return (<Text key={'av_'+index} style={styles.chatAreaHeaderMoreText}>
+          +{clientData.length-3} more
+        </Text>)
+      } else {
+        return (<View key={'av_'+index}></View>)
+      }
+    })}
+  </View>)
+}
 export default function Messages() {
 
   // Hooks.
@@ -56,6 +77,9 @@ export default function Messages() {
   const [showCreateGroup, setShowCreateGroup] = useState(false)
   const [hasContents, setHasContents] = useState(false)
   const [selectedClients, setSelectedClients] = useState([])
+  const [groupTitle, setGroupTitle] = useState('')
+  const [showCreateGroupIndicator, setShowCreateGroupIndicator] = useState(false)
+  const [createGroupError, setCreateGroupError] = useState('')
 
   // Add template variables.
   const [showAddTemplate, setShowAddTemplate] = useState(false)
@@ -85,13 +109,27 @@ export default function Messages() {
   const [chosenReaction, setChosenReaction] = useState('')
 
   // Helper functions.
-  const generateChatName = (list, index) => {
+  const generateChatName = (list, title, index) => {
     // Generate chat name.
     var name = ''
-    if (list.length > 2) {
-      // TODO: Generate list of names string.
+    if (title.length > 0) {
+      name = title
     } else {
-      name = list[index].FirstName + ' ' + list[index].LastName
+      if (list.length > 2) {
+        // TODO: Generate list of names string.
+        for (var i = 0; i < list.length; i++) {
+          console.log('i:',i,list[i])
+          if (i  == 0) {
+            name = name + list[i].FirstName + ', '
+          } else if (i == 1) {
+            name = name + list[i].FirstName
+          } else if (i == 2) {
+            name = name + ', +' + (list.length-3)
+          }
+        }
+      } else {
+        name = list[index].FirstName + ' ' + list[index].LastName
+      }
     }
     return name
   }
@@ -149,6 +187,26 @@ export default function Messages() {
     }
     setClients(cs)
   } 
+
+  const createGroupTrigger = async () => {
+    setShowCreateGroupIndicator(true)
+    var ids = []
+    for (var i = 0; i < selectedClients.length; i++) {
+      ids.push(selectedClients[i].Id)
+    }
+    var clientsStr = ids.join()
+    var post = await createGroup(coach.Token, coach.Id, groupTitle, clientsStr)
+    if (post) {
+      refreshChatList()
+      setGroupTitle('')
+      setSelectedClients([])
+      searchCreateGroup('')
+      setShowCreateGroup(false)
+    } else {
+      setCreateGroupError('Error creating. Please try again.')
+    }
+    setShowCreateGroupIndicator(false)
+  }
 
   // Add template functions.
   const openAddTemplate = () => {
@@ -427,7 +485,7 @@ export default function Messages() {
         </View>) || (<View>
           {userList.map((chat, index) => {
 
-            var name = generateChatName(chat.ClientData, 0)
+            var name = generateChatName(chat.ClientData, chat.Title, 0)
 
             // Generate message.
             var message = chat.LastSenderMessage
@@ -486,6 +544,12 @@ export default function Messages() {
                   <TextInput 
                     placeholder='Set group name...'
                     style={styles.createGroupNameInput}
+                    value={groupTitle}
+                    onChangeText={(text) => {
+                      if (text.length < 255) {
+                        setGroupTitle(text)
+                      }
+                    }}
                   />
                   {selectedClients.length > 0 && (<View style={styles.createGroupAdded}>
                     {selectedClients.map((client, index) => {
@@ -506,6 +570,7 @@ export default function Messages() {
                           />
                           <Text style={styles.createGroupAddedBubbleTextBottom}>{client.FirstName} {client.LastName.charAt(0)}.</Text>
                         </View>)
+
                       } else if (index == clients.length-1) {
                         // Show +x more bubble.
                         var x = index - 2
@@ -515,6 +580,9 @@ export default function Messages() {
                           </View>
                           <Text style={styles.createGroupAddedBubbleTextBottom}>others</Text>
                         </View>)
+
+                      } else {
+                        return (<></>)
                       }
 
                     })}
@@ -585,18 +653,43 @@ export default function Messages() {
 
                         } else {
 
-                          return (<></>)
+                          return (<View key={'client_'+client.Id}></View>)
 
                         }
 
                       })}
                     </ScrollView>
+                    <View>
+                      <Text style={styles.createGroupError}>{createGroupError}</Text>
+                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
+                        title='Create'
+                        buttonStyle={styles.createGroupButton}
+                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
+                        onPress={() => createGroupTrigger()}
+                        disabled={selectedClients.length < 2}
+                      />)}
+                    </View>
                   </View>
                 </View>
               </View>)}
             </>)}
           </>) || (<View style={styles.chatArea}>
             <View style={styles.chatMainContainer}>
+              <View style={styles.chatAreaHeader}>
+                <Text style={styles.chatAreaHeaderText}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0)}</Text>
+                <ChatAvatars 
+                  clientData={userList[chatIndex].ClientData}
+                  coachId={coach.Id}
+                  styles={styles}
+                />
+                <View style={styles.chatAreaHeaderRight}>
+                  <Button 
+                    title={'Manage'}
+                    buttonStyle={styles.chatAreaHeaderManageButton}
+                    titleStyle={styles.chatAreaHeaderManageButtonTitle}
+                  />
+                </View>
+              </View>
               {userList[chatIndex].Messages.length > 0 && (<ScrollView contentContainerStyle={[styles.chatMain,{justifyContent:'flex-end',flexGrow:1}]}
               ref={scrollViewRef}
               onContentSizeChange={(width, height) => {

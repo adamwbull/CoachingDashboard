@@ -188,6 +188,33 @@ export async function check() {
 
 */
 
+
+export async function createGroup(token, coachId, title, clients) {
+
+  var ret = false
+  var arr = {Token:token, CoachId:coachId, Title:title, Clients:clients}
+  
+  console.log('Creating group...')
+  const res = await fetch(url + '/conversation/coach-create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows == 1) {
+    console.log('Group created!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function uploadMessageImage(uri, fileType, token, id) {
   
   console.log('sending:', uri, fileType, token, id);
