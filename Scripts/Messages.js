@@ -94,6 +94,14 @@ export default function Messages() {
   const [isSending, setIsSending] = useState(false)
   const [sendButtonDisabled, setSendButtonDisabled] = useState(false)
 
+  // Group variables.
+  const [showManageGroup, setShowManageGroup] = useState(false)
+  const [manageHasContents, setManageHasContents] = useState(false)
+  const [manageSelectedClients, setManageSelectedClients] = useState([])
+  const [manageGroupTitle, setManageGroupTitle] = useState('')
+  const [showManageGroupIndicator, setShowManageGroupIndicator] = useState(false)
+  const [manageGroupError, setManageGroupError] = useState('')
+
   // Attachment variables.
   const hiddenFileInput = React.useRef(null)
   const [showAttachmentField, setShowAttachmentField] = useState(false)
@@ -219,6 +227,11 @@ export default function Messages() {
   }
 
   // Chat functions.
+  const manageGroupTrigger = () => {
+    // Import chat variables into manage group vars.
+
+  }
+
   const handleBlur = (e) => {
     checkMessage(e.target.value)
   }
@@ -687,6 +700,7 @@ export default function Messages() {
                     title={'Manage'}
                     buttonStyle={styles.chatAreaHeaderManageButton}
                     titleStyle={styles.chatAreaHeaderManageButtonTitle}
+                    onPress={() => manageGroupTrigger(this, manageGroup)}
                   />
                 </View>
               </View>
