@@ -727,10 +727,17 @@ export default function Messages() {
         {userList.length > 0 && (<>
           {chatIndex == -1 && (<>
             {showAddTemplate && (<View style={styles.addTemplateContainer}>
-            
+              <View style={[styles.promptMain,{width:(windowDims.width*0.6),height:(windowDims.height*0.8)}]}>
+                <View style={styles.templateMainHeader}>
+                  <View style={{flex:1}}>
+                    <Text style={styles.templateMainHeaderTitle}>Manage Templates</Text>
+                    <Text style={styles.templateMainDesc}>Pre-made messages to quickly and easily send clients.</Text>
+                  </View>
+                </View>
+              </View>
             </View>) || (<>
               {showCreateGroup && (<View style={[styles.createGroupContainer]}>
-                <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
+                <View style={[styles.promptMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
                   <Text style={styles.createGroupHeader}>Create Group</Text>
                   <View style={styles.createGroupSpacer}></View>
                   <TextInput 
@@ -865,7 +872,7 @@ export default function Messages() {
                 </View>
               </View>)}
               {showManageGroup && (<View style={[styles.createGroupContainer]}>
-                <View style={[styles.createGroupMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
+                <View style={[styles.promptMain,{width:(windowDims.width*0.3),height:(windowDims.height*0.8)}]}>
                   <Text style={styles.createGroupHeader}>Manage Group</Text>
                   <View style={styles.createGroupSpacer}></View>
                   <TextInput 
@@ -1171,7 +1178,7 @@ export default function Messages() {
                 </>)}
               </View>)}
               <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
-              <View style={styles.chatInputContainer}>
+              <View style={!showAttachmentField && [styles.chatInputContainer,{borderTopRightRadius:10}] || styles.chatInputContainer}>
                 <TouchableOpacity style={styles.chatInputAttachIconContainer}>
                   {showAttachmentField && (<Icon
                     name='close'

@@ -5348,7 +5348,6 @@ export const messagesLight = StyleSheet.create({
     paddingBottom:15,
     paddingTop:15,
     marginRight:0,
-    borderTopRightRadius:10
   },
   chatInputAttachIconContainer: {
     width:28,
@@ -5460,7 +5459,8 @@ export const messagesLight = StyleSheet.create({
     paddingLeft:20,
     paddingRight:20,
     flexDirection:'row',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
+    borderTopRightRadius:10,
   },
   attachButton: {
     backgroundColor:btnColors.primary,
@@ -5516,11 +5516,10 @@ export const messagesLight = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center',
   },
-  createGroupMain: {
+  promptMain: {
     backgroundColor:colorsLight.mainBackground,
     padding:20,
     borderRadius:25,
-    width:'60%',
     alignItems:'center'
   },
   createGroupHeader: {
@@ -5789,6 +5788,21 @@ export const messagesLight = StyleSheet.create({
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
   },
+  templateMainHeader: {
+    flexDirection:'row'
+  },
+  templateMainHeaderTitle: {
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    marginBottom:0
+  },
+  templateMainDesc: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    marginBottom:0
+  }
 })
 
 export const basic = StyleSheet.create({
