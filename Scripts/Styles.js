@@ -5237,11 +5237,15 @@ export const messagesLight = StyleSheet.create({
   chatListAvatar: {
     width:30,
     height:30,
+    borderRadius:30,
+    backgroundColor:btnColors.info,
+    justifyContent:'center',
+    alignItems:'center'
   },
   chatListAvatarImage: {
     width:30,
     height:30,
-    borderRadius:20
+    borderRadius:30
   },
   chatListText: {
     flex:1,
@@ -5665,19 +5669,30 @@ export const messagesLight = StyleSheet.create({
   },
   chatSummary: {
     width:320,
-    height:'95%',
+    height:'92%',
     backgroundColor:colorsLight.mainBackground,
     marginLeft:20,
     marginRight:20,
     borderTopLeftRadius:25,
     borderTopRightRadius:25,
-    padding:20
+    padding:20,
+    alignItems:'center'
+  },
+  chatSummaryMainImage: {
+    width:70,
+    height:70,
+    marginTop:-55,
+    borderRadius:40,
+    backgroundColor:btnColors.info,
+    justifyContent:'center',
+    alignItem:'center'
   },
   groupMembers: {
     flexDirection:'row',
     alignItems:'flex-start',
     justifyContent:'space-between',
-    paddingTop:20
+    paddingTop:10,
+    width:'100%'
   },
   groupMembersTitle: {
     fontSize:16,
@@ -5708,20 +5723,22 @@ export const messagesLight = StyleSheet.create({
     height:90,
     borderRadius:100,
   },
+  groupManageButton: {
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:1,
+    borderColor:btnColors.primary,
+    padding:5,
+    marginTop:10,
+  },
+  groupManageButtonTitle: {
+    color:btnColors.primary,
+    fontSize:14
+  },
   chatSummaryTitle: {
     fontSize:25,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
     textAlign:'center'
-  },
-  templateTextTitle: {
-    fontSize:22,
-    marginLeft:20,
-    marginRight:20,
-    marginTop:3,
-    marginBottom:15,
-    fontFamily:'PoppinsSemiBold',
-    color:colorsLight.mainTextColor,
   },
   chatAreaHeaderAvatars: {
     flexDirection:'row',
@@ -5736,9 +5753,10 @@ export const messagesLight = StyleSheet.create({
   chatAreaHeaderMoreText: {
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
-    fontSize:18,
-    textAlign:'right',
-    marginRight:5
+    fontSize:16,
+    textAlign:'center',
+    marginRight:5,
+    width:'100%'
   },
   userListTitleContainer: {
     flexDirection:'row',
@@ -5747,6 +5765,22 @@ export const messagesLight = StyleSheet.create({
     padding:20,
   },
   userListTitle: {
+    fontSize:22,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  templateTitleContainer: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    width:'100%',
+    borderTopWidth:2,
+    borderTopColor:colorsLight.mainTextColor,
+    paddingTop:20,
+    marginTop:20,
+    marginBottom:10
+  },
+  templateTextTitle: {
     fontSize:22,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,

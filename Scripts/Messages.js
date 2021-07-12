@@ -25,29 +25,82 @@ import userContext from './Context.js'
 
 var socket = io("https://messages.coachsync.me/")
 
-export function ChatAvatars({ clientData, coachId, styles }) {
+export function ChatAvatars({ clientData, coach, styles }) {
 
+  const [otherNames, setOtherNames] = useState('')
+  console.log('clientData:',clientData)
+  useEffect(() => {
+    var names = ''
+    var firstNotFound = true
+    for (var i = 3; i < clientData.length; i++) {
+      var client = clientData[i]
+      if (firstNotFound && coach.Id != client.Id) {
+        names = client.FirstName + ' ' + client.LastName
+      } else if (coach.Id != client.Id) {
+        names = name + "\n" + client.FirstName + ' ' + client.LastName
+      }
+    }
+    setOtherNames(names)
+  }, [])
   return (<View style={{justifyContent:'center',alignItems:'flex-end'}}>
   <Text style={styles.groupMembersTitle}>Members</Text>
   <View style={styles.chatAreaHeaderAvatars}>
+    
     {clientData.map((client, index) => {
-      if (coachId != client.Id) {
+      if (coach.Id != client.Id) {
         if (index < 3) {
-          return (<View key={'av1_'+index}>
-            <Image
-              source={{uri:client.Avatar}}
-              style={styles.chatAreaHeaderAvatar}
-            />
-          </View>)
+          if (coach.Theme == 0) {
+            return (<Popup 
+              trigger={<View key={'av1_'+index}>
+                <Image
+                  source={{uri:client.Avatar}}
+                  style={styles.chatAreaHeaderAvatar}
+                />
+              </View>}
+              content={client.FirstName + ' ' + client.LastName}
+              position={'top center'}
+              size={'tiny'}
+              inverted
+            />)
+          } else {
+            return (<Popup 
+              trigger={<View key={'av1_'+index}>
+                <Image
+                  source={{uri:client.Avatar}}
+                  style={styles.chatAreaHeaderAvatar}
+                />
+              </View>}
+              content={client.FirstName + ' ' + client.LastName}
+              position={'top center'}
+              size={'tiny'}
+            />)
+          }
         } else {
           return (<View key={'av1_'+index}></View>)
         }
       }
     })}
     </View>
-    {clientData.length > 4 && (<Text style={styles.chatAreaHeaderMoreText}>
-      +{clientData.length-4} more
-    </Text>)}
+    {coach.Theme == 0 && (<>
+      {clientData.length > 4 && (<Popup 
+        trigger={<Text style={styles.chatAreaHeaderMoreText}>
+        +{clientData.length-4} more
+      </Text>}
+      content={otherNames}
+      position={'bottom center'}
+      size={'tiny'}
+      inverted
+      />)}
+    </>) || (<>
+      {clientData.length > 4 && (<Popup 
+        trigger={<Text style={styles.chatAreaHeaderMoreText}>
+        +{clientData.length-4 } more
+      </Text>}
+      content={otherNames}
+      position={'bottom center'}
+      size={'tiny'}
+      />)}
+    </>)}
   </View>)
 }
 export default function Messages() {
@@ -152,6 +205,7 @@ export default function Messages() {
   const openChat = (index) => {
     setChatIndex(index)
     setShowCreateGroup(false)
+    setShowAddTemplate(false)
     setShowManageGroup(false)
   }
 
@@ -185,6 +239,7 @@ export default function Messages() {
 
   const openCreateGroup = () => {
     setChatIndex(-1)
+    setShowAddTemplate(false)
     setShowManageGroup(false)
     setShowCreateGroup(true)
     var c = JSON.parse(JSON.stringify(clients))
@@ -283,7 +338,6 @@ export default function Messages() {
         textInput.current.value = ''
 
         // 
-        messagesEnd.current.scrollIntoView({ behavior: "smooth" });
         setIsSending(false)
 
       } 
@@ -620,10 +674,15 @@ export default function Messages() {
               onPress={() => openChat(index)}
             >
               <View style={styles.chatListAvatar}>
-                <Image
+                {chat.ClientData.length > 2 && (<Icon 
+                  name='people'
+                  type='ionicon'
+                  size={16}
+                  color={'#fff'}
+                />) || (<Image
                   source={{ uri: chat.ClientData[0].Avatar }}
                   style={styles.chatListAvatarImage}
-                />
+                />)}
               </View>
               <View style={styles.chatListText}>
                 <Text style={styles.chatListTextClient}>{name}</Text>
@@ -1132,6 +1191,17 @@ export default function Messages() {
               </View>
             </View>
             <View style={styles.chatSummary}>
+              {userList[chatIndex].ClientData.length > 2 && (<View style={styles.chatSummaryMainImage}>
+                <Icon 
+                  name='people'
+                  type='ionicon'
+                  size={40}
+                  color={'#fff'}
+                />
+              </View>) || (<Image
+                source={{uri:userList[chatIndex].ClientData[0].Avatar}}
+                style={styles.chatSummaryMainImage}
+              />)} 
               <Text style={styles.chatSummaryTitle}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0)}</Text>
               {userList[chatIndex].ClientData.length > 2 && (<View style={styles.groupMembers}>
                 <View style={styles.groupOwner}>
@@ -1142,18 +1212,24 @@ export default function Messages() {
                     />
                   </View>
                   <Text style={styles.groupOwnerTitle}>
-                    Owner
+                    Coach
                   </Text>
                 </View>
-                <ChatAvatars 
-                  clientData={userList[chatIndex].ClientData}
-                  coachId={coach.Id}
-                  styles={styles}
-                />
+                <View>
+                  <ChatAvatars 
+                    clientData={userList[chatIndex].ClientData}
+                    coach={coach}
+                    styles={styles}
+                  />
+                  <Button 
+                    title='Manage'
+                    onPress={() => openManageGroup()}
+                    buttonStyle={styles.groupManageButton}
+                    titleStyle={styles.groupManageButtonTitle}
+                  />
+                </View>
               </View>)}
-              <TouchableOpacity style={styles.userListTitleContainer}
-                onPress={() => openAddTemplate()}
-              >
+              <View style={styles.templateTitleContainer}>
                 <Text style={styles.templateTextTitle}>Templates</Text>
                 <Icon
                   name='add'
@@ -1161,8 +1237,9 @@ export default function Messages() {
                   size={28}
                   color={colors.mainTextColor}
                   style={{}}
+                  onPress={() => openAddTemplate()}
                 />
-              </TouchableOpacity>
+              </View>
               {templates.length > 0 && (<ScrollView>
               
               </ScrollView>) || (<View style={{paddingTop:10}}>
