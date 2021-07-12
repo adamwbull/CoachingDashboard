@@ -44,7 +44,6 @@ export default function Main() {
   const linkTo = useLinkTo()
 
   useEffect(() => {
-    console.log("Made it here")
     if (coach != null) {
       setTimeout(() => {
         if (coach.Theme == 1) {

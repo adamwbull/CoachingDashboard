@@ -28,7 +28,7 @@ var socket = io("https://messages.coachsync.me/")
 export function ChatAvatars({ clientData, coach, styles }) {
 
   const [otherNames, setOtherNames] = useState('')
-  console.log('clientData:',clientData)
+
   useEffect(() => {
     var names = ''
     var firstNotFound = true
@@ -51,7 +51,8 @@ export function ChatAvatars({ clientData, coach, styles }) {
         if (index < 3) {
           if (coach.Theme == 0) {
             return (<Popup 
-              trigger={<View key={'av1_'+index}>
+              key={'av1_'+index}
+              trigger={<View>
                 <Image
                   source={{uri:client.Avatar}}
                   style={styles.chatAreaHeaderAvatar}
@@ -64,7 +65,8 @@ export function ChatAvatars({ clientData, coach, styles }) {
             />)
           } else {
             return (<Popup 
-              trigger={<View key={'av1_'+index}>
+              key={'av1_'+index}
+              trigger={<View>
                 <Image
                   source={{uri:client.Avatar}}
                   style={styles.chatAreaHeaderAvatar}
@@ -184,7 +186,6 @@ export default function Messages() {
       if (list.length > 2) {
         // TODO: Generate list of names string.
         for (var i = 0; i < list.length; i++) {
-          console.log('i:',i,list[i])
           if (i  == 0) {
             name = name + list[i].FirstName + ', '
           } else if (i == 1) {
@@ -211,7 +212,6 @@ export default function Messages() {
 
   // Create group functions.
   const addClient = (index) => {
-    console.log('adding client', index)
     var c = JSON.parse(JSON.stringify(clients))
     c[index].Checked = true
     setClients(c)
@@ -219,7 +219,6 @@ export default function Messages() {
     var s = JSON.parse(JSON.stringify(selectedClients))
     s.push(c[index])
     setSelectedClients(s)
-    console.log(s)
   }
 
   const removeClient = (index) => {
@@ -234,7 +233,6 @@ export default function Messages() {
       }
     }
     setSelectedClients(s)
-    console.log(s)
   }
 
   const openCreateGroup = () => {
@@ -278,6 +276,7 @@ export default function Messages() {
       setSelectedClients([])
       searchCreateGroup('')
       setShowCreateGroup(false)
+      setCreateGroupError('')
     } else {
       setCreateGroupError('Error creating. Please try again.')
     }
@@ -418,7 +417,6 @@ export default function Messages() {
 
   // Manage group functions.
    const addManageGroupClient = (index) => {
-    console.log('adding client', index)
     var c = JSON.parse(JSON.stringify(clients))
     c[index].Checked = true
     setClients(c)
@@ -426,7 +424,6 @@ export default function Messages() {
     var s = JSON.parse(JSON.stringify(manageSelectedClients))
     s.push(c[index])
     setManageSelectedClients(s)
-    console.log(s)
   }
 
   const removeManageGroupClient = (index) => {
@@ -441,20 +438,24 @@ export default function Messages() {
       }
     }
     setManageSelectedClients(s)
-    console.log(s)
   }
 
   const openManageGroup = () => {
     var x = chatIndex
-    var arr = userList[x].Clients.split(',')
-    console.log('arrrr:',arr)
+    var userIds = []
+    for (var j = 0; j < userList[chatIndex].ClientData.length; j++) {
+      if (coach.Id != userList[chatIndex].ClientData[j].Id) {
+        userIds.push(userList[chatIndex].ClientData[j].Id)
+      }
+    }
+    console.log(userIds)
     setGroup(chatIndex)
     setChatIndex(-1)
     setShowManageGroup(true)
     var selected = []
     var c = JSON.parse(JSON.stringify(clients))
     for (var i = 0; i < clients.length; i++) {
-      if (arr.includes(c[i].Id.toString())) {
+      if (userIds.includes(c[i].Id)) {
         c[i].Checked = true
         selected.push(c[i])
       } else {

@@ -195,6 +195,7 @@ export async function createGroup(token, coachId, title, clients) {
   var arr = {Token:token, CoachId:coachId, Title:title, Clients:clients}
   
   console.log('Creating group...')
+  console.log(arr)
   const res = await fetch(url + '/conversation/coach-create', {
     method:'POST',
     body: JSON.stringify(arr),
@@ -205,7 +206,7 @@ export async function createGroup(token, coachId, title, clients) {
   })
 
   const payload = await res.json()
-
+  
   if (payload.affectedRows == 1) {
     console.log('Group created!')
     ret = true
