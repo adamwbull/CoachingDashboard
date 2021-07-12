@@ -188,6 +188,32 @@ export async function check() {
 
 */
 
+export async function updateGroup(token, conversationId, coachId, title, clients) {
+
+  var ret = false
+  var arr = {Token:token, ConversationId:conversationId, CoachId:coachId, Title:title, Clients:clients}
+  
+  console.log('Updating group...')
+  console.log(arr)
+  const res = await fetch(url + '/conversation/coach-update', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+  
+  if (payload.affectedRows == 1) {
+    console.log('Group updated!')
+    ret = true
+  }
+
+  return ret
+
+}
 
 export async function createGroup(token, coachId, title, clients) {
 

@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { ReactConfirmAlert, confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
+import { updateGroup, createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -32,22 +32,30 @@ export function ChatAvatars({ clientData, coach, styles }) {
   useEffect(() => {
     var names = ''
     var firstNotFound = true
-    for (var i = 3; i < clientData.length; i++) {
-      var client = clientData[i]
-      if (firstNotFound && coach.Id != client.Id) {
-        names = client.FirstName + ' ' + client.LastName
-      } else if (coach.Id != client.Id) {
-        names = name + "\n" + client.FirstName + ' ' + client.LastName
+    var count = 0
+    for (var i = 0; i < clientData.length; i++) {
+      if (count == 3) {
+        var client = clientData[i]
+        if (firstNotFound && coach.Id != client.Id) {
+          names = client.FirstName + ' ' + client.LastName
+          firstNotFound = false
+        } else if (coach.Id != client.Id) {
+          names = names + "\n" + client.FirstName + ' ' + client.LastName
+        }
+      } else {
+        if (clientData[i].Removed == 0) {
+          count++;
+        }
       }
     }
     setOtherNames(names)
   }, [])
-  return (<View style={{justifyContent:'center',alignItems:'flex-end'}}>
+  return (<View style={{justifyContent:'center',alignItems:'center'}}>
   <Text style={styles.groupMembersTitle}>Members</Text>
   <View style={styles.chatAreaHeaderAvatars}>
     
     {clientData.map((client, index) => {
-      if (coach.Id != client.Id) {
+      if (coach.Id != client.Id && client.Removed == 0) {
         if (index < 3) {
           if (coach.Theme == 0) {
             return (<Popup 
@@ -88,11 +96,12 @@ export function ChatAvatars({ clientData, coach, styles }) {
         trigger={<Text style={styles.chatAreaHeaderMoreText}>
         +{clientData.length-4} more
       </Text>}
-      content={otherNames}
       position={'bottom center'}
       size={'tiny'}
       inverted
-      />)}
+      >
+        <Text style={styles.groupTooltipText}>{otherNames}</Text>
+      </Popup>)}
     </>) || (<>
       {clientData.length > 4 && (<Popup 
         trigger={<Text style={styles.chatAreaHeaderMoreText}>
@@ -177,21 +186,35 @@ export default function Messages() {
   const [chosenReaction, setChosenReaction] = useState('')
 
   // Helper functions.
-  const generateChatName = (list, title, index) => {
+  const generateChatName = (list, title, index, use3Names) => {
     // Generate chat name.
     var name = ''
     if (title.length > 0) {
       name = title
     } else {
       if (list.length > 2) {
-        // TODO: Generate list of names string.
+        // Genereate list of names.
         for (var i = 0; i < list.length; i++) {
-          if (i  == 0) {
-            name = name + list[i].FirstName + ', '
-          } else if (i == 1) {
-            name = name + list[i].FirstName
-          } else if (i == 2) {
-            name = name + ', +' + (list.length-3)
+          if (list[i].Id != coach.Id) {
+            if (use3Names) {
+              if (i <= 2) {
+                if (list.length == 4 && i == 2) {
+                  name = name + list[i].FirstName
+                } else {
+                  name = name + list[i].FirstName + ', '
+                }
+              } else if (i == 3) {
+                name = name + '+' + (list.length-4)
+              }
+            } else {
+              if (i  == 0) {
+                name = name + list[i].FirstName + ', '
+              } else if (i == 1) {
+                name = name + list[i].FirstName
+              } else if (i == 2) {
+                name = name + ', +' + (list.length-3)
+              }
+            }
           }
         }
       } else {
@@ -443,9 +466,11 @@ export default function Messages() {
   const openManageGroup = () => {
     var x = chatIndex
     var userIds = []
+    var usersRemoved = []
     for (var j = 0; j < userList[chatIndex].ClientData.length; j++) {
       if (coach.Id != userList[chatIndex].ClientData[j].Id) {
         userIds.push(userList[chatIndex].ClientData[j].Id)
+        usersRemoved.push(userList[chatIndex].ClientData[j].Removed)
       }
     }
     console.log(userIds)
@@ -455,7 +480,8 @@ export default function Messages() {
     var selected = []
     var c = JSON.parse(JSON.stringify(clients))
     for (var i = 0; i < clients.length; i++) {
-      if (userIds.includes(c[i].Id)) {
+      var index = userIds.indexOf(c[i].Id)
+      if (index != -1 && usersRemoved[index] == 0) {
         c[i].Checked = true
         selected.push(c[i])
       } else {
@@ -489,7 +515,7 @@ export default function Messages() {
       ids.push(manageSelectedClients[i].Id)
     }
     var clientsStr = ids.join()
-    var post = await createGroup(coach.Token, coach.Id, groupTitle, clientsStr)
+    var post = await updateGroup(coach.Token, userList[group].Id, coach.Id, manageGroupTitle, clientsStr)
     if (post) {
       refreshChatList()
       setManageGroupTitle('')
@@ -646,7 +672,7 @@ export default function Messages() {
         </View>) || (<View>
           {userList.map((chat, index) => {
 
-            var name = generateChatName(chat.ClientData, chat.Title, 0)
+            var name = generateChatName(chat.ClientData, chat.Title, 0, false)
 
             // Generate message.
             var message = chat.LastSenderMessage
@@ -1203,7 +1229,7 @@ export default function Messages() {
                 source={{uri:userList[chatIndex].ClientData[0].Avatar}}
                 style={styles.chatSummaryMainImage}
               />)} 
-              <Text style={styles.chatSummaryTitle}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0)}</Text>
+              <Text style={styles.chatSummaryTitle}>{generateChatName(userList[chatIndex].ClientData, userList[chatIndex].Title, 0, true)}</Text>
               {userList[chatIndex].ClientData.length > 2 && (<View style={styles.groupMembers}>
                 <View style={styles.groupOwner}>
                   <View style={styles.groupOwnerAvatarContainer}>
@@ -1216,7 +1242,7 @@ export default function Messages() {
                     Coach
                   </Text>
                 </View>
-                <View>
+                <View style={{flex:1,marginLeft:20,}}>
                   <ChatAvatars 
                     clientData={userList[chatIndex].ClientData}
                     coach={coach}

@@ -5734,6 +5734,10 @@ export const messagesLight = StyleSheet.create({
     color:btnColors.primary,
     fontSize:14
   },
+  groupTooltipText: {
+    fontSize:12,
+    color:colorsLight.mainBackground
+  },
   chatSummaryTitle: {
     fontSize:25,
     fontFamily:'PoppinsSemiBold',
