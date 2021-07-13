@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { ReactConfirmAlert, confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { updateGroup, createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
+import { createTemplate, updateGroup, createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -152,7 +152,10 @@ export default function Messages() {
   // Add template variables.
   const [showAddTemplate, setShowAddTemplate] = useState(false)
   const [templateMessage, setTemplateMessage] = useState('')
-  
+  const [templateScrollHeight, setTemplateScrollHeight] = useState(null)
+  const [templateActivityIndicator, setTemplateActivityIndicator] = useState(false)
+  const [templateIndices, setTemplateIndices] = useState([])
+  const [templateSearchHasContents, setTemplateSearchHasContents] = useState(false)
   // Chat variables.
   const [chatLoading, setChatLoading] = useState(true)
   const [chatIndex, setChatIndex] = useState(-1)
@@ -312,8 +315,39 @@ export default function Messages() {
     setShowAddTemplate(true)
   }
 
-  const submitTemplate = () => {
+  const searchTemplates = (text) => {
+    var cs = JSON.parse(JSON.stringify(clients))
+    for (var i = 0; i < cs.length; i++) {
+      var str = cs[i].FirstName + ' ' + cs[i].LastName
+      if (str.includes(text) || text.length == 0) {
+        if (cs[i].Id != coach.Id) {
+          cs[i].Visible = true
+        }
+      } else {
+        cs[i].Visible = false
+      }
+    }
+    setClients(cs)
+  } 
 
+  const submitTemplate = async () => {
+    setTemplateActivityIndicator(true)
+    var posted = await createTemplate(templateMessage, coach.Id, coach.Token)
+    if (posted) {
+      var newTemplates = JSON.parse(JSON.stringify(templates))
+      newTemplates.unshift({
+        Message:templateMessage,
+        CoachId:coach.Id
+      })
+      var newIndices = JSON.parse(JSON.stringify(templateIndices))
+      newIndices.unshift(0)
+      setTemplates(newTemplates)
+      setTemplateIndices(newIndices)
+      setTemplateMessage('')
+    } else {
+
+    }
+    setTemplateActivityIndicator(false)
   }
 
   // Chat functions.
@@ -453,6 +487,7 @@ export default function Messages() {
     var c = JSON.parse(JSON.stringify(clients))
     c[index].Checked = false
     setClients(c)
+
     // Remove from selected clients arr.
     var s = JSON.parse(JSON.stringify(manageSelectedClients))
     for (var i = 0; i < s.length; i++) {
@@ -568,6 +603,11 @@ export default function Messages() {
     console.log('data:', get)
     setUserList(get[0])
     setTemplates(get[1])
+    var indices = []
+    for (var i = 0; i < get[1].length; i++) {
+      indices.push(0)
+    }
+    setTemplateIndices(indices)
     setUserListLoading(false)
     setChatLoading(false)
     // Build message array and client array.
@@ -720,19 +760,140 @@ export default function Messages() {
         </View>)}
       </View>)}
     </View>
-    <View style={styles.chatContainer}>
+    <ScrollView showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chatContainer}>
       {chatLoading && (<View>
         <ActivityIndicatorView />
       </View>) || (<View style={styles.chatContainer}>
         {userList.length > 0 && (<>
           {chatIndex == -1 && (<>
             {showAddTemplate && (<View style={styles.addTemplateContainer}>
-              <View style={[styles.promptMain,{width:(windowDims.width*0.6),height:(windowDims.height*0.8)}]}>
+              <View style={[styles.promptMain,{marginTop:20,
+              marginBottom:20,width:(windowDims.width*0.65),height:(windowDims.height*0.8)}]}>
                 <View style={styles.templateMainHeader}>
-                  <View style={{flex:1}}>
+                  <View style={{width:30,height:30}}></View>
+                  <View style={{flex:1,alignItems:'center'}}>
                     <Text style={styles.templateMainHeaderTitle}>Manage Templates</Text>
                     <Text style={styles.templateMainDesc}>Pre-made messages to quickly and easily send clients.</Text>
                   </View>
+                  <View style={{width:30,height:30}}>
+                     <Icon
+                        name='help-circle-outline'
+                        type='ionicon'
+                        size={28}
+                        color={colors.mainTextColor}
+                        style={{}}
+                      />
+                  </View>
+                </View>
+                <View style={styles.templateMainSection}>
+                  <Text style={styles.templateMainSubtitle}>Add Template</Text>
+                  <TextInput
+                    className='custom-textinput'
+                    multiline={true}
+                    onChange={(e) => {
+                      if (e.currentTarget.value.length < 4) {
+                        setTemplateScrollHeight(null)
+                      } else if (e.target.scrollHeight - templateScrollHeight > 10) {
+                        setTemplateScrollHeight(e.target.scrollHeight)
+                      }
+                    }}
+                    onChangeText={(t) => {
+                      if (t.length < 500) {
+                        setTemplateMessage(t)
+                      }
+                    }}
+                    value={templateMessage}
+                    style={[styles.templateMessageInput,{height:templateScrollHeight}]}
+                    placeholder={'Enter template message...'}
+                  />
+                  <View style={styles.templateMessageRow}>
+                    <View style={styles.templateMessageContainer}>
+                      {templateMessage.length > 0 && (<View style={[styles.mainMessageMe,{maxWidth:'70%'}]}>
+                        <Text style={styles.messageTextMe}>{templateMessage}</Text>
+                      </View>) || (<View style={[styles.mainMessageMe,{maxWidth:'70%'}]}>
+                        <Text style={styles.messageTextMe}>Preview your message here!</Text>
+                      </View>)}
+                    </View>
+                    <View style={styles.templateMessageSaveContainer}>
+                      {templateActivityIndicator && (<ActivityIndicatorView />) || (<Button 
+                        title={'Save'}
+                        buttonStyle={styles.templateMessageSave}
+                        titleStyle={styles.templateMessageSaveTitle}
+                        onPress={() => submitTemplate()}
+                        disabled={templateMessage.length < 1}
+                      />)}
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.templateMainExisting}>
+                  <Text style={[styles.templateMainSubtitle,{textAlign:'left'}]}>Existing Templates</Text>
+                  {templates.length > 0 && (<>
+                    <View style={{flexDirection:'row',alignItems:'center',marginTop:10,
+                    marginBottom:10}}>
+                      <Button 
+                        title={'Delete Selected'}
+                        buttonStyle={styles.deleteTemplatesButton}
+                        titleStyle={styles.deleteTemplatesButtonTitle}
+                        disabled={!templateIndices.includes(1)}
+                      />
+                      <View style={templateSearchHasContents && [styles.createGroupAddHeaderHighlight,{margin:0,flex:1}] || [styles.createGroupAddHeader,{margin:0,flex:1}]}>
+                        <View style={styles.createGroupAddIcon}>
+                          <Icon
+                            name='search'
+                            type='ionicon'
+                            size={28}
+                            color={manageHasContents && colors.mainTextColor || colors.headerBorder}
+                            style={[{marginLeft:5,marginTop:2}]}
+                          />
+                        </View>
+                        <TextInput 
+                          placeholder='Find templates...'
+                          style={styles.createGroupAddInput}
+                          onChange={(e) => {
+                            searchManageGroup(e.currentTarget.value)
+                            setTemplateSearchHasContents((e.currentTarget.value.length > 0))
+                          }}
+                          className='custom-textinput'
+                        />
+                      </View>
+                    </View>
+                    <ScrollView contentContainerStyle={styles.templateRowList}>
+                      {templates.map((template, index) => {
+                        
+                        return (<View style={styles.templateRow} key={'templateManage_'+index}>
+                          {templateIndices[index] == 0 && (<Icon
+                            name='square-outline'
+                            type='ionicon'
+                            size={25}
+                            color={colors.mainTextColor}
+                            onPress={() => {
+                              var indices = JSON.parse(JSON.stringify(templateIndices))
+                              indices[index] = 1
+                              setTemplateIndices(indices)
+                            }}
+                          />) || (<Icon
+                            name='checkbox'
+                            type='ionicon'
+                            size={25}
+                            color={btnColors.danger}
+                            onPress={() => {
+                              var indices = JSON.parse(JSON.stringify(templateIndices))
+                              indices[index] = 0
+                              setTemplateIndices(indices)
+                            }}
+                          />)}
+                          <View style={styles.templateContainer}>
+                            <View style={[styles.mainMessageMe,{alignSelf:'flex-start',maxWidth:400,margin:5}]}>
+                              {template.Message}
+                            </View>
+                          </View>
+                        </View>)
+
+                      })}
+                    </ScrollView>
+                  </>) || (<View style={{flex:1}}>
+                    <Text style={styles.templateMainDesc}>No templates yet.</Text>
+                  </View>)}
                 </View>
               </View>
             </View>) || (<>
@@ -788,8 +949,18 @@ export default function Messages() {
                   </View>) || (<View style={styles.createGroupAdded}>
                     <Text style={styles.noClientsSelected}>Select clients below.</Text>
                   </View>)}
-                  <View style={styles.createGroupSpacer}></View>
+                  <View style={[styles.createGroupSpacer,{marginBottom:10}]}></View>
                   <View style={styles.createGroupAddContainer}>
+                    <View>
+                      <Text style={styles.createGroupError}>{createGroupError}</Text>
+                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
+                        title='Create'
+                        buttonStyle={styles.createGroupButton}
+                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
+                        onPress={() => createGroupTrigger()}
+                        disabled={selectedClients.length < 2}
+                      />)}
+                    </View>
                     <View style={hasContents && styles.createGroupAddHeaderHighlight || styles.createGroupAddHeader}>
                       <View style={styles.createGroupAddIcon}>
                         <Icon
@@ -810,7 +981,9 @@ export default function Messages() {
                         className='custom-textinput'
                       />
                     </View>
-                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}>
+                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}
+                    showsHorizontalScrollIndicator={false}
+                    >
                       {clients.map((client, index) => {
 
                         if (client.Visible) {
@@ -858,16 +1031,6 @@ export default function Messages() {
 
                       })}
                     </ScrollView>
-                    <View>
-                      <Text style={styles.createGroupError}>{createGroupError}</Text>
-                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
-                        title='Create'
-                        buttonStyle={styles.createGroupButton}
-                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
-                        onPress={() => createGroupTrigger()}
-                        disabled={selectedClients.length < 2}
-                      />)}
-                    </View>
                   </View>
                 </View>
               </View>)}
@@ -923,15 +1086,25 @@ export default function Messages() {
                   </View>) || (<View style={styles.createGroupAdded}>
                     <Text style={styles.noClientsSelected}>Select clients below.</Text>
                   </View>)}
-                  <View style={styles.createGroupSpacer}></View>
+                  <View style={[styles.createGroupSpacer,{marginBottom:10}]}></View>
                   <View style={styles.createGroupAddContainer}>
-                    <View style={hasContents && styles.createGroupAddHeaderHighlight || styles.createGroupAddHeader}>
+                    <View>
+                      <Text style={styles.createGroupError}>{createGroupError}</Text>
+                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
+                        title='Update'
+                        buttonStyle={styles.createGroupButton}
+                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
+                        onPress={() => updateGroupTrigger()}
+                        disabled={manageSelectedClients.length < 2}
+                      />)}
+                    </View>
+                    <View style={manageHasContents && styles.createGroupAddHeaderHighlight || styles.createGroupAddHeader}>
                       <View style={styles.createGroupAddIcon}>
                         <Icon
                           name='search'
                           type='ionicon'
                           size={28}
-                          color={hasContents && colors.mainTextColor || colors.headerBorder}
+                          color={manageHasContents && colors.mainTextColor || colors.headerBorder}
                           style={[{marginLeft:5,marginTop:2}]}
                         />
                       </View>
@@ -945,7 +1118,8 @@ export default function Messages() {
                         className='custom-textinput'
                       />
                     </View>
-                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}>
+                    <ScrollView contentContainerStyle={[styles.createGroupList,{height:'100%'}]}
+                    showsHorizontalScrollIndicator={false}>
                       {clients.map((client, index) => {
 
                         if (client.Visible) {
@@ -993,16 +1167,6 @@ export default function Messages() {
 
                       })}
                     </ScrollView>
-                    <View>
-                      <Text style={styles.createGroupError}>{createGroupError}</Text>
-                      {showCreateGroupIndicator && (<ActivityIndicatorView />) || (<Button 
-                        title='Update'
-                        buttonStyle={styles.createGroupButton}
-                        titleStyle={{color:'#fff',fontFamily:'Poppins'}}
-                        onPress={() => updateGroupTrigger()}
-                        disabled={manageSelectedClients.length < 2}
-                      />)}
-                    </View>
                   </View>
                 </View>
               </View>)}
@@ -1263,7 +1427,7 @@ export default function Messages() {
                   />
                 </View>
               </View>)}
-              <View style={styles.templateTitleContainer}>
+              <TouchableOpacity style={styles.templateTitleContainer} onPress={() => openAddTemplate()}>
                 <Text style={styles.templateTextTitle}>Templates</Text>
                 <Icon
                   name='add'
@@ -1271,10 +1435,10 @@ export default function Messages() {
                   size={28}
                   color={colors.mainTextColor}
                   style={{}}
-                  onPress={() => openAddTemplate()}
+                  
                 />
-              </View>
-              {templates.length > 0 && (<ScrollView>
+              </TouchableOpacity>
+              {templates.length > 0 && (<ScrollView showsHorizontalScrollIndicator={false}>
               
               </ScrollView>) || (<View style={{paddingTop:10}}>
               <Text style={styles.chatInfoText}>No templates yet.</Text>
@@ -1285,6 +1449,6 @@ export default function Messages() {
           <Text style={styles.infoTitle}>Add clients to message.</Text>
         </View>)}
       </View>)}
-    </View>
+    </ScrollView>
   </View>)
 }

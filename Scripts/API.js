@@ -188,6 +188,60 @@ export async function check() {
 
 */
 
+
+
+export async function deleteTemplate(templateId, coachId, token) {
+
+  var ret = false
+  var arr = {Id:templateId, CoachId:coahId, Token:token}
+
+  console.log('Deleting template...')
+  const res = await fetch(url + '/template/delete', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Template deleted!')
+    ret = true
+  }
+
+  return ret
+
+}
+
+export async function createTemplate(message, coachId, token) {
+
+  var ret = false
+  var arr = {Message:message, CoachId:coachId, Token:token}
+
+  console.log('Creating template...')
+  const res = await fetch(url + '/template/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Template created!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function updateGroup(token, conversationId, coachId, title, clients) {
 
   var ret = false

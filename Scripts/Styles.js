@@ -5516,6 +5516,9 @@ export const messagesLight = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center',
   },
+  createGroupButton: {
+    marginBottom:20,
+  },
   promptMain: {
     backgroundColor:colorsLight.mainBackground,
     padding:20,
@@ -5789,7 +5792,10 @@ export const messagesLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
   },
   templateMainHeader: {
-    flexDirection:'row'
+    flexDirection:'row',
+    width:'100%',
+    justifyContent:'space-between',
+    marginBottom:20
   },
   templateMainHeaderTitle: {
     fontSize:20,
@@ -5801,7 +5807,71 @@ export const messagesLight = StyleSheet.create({
     fontSize:16,
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
-    marginBottom:0
+    marginBottom:0,
+    textAlign:'center'
+  },
+  templateMainSection: {
+    padding:20,
+    marginBottom:20,
+    width:'100%',
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:20,
+  },
+  templateMainSubtitle: {
+    fontSize:20,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor
+  },
+  templateMessageInput: {
+    backgroundColor:colorsLight.mainBackground,
+    padding:10,
+    color:colorsLight.mainTextColor,
+    borderRadius:25,
+    marginTop:10,
+    marginBottom:20,
+    outlineWidth:0
+  },
+  templateMessageRow: {
+    flexDirection:'row',
+    alignItems:'flex-end'
+  },
+  templateMessageContainer: {
+    flex:1,
+    marginRight:15
+  },
+  templateMessageSave: {
+    backgroundColor:btnColors.success
+  },
+  templateMessageSaveTitle: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    color:'#fff'
+  },
+  templateMainExisting: {
+    flex:1,
+    width:'100%'
+  },
+  templateRowList: {
+    flex:1,
+    alignItems:'flex-start'
+  },
+  templateContainer: {
+    width:'100%',
+    alignItems:'flex-start'
+  },
+  templateRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  deleteTemplatesButton: {
+    backgroundColor:btnColors.danger,
+    marginRight:20,
+    padding:5,
+  },
+  deleteTemplatesButtonTitle: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:'#fff'
   }
 })
 
