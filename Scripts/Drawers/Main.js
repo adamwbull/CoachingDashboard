@@ -254,7 +254,7 @@ export default function Main() {
           title:'App - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
-              name='color-palette'
+              name='phone-portrait-sharp'
               type='ionicon'
               size={30}
               color={focused ? coach.SecondaryHighlight : colors.mainBackground}

@@ -19,6 +19,7 @@ const Drawer = createDrawerNavigator()
 import Overview from '../Overview.js'
 import BrandDesign from '../BrandDesign.js'
 import SocialFeed from '../SocialFeed.js'
+import Onboarding from '../Onboarding.js'
 import Notifications from '../Notifications.js'
 
 export default function MobileApp() {
@@ -76,7 +77,7 @@ export default function MobileApp() {
           title:'Brand - CoachSync',
           drawerIcon: ({focused, size}) => (
             <Icon
-              name='eye'
+              name='color-palette'
               type='ionicon'
               size={20}
               style={{backgroundColor:''}}
@@ -104,6 +105,24 @@ export default function MobileApp() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Social Feed</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="Onboarding" component={Onboarding}
+        options={{
+          title:'Onboarding - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='easel'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Onboarding</Text>)
           }
         }}
       />

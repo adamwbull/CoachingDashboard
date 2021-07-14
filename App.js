@@ -37,6 +37,7 @@ const linking = {
             screens: {
               BrandDesign: 'brand',
               SocialFeed: 'social-feed',
+              Onboarding: 'onboarding',
               Notifications: 'notifications'
             }
           },

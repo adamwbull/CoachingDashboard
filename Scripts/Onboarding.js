@@ -10,7 +10,7 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 
 import userContext from './Context.js'
 
-export default function SocialFeed() {
+export default function Onboarding() {
 
   const user = useContext(userContext)
   const linkTo = useLinkTo()
@@ -25,7 +25,7 @@ export default function SocialFeed() {
   const [coach, setCoach] = useState(user)
 
   useEffect(() => {
-    console.log('Welcome to Social Feed.')
+    console.log('Welcome to Onboarding.')
     if (coach != null) {
       // Load page.
     } else {
