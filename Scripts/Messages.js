@@ -13,7 +13,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { ReactConfirmAlert, confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-import { createTemplate, updateGroup, createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
+import { deleteTemplate, createTemplate, updateGroup, createGroup, uploadMessageImage, refreshMessageInfo, postMessage, getMessageInfo, parseSimpleDateText, sqlToJsDate, dateToSql, parseDateText } from './API.js'
 import { Dropdown, Accordion, Radio, Checkbox, Popup } from 'semantic-ui-react'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
 import './DatePickerClients/DatePicker.css'
@@ -156,6 +156,8 @@ export default function Messages() {
   const [templateActivityIndicator, setTemplateActivityIndicator] = useState(false)
   const [templateIndices, setTemplateIndices] = useState([])
   const [templateSearchHasContents, setTemplateSearchHasContents] = useState(false)
+  const [templateContainerStyle, setTemplateContainerStyle] = useState({height:'100%',flex:1})
+  
   // Chat variables.
   const [chatLoading, setChatLoading] = useState(true)
   const [chatIndex, setChatIndex] = useState(-1)
@@ -234,6 +236,7 @@ export default function Messages() {
     setShowCreateGroup(false)
     setShowAddTemplate(false)
     setShowManageGroup(false)
+    setTemplateContainerStyle({height:'100%'})
   }
 
   // Create group functions.
@@ -266,6 +269,7 @@ export default function Messages() {
     setShowAddTemplate(false)
     setShowManageGroup(false)
     setShowCreateGroup(true)
+    setTemplateContainerStyle({height:'100%'})
     var c = JSON.parse(JSON.stringify(clients))
     for (var i = 0; i < clients.length; i++) {
       c[i].Checked = false
@@ -311,33 +315,55 @@ export default function Messages() {
 
   // Add template functions.
   const openAddTemplate = () => {
+    setGroup(chatIndex)
     setChatIndex(-1)
     setShowAddTemplate(true)
+    setTemplateContainerStyle({height:null})
   }
 
   const searchTemplates = (text) => {
-    var cs = JSON.parse(JSON.stringify(clients))
-    for (var i = 0; i < cs.length; i++) {
-      var str = cs[i].FirstName + ' ' + cs[i].LastName
-      if (str.includes(text) || text.length == 0) {
-        if (cs[i].Id != coach.Id) {
-          cs[i].Visible = true
-        }
+    var tems = JSON.parse(JSON.stringify(templates))
+    for (var i = 0; i < tems.length; i++) {
+      var str = tems[i].Message
+      if (str.toLowerCase().includes(text.toLowerCase()) || text.length == 0) {
+        tems[i].Visible = true
       } else {
-        cs[i].Visible = false
+        tems[i].Visible = false
       }
     }
-    setClients(cs)
+    setTemplates(tems)
   } 
+
+  const deleteTemplates = async () => {
+    // BUild array to delete and new arrays.
+    var ids = []
+    var newTemplates = []
+    var newIndices = []
+    for (var i = 0; i < templates.length; i++) {
+      if (templateIndices[i] == 1) {
+        ids.push(templates[i].Id)
+      } else {
+        newTemplates.push(templates[i])
+        newIndices.push(0)
+      }
+    }
+    var deleted = await deleteTemplate(JSON.stringify(ids), coach.Id, coach.Token)
+    if (deleted) {
+      setTemplateIndices(newIndices)
+      setTemplates(newTemplates)
+    }
+  }
 
   const submitTemplate = async () => {
     setTemplateActivityIndicator(true)
     var posted = await createTemplate(templateMessage, coach.Id, coach.Token)
-    if (posted) {
+    if (posted > 0) {
       var newTemplates = JSON.parse(JSON.stringify(templates))
       newTemplates.unshift({
         Message:templateMessage,
-        CoachId:coach.Id
+        CoachId:coach.Id,
+        Visible:true,
+        Id:posted
       })
       var newIndices = JSON.parse(JSON.stringify(templateIndices))
       newIndices.unshift(0)
@@ -351,6 +377,17 @@ export default function Messages() {
   }
 
   // Chat functions.
+  const copyTemplate = (index) => {
+    var newMessages = JSON.parse(JSON.stringify(messages))
+    var msg = newMessages[chatIndex] + templates[index].Message
+    newMessages[chatIndex] = msg
+    setMessages(newMessages)
+    if (msg.length < 1000) {
+      textInput.current.value = msg
+     setScrollHeight(textInput.current.scrollHeight)
+    }
+  }
+
   const handleBlur = (e) => {
     checkMessage(e.target.value)
   }
@@ -509,6 +546,7 @@ export default function Messages() {
       }
     }
     console.log(userIds)
+    setTemplateContainerStyle({height:'100%'})
     setGroup(chatIndex)
     setChatIndex(-1)
     setShowManageGroup(true)
@@ -602,11 +640,15 @@ export default function Messages() {
     var get = await getMessageInfo(coach.Id, coach.Token)
     console.log('data:', get)
     setUserList(get[0])
-    setTemplates(get[1])
     var indices = []
+    var tems = []
     for (var i = 0; i < get[1].length; i++) {
       indices.push(0)
+      var t = get[1][i]
+      t.Visible = true
+      tems.push(t)
     }
+    setTemplates(tems)
     setTemplateIndices(indices)
     setUserListLoading(false)
     setChatLoading(false)
@@ -760,29 +802,34 @@ export default function Messages() {
         </View>)}
       </View>)}
     </View>
-    <ScrollView showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chatContainer}>
+    <ScrollView showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.chatContainer,templateContainerStyle]}>
       {chatLoading && (<View>
         <ActivityIndicatorView />
-      </View>) || (<View style={styles.chatContainer}>
+      </View>) || (<View style={[styles.chatContainer,templateContainerStyle]}>
         {userList.length > 0 && (<>
           {chatIndex == -1 && (<>
             {showAddTemplate && (<View style={styles.addTemplateContainer}>
               <View style={[styles.promptMain,{marginTop:20,
-              marginBottom:20,width:(windowDims.width*0.65),height:(windowDims.height*0.8)}]}>
+              marginBottom:20,width:(windowDims.width*0.65),minHeight:(windowDims.height*0.85)}]}>
                 <View style={styles.templateMainHeader}>
-                  <View style={{width:30,height:30}}></View>
+                  <View style={{width:30,height:30}}>
+                    <Icon
+                      name='chevron-back'
+                      type='ionicon'
+                      size={28}
+                      color={colors.mainTextColor}
+                      style={{}}
+                      onPress={() => {
+                        openChat(group)
+                      }}
+                    />
+                  </View>
                   <View style={{flex:1,alignItems:'center'}}>
                     <Text style={styles.templateMainHeaderTitle}>Manage Templates</Text>
                     <Text style={styles.templateMainDesc}>Pre-made messages to quickly and easily send clients.</Text>
                   </View>
                   <View style={{width:30,height:30}}>
-                     <Icon
-                        name='help-circle-outline'
-                        type='ionicon'
-                        size={28}
-                        color={colors.mainTextColor}
-                        style={{}}
-                      />
+                     
                   </View>
                 </View>
                 <View style={styles.templateMainSection}>
@@ -826,23 +873,25 @@ export default function Messages() {
                   </View>
                 </View>
                 <View style={styles.templateMainExisting}>
-                  <Text style={[styles.templateMainSubtitle,{textAlign:'left'}]}>Existing Templates</Text>
+                  <View style={{flexDirection:'row',alignItems:'center'}}>
+                    <Text style={[styles.templateMainSubtitle,{textAlign:'left',marginRight:10}]}>Existing Templates</Text>
+                    <Button 
+                      title={'Delete Selected'}
+                      buttonStyle={styles.deleteTemplatesButton}
+                      titleStyle={styles.deleteTemplatesButtonTitle}
+                      disabled={!templateIndices.includes(1)}
+                      onPress={() => deleteTemplates()}
+                    />
+                  </View>
                   {templates.length > 0 && (<>
-                    <View style={{flexDirection:'row',alignItems:'center',marginTop:10,
-                    marginBottom:10}}>
-                      <Button 
-                        title={'Delete Selected'}
-                        buttonStyle={styles.deleteTemplatesButton}
-                        titleStyle={styles.deleteTemplatesButtonTitle}
-                        disabled={!templateIndices.includes(1)}
-                      />
+                    <View style={{flexDirection:'row',alignItems:'center',marginTop:10,marginBottom:10}}>
                       <View style={templateSearchHasContents && [styles.createGroupAddHeaderHighlight,{margin:0,flex:1}] || [styles.createGroupAddHeader,{margin:0,flex:1}]}>
                         <View style={styles.createGroupAddIcon}>
                           <Icon
                             name='search'
                             type='ionicon'
                             size={28}
-                            color={manageHasContents && colors.mainTextColor || colors.headerBorder}
+                            color={templateSearchHasContents && colors.mainTextColor || colors.headerBorder}
                             style={[{marginLeft:5,marginTop:2}]}
                           />
                         </View>
@@ -850,7 +899,7 @@ export default function Messages() {
                           placeholder='Find templates...'
                           style={styles.createGroupAddInput}
                           onChange={(e) => {
-                            searchManageGroup(e.currentTarget.value)
+                            searchTemplates(e.currentTarget.value)
                             setTemplateSearchHasContents((e.currentTarget.value.length > 0))
                           }}
                           className='custom-textinput'
@@ -860,34 +909,37 @@ export default function Messages() {
                     <ScrollView contentContainerStyle={styles.templateRowList}>
                       {templates.map((template, index) => {
                         
-                        return (<View style={styles.templateRow} key={'templateManage_'+index}>
-                          {templateIndices[index] == 0 && (<Icon
-                            name='square-outline'
-                            type='ionicon'
-                            size={25}
-                            color={colors.mainTextColor}
-                            onPress={() => {
-                              var indices = JSON.parse(JSON.stringify(templateIndices))
-                              indices[index] = 1
-                              setTemplateIndices(indices)
-                            }}
-                          />) || (<Icon
-                            name='checkbox'
-                            type='ionicon'
-                            size={25}
-                            color={btnColors.danger}
-                            onPress={() => {
-                              var indices = JSON.parse(JSON.stringify(templateIndices))
-                              indices[index] = 0
-                              setTemplateIndices(indices)
-                            }}
-                          />)}
-                          <View style={styles.templateContainer}>
-                            <View style={[styles.mainMessageMe,{alignSelf:'flex-start',maxWidth:400,margin:5}]}>
-                              {template.Message}
+                        if (template.Visible) {
+                          return (<View style={[styles.templateRow]} key={'templateManage_'+index}>
+                            {templateIndices[index] == 0 && (<Icon
+                              name='square-outline'
+                              type='ionicon'
+                              size={25}
+                              color={colors.mainTextColor}
+                              onPress={() => {
+                                var indices = JSON.parse(JSON.stringify(templateIndices))
+                                indices[index] = 1
+                                setTemplateIndices(indices)
+                              }}
+                            />) || (<Icon
+                              name='checkbox'
+                              type='ionicon'
+                              size={25}
+                              color={btnColors.danger}
+                              onPress={() => {
+                                var indices = JSON.parse(JSON.stringify(templateIndices))
+                                indices[index] = 0
+                                setTemplateIndices(indices)
+                              }}
+                            />)}
+                            <View style={styles.templateContainer}
+                            >
+                              <Text style={[styles.mainMessageMe,{alignSelf:'flex-start',maxWidth:400,marginLeft:10}]}>
+                                {template.Message}
+                              </Text>
                             </View>
-                          </View>
-                        </View>)
+                          </View>)
+                        }
 
                       })}
                     </ScrollView>
@@ -1427,20 +1479,58 @@ export default function Messages() {
                   />
                 </View>
               </View>)}
-              <TouchableOpacity style={styles.templateTitleContainer} onPress={() => openAddTemplate()}>
-                <Text style={styles.templateTextTitle}>Templates</Text>
-                <Icon
-                  name='add'
-                  type='ionicon'
-                  size={28}
-                  color={colors.mainTextColor}
-                  style={{}}
-                  
-                />
-              </TouchableOpacity>
-              {templates.length > 0 && (<ScrollView showsHorizontalScrollIndicator={false}>
-              
-              </ScrollView>) || (<View style={{paddingTop:10}}>
+              <View style={styles.templateTitleContainer}>
+                <TouchableOpacity style={{flexDirection:'row',justifyContent:'space-between',width:'100%'}} onPress={() => openAddTemplate()}>
+                  <Text style={styles.templateTextTitle}>Templates</Text>
+                  <Icon
+                    name='add'
+                    type='ionicon'
+                    size={28}
+                    color={colors.mainTextColor}
+                    style={{}}
+                    
+                  />
+                </TouchableOpacity>
+              </View>
+              {templates.length > 0 && (<View style={{flex:1,width:'100%'}}>
+                <View style={templateSearchHasContents && [styles.createGroupAddHeaderHighlight,{marginBottom:10,width:'100%'}] || [styles.createGroupAddHeader,{marginBottom:10,width:'100%'}]}>
+                  <View style={styles.createGroupAddIcon}>
+                    <Icon
+                      name='search'
+                      type='ionicon'
+                      size={28}
+                      color={templateSearchHasContents && colors.mainTextColor || colors.headerBorder}
+                      style={[{marginLeft:5,marginTop:2}]}
+                    />
+                  </View>
+                  <TextInput 
+                    placeholder='Find templates...'
+                    style={styles.createGroupAddInput}
+                    onChange={(e) => {
+                      searchTemplates(e.currentTarget.value)
+                      setTemplateSearchHasContents((e.currentTarget.value.length > 0))
+                    }}
+                    className='custom-textinput'
+                  />
+                </View>
+                <ScrollView showsHorizontalScrollIndicator={false}>
+                  {templates.map((template, index) => {
+                    
+                    if (template.Visible) {
+                      return (<View style={styles.templateRow} key={'templateManage_'+index}>
+                        <TouchableOpacity style={styles.templateContainer}
+                          onPress={() => copyTemplate(index)}
+                        >
+                          <Text style={[styles.mainMessageMe,{alignSelf:'flex-start',maxWidth:400,marginLeft:10}]}>
+                            {template.Message}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>)
+                    }
+
+                  })}
+                </ScrollView>
+              </View>) || (<View style={{paddingTop:10}}>
               <Text style={styles.chatInfoText}>No templates yet.</Text>
               </View>)}
             </View>

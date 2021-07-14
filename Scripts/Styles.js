@@ -5212,12 +5212,10 @@ export const messagesLight = StyleSheet.create({
   },
   
   chatContainer: {
-    flex:1,
     justifyContent:'center',
     alignItems:'center',
     width:'100%',
     flexDirection:'row',
-    height:'100%'
   },
   userListNone: {
     fontFamily:'Poppins',
@@ -5694,7 +5692,8 @@ export const messagesLight = StyleSheet.create({
     alignItems:'flex-start',
     justifyContent:'space-between',
     paddingTop:10,
-    width:'100%'
+    width:'100%',
+    marginBottom:10
   },
   groupMembersTitle: {
     fontSize:16,
@@ -5782,8 +5781,7 @@ export const messagesLight = StyleSheet.create({
     width:'100%',
     borderTopWidth:2,
     borderTopColor:colorsLight.mainTextColor,
-    paddingTop:20,
-    marginTop:20,
+    paddingTop:10,
     marginBottom:10
   },
   templateTextTitle: {
@@ -5844,7 +5842,7 @@ export const messagesLight = StyleSheet.create({
   },
   templateMessageSaveTitle: {
     color:colorsLight.mainTextColor,
-    fontFamily:'Poppins',
+    fonttemplateTitleContainerFamily:'Poppins',
     color:'#fff'
   },
   templateMainExisting: {
@@ -5861,11 +5859,12 @@ export const messagesLight = StyleSheet.create({
   },
   templateRow: {
     flexDirection:'row',
-    alignItems:'center'
+    alignItems:'center',
+    marginBottom:10
   },
   deleteTemplatesButton: {
     backgroundColor:btnColors.danger,
-    marginRight:20,
+    marginRight:10,
     padding:5,
   },
   deleteTemplatesButtonTitle: {

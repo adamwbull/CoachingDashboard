@@ -190,11 +190,11 @@ export async function check() {
 
 
 
-export async function deleteTemplate(templateId, coachId, token) {
+export async function deleteTemplate(ids, coachId, token) {
 
   var ret = false
-  var arr = {Id:templateId, CoachId:coahId, Token:token}
-
+  var arr = {Ids:ids, CoachId:coachId, Token:token}
+  console.log(arr)
   console.log('Deleting template...')
   const res = await fetch(url + '/template/delete', {
     method:'POST',
@@ -235,7 +235,7 @@ export async function createTemplate(message, coachId, token) {
 
   if (payload.affectedRows > 0) {
     console.log('Template created!')
-    ret = true
+    ret = payload.insertId
   }
 
   return ret
