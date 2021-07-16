@@ -1084,7 +1084,7 @@ export default function Prompts() {
   const submitPayment = async () => {
     setCreateButtonActivityIndicator(true)
     setCreateButtonDisabled(true)
-    var post = await createPayment(coach.Token, coach.Id, paymentAmount, paymentTitle, paymentMemo, paymentType, 0)
+    var post = await createPayment(coach.Token, coach.Id, parseInt(paymentAmount)*100, paymentTitle, paymentMemo, paymentType, 0)
     if (post) {
       refreshPayments(coach.Id, coach.Token)
       setCreateButtonActivityIndicator(false)
@@ -1526,7 +1526,7 @@ export default function Prompts() {
                             <Text style={styles.taskPreviewTitle}>{name}</Text>
                           </View>
                           {deletePaymentIndex == index && (<><Text style={styles.taskWarningText}>This Task will be lost forever. Are you sure you want to continue?</Text></>) || (<><Text style={styles.taskPreviewText}>
-                          <Text style={{fontFamily:'PoppinsSemiBold'}}>${payment.Amount}</Text> - {text}
+                          <Text style={{fontFamily:'PoppinsSemiBold'}}>${parseInt(payment.Amount)/100 }</Text> - {text}
                           </Text></>)}
                         </View>
                         {deletePaymentIndex == index && (<><View style={styles.taskButtons}><TouchableOpacity style={[styles.taskButtonLeft,{backgroundColor:btnColors.danger}]} onPress={() => deletePaymentTrigger(index)}>

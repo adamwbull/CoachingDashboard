@@ -748,10 +748,10 @@ export default function Messages() {
       </TouchableOpacity>
       {userListLoading && (<View style={{paddingTop:10}}>
         <ActivityIndicatorView size={'small'} />
-      </View>) || (<View>
+      </View>) || (<View style={{flex:1}}>
         {userList.length == 0 && (<View>
           <Text style={styles.userListNone}>No conversations yet.</Text>
-        </View>) || (<View>
+         </View>) || (<ScrollView contentContainerStyle={{flex:1}} showsHorizontalScrollIndicator={false}>
           {userList.map((chat, index) => {
 
             var name = generateChatName(chat.ClientData, chat.Title, 0, false)
@@ -799,7 +799,7 @@ export default function Messages() {
               </View>
             </TouchableOpacity>)
           })}
-        </View>)}
+        </ScrollView>)}
       </View>)}
     </View>
     <ScrollView showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.chatContainer,templateContainerStyle]}>

@@ -36,6 +36,7 @@ export default function InviteClients() {
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
+      console.log(sCoach)
       setTimeout(() => {
         setActivityIndicator(false)
         setMain(true)
