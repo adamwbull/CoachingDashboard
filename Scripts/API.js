@@ -191,20 +191,15 @@ export async function check() {
 export async function getOnboardingData(id, token) {
 
   var ret = false
-  var arr = {CoachId:id, Token:token}
 
   console.log('Getting onboarding data...')
   const res = await fetch(url + '/user/coach/onboarding-data/' + id + '/' + token, {
-    method:'POST',
-    body: JSON.stringify(arr),
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    }
+    method:'GET'
   })
 
   const payload = await res.json()
 
+  console.log('pay:',payload)
   if (payload.success == true) {
     console.log('Data found!')
     ret = payload

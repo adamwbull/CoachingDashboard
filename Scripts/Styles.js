@@ -5874,6 +5874,246 @@ export const messagesLight = StyleSheet.create({
   }
 })
 
+export const onboardingStylesLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    padding:20,
+    marginBottom:20,
+    flex:1
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  promptListContainer: {
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  promptHeader: {
+    flexDirection:'row',
+    justifyContent:'flex-start',
+    alignItems:'center',
+    paddingBottom:5
+  },
+  promptHeaderTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    paddingLeft:5,
+    paddingRight:10,
+  },
+  promptHeaderDesc: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:16,
+    paddingLeft:10,
+  },
+  promptHeaderCount: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:16
+  },
+  promptsRow: {
+    paddingTop:10,
+  },
+  promptsData: {
+    flex:1
+  },
+  addPromptContainer: {
+    width:200,
+    height:200,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    backgroundColor:colorsLight.header,
+    borderRadius:10,
+    justifyContent:'center',
+    alignItems:'center',
+    marginRight:10,
+  },
+  promptAddButtonTitle: {
+    fontSize:14,
+    fontFamily:'Poppins'
+  },
+  promptAddButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:50,
+    padding:5,
+  },
+  promptAddButtonContainer: {
+    width:'70%'
+  },
+  innerRow: {
+    flexDirection:'row',
+    marginBottom:10
+  },
+  taskBox: {
+    width:200,
+    height:200,
+    borderWidth:1,
+    borderColor:colorsLight.headerBorder,
+    borderRadius:10,
+    overflow:'hidden',
+    marginRight:10
+  },
+  taskPreview: {
+    flex:1,
+  },
+  taskPreviewHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  taskPreviewHeaderIcon: {
+    padding:10,
+    borderRightColor:colorsLight.headerBorder,
+    borderRightWidth:1
+  },
+  taskPreviewTitle: {
+    flex:1,
+    marginLeft:10,
+    fontSize:13,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold'
+  },
+  taskPreviewText: {
+    fontSize:14,
+    padding:10,
+    flex:1,
+    color:colorsLight.mainTextColor,
+    textAlign:'left',
+    fontFamily:'Poppins'
+  },
+  taskWarningText: {
+    fontSize:14,
+    padding:10,
+    color:btnColors.danger,
+    textAlign:'center',
+    fontFamily:'Poppins'
+  },
+  taskButtons: {
+    flexDirection:'row'
+  },
+  taskButtonTop: {
+    width:'100%',
+    borderTopWidth:1,
+    borderTopColor:colorsLight.headerBorder,
+    padding:1,
+    backgroundColor:colorsLight.header
+  },
+  taskButtonLeft: {
+    flex:1,
+    borderTopWidth:1,
+    borderRightWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderRightColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.info
+  },
+  taskButtonRight: {
+    flex:1,
+    borderTopWidth:1,
+    borderLeftWidth:0.5,
+    borderTopColor:colorsLight.headerBorder,
+    borderLeftColor:colorsLight.headerBorder,
+    padding:10,
+    backgroundColor:btnColors.danger
+  },
+  taskButtonText: {
+    color:'#ffffff',
+    fontSize:14,
+    fontFamily:'Poppins',
+    textAlign:'center'
+  },
+  helpBox: {
+    width:400,
+    height:200,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  helpBoxText: {
+    fontFamily:'Poppins',
+    textAlign:'center',
+    fontSize:14,
+    color:colorsLight.mainTextColor
+  },
+  helpBoxError: {
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center',
+    fontSize:14,
+    color:colorsLight.mainTextColor
+  },
+  searchHighlight: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    borderWidth:2,
+    borderColor:colorsLight.mainTextColor,
+    borderRadius:25,
+    paddingRight:10,
+    marginBottom:10,
+    width:'50%'
+  },
+  searchInput: {
+    flex:1,
+    marginLeft:4,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    outline:'none',
+    paddingLeft:5,
+    paddingTop:5,
+    paddingBottom:5,
+    outlineWidth:0,
+    width:'100%'
+  },
+  searchIcon: {
+    width:34,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+})
+
 export const basic = StyleSheet.create({
   container: {
     flex: 1,
