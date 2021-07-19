@@ -1585,7 +1585,7 @@ export async function createSurveyItem(token, surveyId, type, question, richText
 export async function createMeasurementSurvey(id, token, title, text) {
 
   var ret = false
-  var arr = {CoachId:id, Token:token, Title:title, Text:text, Type:1}
+  var arr = {CoachId:id, Token:token, Title:title, Text:text, Type:0}
 
   console.log('Creating survey...')
   const res = await fetch(url + '/survey/create', {

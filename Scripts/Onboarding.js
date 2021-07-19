@@ -79,17 +79,26 @@ export default function Onboarding() {
     setPaymentId(data.PaymentId)
     setContractId(data.ContractId)
 
-    // Set visible variables.
+    // Set visible variables, set selectedIndices.
     for (var i = 0; i < data.Surveys.length; i++) {
       data.Surveys[i].Visible = true
+      if (data.SurveyId == data.Surveys[i].Id) {
+        setSurveySelectedIndex(i)
+      }
     }
 
     for (var i = 0; i < data.Payments.length; i++) {
       data.Payments[i].Visible = true
+      if (data.PaymentId == data.Payments[i].Id) {
+        setPaymentSelectedIndex(i)
+      }
     }
 
     for (var i = 0; i < data.Contracts.length; i++) {
       data.Contracts[i].Visible = true
+      if (data.ContractId == data.Contracts[i].Id) {
+        setContractSelectedIndex(i)
+      }
     }
 
     setSurveys(data.Surveys)
@@ -126,16 +135,19 @@ export default function Onboarding() {
       for (var i = 0; i < surveys.length; i++) {
         if (i == index) {
           id = surveys[i].Id
+          setSurveySelectedIndex(i)
           break
         }
       }
       setSurveyId(id)
+      
 
     } else if (type == 1) {
 
       for (var i = 0; i < payments.length; i++) {
         if (i == index) {
           id = payments[i].Id
+          setPaymentSelectedIndex(i)
           break
         }
       }
@@ -146,6 +158,7 @@ export default function Onboarding() {
       for (var i = 0; i < contracts.length; i++) {
         if (i == index) {
           id = contracts[i].Id
+          setContractSelectedIndex(i)
           break
         }
       }
@@ -221,6 +234,17 @@ export default function Onboarding() {
                   <Text style={styles.promptHeaderDesc}>{onboardingStatus[0] == 1 && 'Enabled' || 'Disabled'}</Text>
                 </View>
                 {onboardingStatus[0] == 1 && (<View style={styles.promptsRow}>
+                  <View>
+                    <View style={styles.selectedPrompt}>
+                      <Text style={styles.selectedPromptHeader}>Selected Survey:</Text>
+                      {surveySelectedIndex == -1 && (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptDesc}>No survey selected.</Text>
+                      </View>) || (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptTitle}>{surveys[surveySelectedIndex].Title}</Text>
+                        <Text style={styles.selectedPromptDesc}>{surveys[surveySelectedIndex].Text}</Text>
+                      </View>)}
+                    </View>
+                  </View>
                   <View style={styles.promptsData}>
                     <View style={hasSearchContents[0] == 1 && [styles.searchHighlight] || [styles.searchHighlight,{borderColor:colors.headerBorder}]}>
                       <View style={styles.searchIcon}>
@@ -277,11 +301,16 @@ export default function Onboarding() {
                               <Text style={styles.taskPreviewText}>{text}</Text>
                               {surveySelectedIndex == index && (<>
                                 <Button 
-                                  title='Selected'
+                                  title='Active'
+                                  titleStyle={styles.taskSelectedTitle}
+                                  buttonStyle={styles.taskSelectedButton}
                                 />
                               </>) || (<>
                                 <Button 
                                   title='Select'
+                                  titleStyle={styles.taskSelectTitle}
+                                  buttonStyle={styles.taskSelectButton}
+                                  onPress={() => selectPrompt(0, index)}
                                 />
                               </>)}
                             </View>

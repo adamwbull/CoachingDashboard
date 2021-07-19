@@ -5956,9 +5956,41 @@ export const onboardingStylesLight = StyleSheet.create({
   },
   promptsRow: {
     paddingTop:10,
+    flexDirection:'row'
   },
   promptsData: {
     flex:1
+  },
+  selectedPrompt: {
+    width:200,
+    marginRight:10,
+    height:248,
+    borderWidth:1,
+    borderRadius:10,
+    borderColor:colorsLight.headerBorder,
+    justifyContent:'space-between',
+    alignItems:'center',
+  },
+  selectedPromptHeader: {
+    textAlign:'center',
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:16,
+    padding:7,
+    width:'100%',
+    backgroundColor:colorsLight.header
+  },
+  selectedPromptDesc: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign: 'center'
+  },
+  selectedPromptTitle: {
+    fontFamily:'PoppinsSemiBold',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    textAlign: 'center'
   },
   addPromptContainer: {
     width:200,
@@ -5985,7 +6017,6 @@ export const onboardingStylesLight = StyleSheet.create({
   },
   innerRow: {
     flexDirection:'row',
-    marginBottom:10
   },
   taskBox: {
     width:200,
@@ -6032,39 +6063,18 @@ export const onboardingStylesLight = StyleSheet.create({
     textAlign:'center',
     fontFamily:'Poppins'
   },
-  taskButtons: {
-    flexDirection:'row'
-  },
-  taskButtonTop: {
-    width:'100%',
-    borderTopWidth:1,
-    borderTopColor:colorsLight.headerBorder,
-    padding:1,
-    backgroundColor:colorsLight.header
-  },
-  taskButtonLeft: {
-    flex:1,
-    borderTopWidth:1,
-    borderRightWidth:0.5,
-    borderTopColor:colorsLight.headerBorder,
-    borderRightColor:colorsLight.headerBorder,
-    padding:10,
-    backgroundColor:btnColors.info
-  },
-  taskButtonRight: {
-    flex:1,
-    borderTopWidth:1,
-    borderLeftWidth:0.5,
-    borderTopColor:colorsLight.headerBorder,
-    borderLeftColor:colorsLight.headerBorder,
-    padding:10,
-    backgroundColor:btnColors.danger
-  },
-  taskButtonText: {
-    color:'#ffffff',
-    fontSize:14,
+  taskSelectedTitle: {
+    color:btnColors.success,
     fontFamily:'Poppins',
-    textAlign:'center'
+    fontSize:16
+  },
+  taskSelectedButton: {
+    backgroundColor:colorsLight.mainBackground,
+  },
+  taskSelectTitle: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:'#fff'
   },
   helpBox: {
     width:400,
