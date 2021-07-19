@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { onboardingStylesLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
+import { onboardingStylesLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { onboardingStylesDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -139,7 +139,6 @@ export default function Onboarding() {
           break
         }
       }
-      setSurveyId(id)
       
 
     } else if (type == 1) {
@@ -151,7 +150,6 @@ export default function Onboarding() {
           break
         }
       }
-      setPaymentId(id)
 
     } else if (type == 2) {
 
@@ -162,7 +160,6 @@ export default function Onboarding() {
           break
         }
       }
-      setContractId(id)
 
     }
 
@@ -201,7 +198,84 @@ export default function Onboarding() {
       }
       setSurveys(newSurveys)
 
+    } else if (type == 1) {
+
+      var newPayments = JSON.parse(JSON.stringify(payments))
+      for (var i = 0; i < newPayments.length; i++) {
+        if (len == 0) {
+          newPayments[i].Visible = true
+        } else if (newPayments[i].Title.includes(text)) {
+          newPayments[i].Visible = true
+        } else {
+          newPayments[i].Visible = false
+        }
+      }
+      setPayments(newPayments)
+
+    } else if (type == 2) {
+
+      var newContracts = JSON.parse(JSON.stringify(contracts))
+      for (var i = 0; i < newContracts.length; i++) {
+        if (len == 0) {
+          newContracts[i].Visible = true
+        } else if (newContracts[i].Title.includes(text)) {
+          newContracts[i].Visible = true
+        } else {
+          newContracts[i].Visible = false
+        }
+      }
+      setContracts(newContracts)
+
     }
+
+  }
+
+  const saveOnboarding = async () => {
+
+    // Determine type.
+    var type = 0
+
+    // All
+    if (onboardingStatus[0] == 1 && onboardingStatus[1] == 1 && onboardingStatus[2] == 1) {
+      type = 7
+    // Payment, Contract
+    } else if (onboardingStatus[0] == 0 && onboardingStatus[1] == 1 && onboardingStatus[2] == 1) {
+      type = 6
+    // Survey, Contract 
+    } else if (onboardingStatus[0] == 1 && onboardingStatus[1] == 0 && onboardingStatus[2] == 1) {
+      type = 5
+    // Survey, Payment
+    } else if (onboardingStatus[0] == 1 && onboardingStatus[1] == 1 && onboardingStatus[2] == 0) {
+      type = 4
+    // Contract
+    } else if (onboardingStatus[0] == 0 && onboardingStatus[1] == 0 && onboardingStatus[2] == 1) {
+      type = 3
+    // Payment
+    } else if (onboardingStatus[0] == 0 && onboardingStatus[1] == 1 && onboardingStatus[2] == 0) {
+      type = 2
+    // Survey
+    } else if (onboardingStatus[0] == 1 && onboardingStatus[1] == 0 && onboardingStatus[2] == 0) {
+      type = 1
+    }
+
+    // Check if the primary prompts have to be updated.
+    var idsToSend = [-1, -1, -1]
+    if (surveyId != surveys[surveySelectedIndex].Id) {
+      idsToSend[0] = surveys[surveySelectedIndex].Id
+    }
+    if (paymentId != payments[paymentSelectedIndex].Id) {
+      idsToSend[1] = payments[paymentSelectedIndex].Id
+    }
+    if (contractId != contracts[contractSelectedIndex].Id) {
+      idsToSend[2] = contracts[contractSelectedIndex].Id
+    }
+
+    console.log('')
+    console.log('type:',type)
+    console.log('idsToSend:',idsToSend)
+    console.log('')
+
+    var updated = await updateOnboarding(type, idsToSend, coach.Id, coach.Token)
 
   }
 
@@ -222,19 +296,46 @@ export default function Onboarding() {
           {showMain && (<View style={styles.main}>
             <ScrollView contentContainerStyle={{flex:1}}>
               
-              <View style={styles.promptListContainer}>
-                <View style={styles.promptHeader}>
-                  
-                  <Text style={styles.promptHeaderTitle}>Onboarding Survey</Text>
-                  <Checkbox 
-                    checked={onboardingStatus[0] == 1}
-                    toggle 
-                    onChange={() => toggleSection(0)}
-                  />
-                  <Text style={styles.promptHeaderDesc}>{onboardingStatus[0] == 1 && 'Enabled' || 'Disabled'}</Text>
-                </View>
-                {onboardingStatus[0] == 1 && (<View style={styles.promptsRow}>
-                  <View>
+              <View style={[styles.promptListContainer,{
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems:'center',
+              }]}>
+                <Icon
+                  name='help-circle-outline'
+                  type='ionicon'
+                  size={30}
+                  color={colors.mainTextColor}
+                  style={{marginRight:10}}
+                  onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+                />
+                <Text style={styles.saveOnboardingInfo}>
+                  Make changes below to your onboarding flow, then save to the right. Onboarding will be shown to new clients after they sign up with your coaching link. 
+                  <Text style={[styles.link,{marginLeft:5}]}><a href="https://wiki.coachsync.me/en/account/credits" target="_blank" rel="noreferrer">Click here to learn more.</a></Text>
+                </Text>
+                <View style={styles.saveOnboardingSpacer}></View>
+                <Button 
+                  title='Save Onboarding'
+                  buttonStyle={styles.saveOnboardingButton}
+                  titleStyle={styles.saveOnboardingTitle}
+                  onPress={() => saveOnboarding()}
+                />
+                
+              </View>
+
+              <View style={{flexDirection:'row'}}>
+
+                <View style={[styles.promptListContainer,{marginRight:10}]}>
+                  <Text style={styles.stepText}>Step #1:</Text>
+                  <View style={styles.promptHeader}>
+                    <Text style={styles.promptHeaderTitle}>Onboarding Survey</Text>
+                    <Checkbox 
+                      checked={onboardingStatus[0] == 1}
+                      toggle 
+                      onChange={() => toggleSection(0)}
+                    />
+                  </View>
+                  {onboardingStatus[0] == 1 && (<View style={styles.promptsRow}>
                     <View style={styles.selectedPrompt}>
                       <Text style={styles.selectedPromptHeader}>Selected Survey:</Text>
                       {surveySelectedIndex == -1 && (<View style={{flex:1,padding:10}}>
@@ -244,90 +345,295 @@ export default function Onboarding() {
                         <Text style={styles.selectedPromptDesc}>{surveys[surveySelectedIndex].Text}</Text>
                       </View>)}
                     </View>
-                  </View>
-                  <View style={styles.promptsData}>
-                    <View style={hasSearchContents[0] == 1 && [styles.searchHighlight] || [styles.searchHighlight,{borderColor:colors.headerBorder}]}>
-                      <View style={styles.searchIcon}>
-                        <Icon
-                          name='search'
-                          type='ionicon'
-                          size={28}
-                          color={hasSearchContents[0] == 1 && colors.mainTextColor || colors.headerBorder}
-                          style={[{marginLeft:5,marginTop:2}]}
+                    <View style={styles.promptsData}>
+                      <View style={hasSearchContents[0] == 1 && [styles.searchHighlight] || [styles.searchHighlight,{borderColor:colors.headerBorder}]}>
+                        <View style={styles.searchIcon}>
+                          <Icon
+                            name='search'
+                            type='ionicon'
+                            size={28}
+                            color={hasSearchContents[0] == 1 && colors.mainTextColor || colors.headerBorder}
+                            style={[{marginLeft:5,marginTop:2}]}
+                          />
+                        </View>
+                        <TextInput 
+                          placeholder='Filter surveys...'
+                          style={styles.searchInput}
+                          onChange={(e) => {
+                            searchSection(0, e.currentTarget.value)
+                          }}
+                          className='custom-textinput'
                         />
                       </View>
-                      <TextInput 
-                        placeholder='Filter surveys...'
-                        style={styles.searchInput}
-                        onChange={(e) => {
-                          searchSection(0, e.currentTarget.value)
-                        }}
-                        className='custom-textinput'
-                      />
-                    </View>
-                    {surveys.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
-                      {surveys.map((survey, index) => {
-    
-                        if (survey.Visible == true) {
+                      {surveys.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                        {surveys.map((survey, index) => {
+      
+                          if (survey.Visible == true) {
 
-                          var promptIcon = 'clipboard-outline'
-                          var name = survey.Title
-                          if (name.length > 15) {
-                            name = name.slice(0,15) + '...'
-                          }
-                          var text = survey.Text
-                          if (text.length > 80) {
-                            text = text.slice(0,80) + '...'
-                          }
+                            var promptIcon = 'clipboard-outline'
+                            var name = survey.Title
+                            if (name.length > 25) {
+                              name = name.slice(0,25) + '...'
+                            }
+                            var text = survey.Text
+                            if (text.length > 80) {
+                              text = text.slice(0,80) + '...'
+                            }
 
-                          return (<View style={styles.taskBox} key={index + '-'}>
-                            <View style={styles.taskPreview}>
-                              <View style={styles.taskPreviewHeader}>
-                                <View style={styles.taskPreviewHeaderIcon}>
-                                  <Icon
-                                    name={promptIcon}
-                                    type='ionicon'
-                                    size={22}
-                                    color={colors.mainTextColor}
-                                  />
+                            return (<View style={styles.taskBox} key={index + '-'}>
+                              <View style={styles.taskPreview}>
+                                <View style={styles.taskPreviewHeader}>
+                                  <View style={styles.taskPreviewHeaderIcon}>
+                                    <Icon
+                                      name={promptIcon}
+                                      type='ionicon'
+                                      size={22}
+                                      color={colors.mainTextColor}
+                                    />
+                                  </View>
+                                  {survey.Title.length > 15 && (<Popup 
+                                    trigger={<Text style={styles.taskPreviewTitle}>{name}</Text>}
+                                    content={survey.Title}
+                                    inverted
+                                    position={'top left'}
+                                  />) || (<Text style={styles.taskPreviewTitle}>{name}</Text>)}
                                 </View>
-                                {survey.Title.length > 15 && (<Popup 
-                                  trigger={<Text style={styles.taskPreviewTitle}>{name}</Text>}
-                                  content={survey.Title}
-                                  inverted
-                                  position={'top left'}
-                                />) || (<Text style={styles.taskPreviewTitle}>{name}</Text>)}
+                                <Text style={styles.taskPreviewText}>{text}</Text>
+                                {surveySelectedIndex == index && (<>
+                                  <Button 
+                                    title='Active'
+                                    titleStyle={styles.taskSelectedTitle}
+                                    buttonStyle={styles.taskSelectedButton}
+                                  />
+                                </>) || (<>
+                                  <Button 
+                                    title='Select'
+                                    titleStyle={styles.taskSelectTitle}
+                                    buttonStyle={styles.taskSelectButton}
+                                    onPress={() => selectPrompt(0, index)}
+                                  />
+                                </>)}
                               </View>
-                              <Text style={styles.taskPreviewText}>{text}</Text>
-                              {surveySelectedIndex == index && (<>
-                                <Button 
-                                  title='Active'
-                                  titleStyle={styles.taskSelectedTitle}
-                                  buttonStyle={styles.taskSelectedButton}
-                                />
-                              </>) || (<>
-                                <Button 
-                                  title='Select'
-                                  titleStyle={styles.taskSelectTitle}
-                                  buttonStyle={styles.taskSelectButton}
-                                  onPress={() => selectPrompt(0, index)}
-                                />
-                              </>)}
-                            </View>
-                          </View>)
+                            </View>)
 
-                        }
+                          }
 
-                      })}
-                    </ScrollView>) || (<View style={styles.helpBox}>
-                      <Text style={styles.helpBoxText}>No surveys created yet.</Text>
-                    </View>)}
+                        })}
+                      </ScrollView>) || (<View style={styles.helpBox}>
+                        <Text style={styles.helpBoxText}>No surveys created yet.</Text>
+                      </View>)}
+                    </View>
+                  </View>)}
+                </View>
+
+                <View style={[styles.promptListContainer,{marginLeft:10,marginRight:10}]}>
+                  <Text style={styles.stepText}>Step #2:</Text>
+                  <View style={styles.promptHeader}>
+                    <Text style={styles.promptHeaderTitle}>Onboarding Payment</Text>
+                    <Checkbox 
+                      checked={onboardingStatus[1] == 1}
+                      toggle 
+                      onChange={() => toggleSection(1)}
+                    />
                   </View>
-                </View>)}
+                  {onboardingStatus[1] == 1 && (<View style={styles.promptsRow}>
+                    <View style={styles.selectedPrompt}>
+                      <Text style={styles.selectedPromptHeader}>Selected Payment:</Text>
+                      {paymentSelectedIndex == -1 && (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptDesc}>No payment selected.</Text>
+                      </View>) || (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptTitle}>{payments[paymentSelectedIndex].Title}</Text>
+                        <Text style={styles.selectedPromptDesc}>{payments[paymentSelectedIndex].Memo}</Text>
+                      </View>)}
+                    </View>
+                    <View style={styles.promptsData}>
+                      <View style={hasSearchContents[1] == 1 && [styles.searchHighlight] || [styles.searchHighlight,{borderColor:colors.headerBorder}]}>
+                        <View style={styles.searchIcon}>
+                          <Icon
+                            name='search'
+                            type='ionicon'
+                            size={28}
+                            color={hasSearchContents[1] == 1 && colors.mainTextColor || colors.headerBorder}
+                            style={[{marginLeft:5,marginTop:2}]}
+                          />
+                        </View>
+                        <TextInput 
+                          placeholder='Filter payments...'
+                          style={styles.searchInput}
+                          onChange={(e) => {
+                            searchSection(1, e.currentTarget.value)
+                          }}
+                          className='custom-textinput'
+                        />
+                      </View>
+                      {payments.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                        {payments.map((payment, index) => {
+      
+                          if (payment.Visible == true) {
+
+                            var promptIcon = 'card'
+                            var name = payment.Title
+                            if (name.length > 25) {
+                              name = name.slice(0,25) + '...'
+                            }
+                            var text = payment.Memo
+                            if (text.length > 80) {
+                              text = text.slice(0,80) + '...'
+                            }
+
+                            return (<View style={styles.taskBox} key={index + '-'}>
+                              <View style={styles.taskPreview}>
+                                <View style={styles.taskPreviewHeader}>
+                                  <View style={styles.taskPreviewHeaderIcon}>
+                                    <Icon
+                                      name={promptIcon}
+                                      type='ionicon'
+                                      size={22}
+                                      color={colors.mainTextColor}
+                                    />
+                                  </View>
+                                  {payment.Title.length > 15 && (<Popup 
+                                    trigger={<Text style={styles.taskPreviewTitle}>{name}</Text>}
+                                    content={payment.Title}
+                                    inverted
+                                    position={'top left'}
+                                  />) || (<Text style={styles.taskPreviewTitle}>{name}</Text>)}
+                                </View>
+                                <Text style={styles.taskPreviewText}>{text}</Text>
+                                {paymentSelectedIndex == index && (<>
+                                  <Button 
+                                    title='Active'
+                                    titleStyle={styles.taskSelectedTitle}
+                                    buttonStyle={styles.taskSelectedButton}
+                                  />
+                                </>) || (<>
+                                  <Button 
+                                    title='Select'
+                                    titleStyle={styles.taskSelectTitle}
+                                    buttonStyle={styles.taskSelectButton}
+                                    onPress={() => selectPrompt(1, index)}
+                                  />
+                                </>)}
+                              </View>
+                            </View>)
+                          }
+                        })}
+                      </ScrollView>) || (<View style={styles.helpBox}>
+                        <Text style={styles.helpBoxText}>No payments created yet.</Text>
+                      </View>)}
+                    </View>
+                  </View>)}
+                </View>
+
+                <View style={[styles.promptListContainer,{marginLeft:10}]}>
+                  <Text style={styles.stepText}>Step #3:</Text>
+                  <View style={styles.promptHeader}>
+                    <Text style={styles.promptHeaderTitle}>Onboarding Contract</Text>
+                    <Checkbox 
+                      checked={onboardingStatus[2] == 1}
+                      toggle 
+                      onChange={() => toggleSection(2)}
+                    />
+                  </View>
+                  {onboardingStatus[2] == 1 && (<View style={styles.promptsRow}>
+                    <View style={styles.selectedPrompt}>
+                      <Text style={styles.selectedPromptHeader}>Selected Contract:</Text>
+                      {contractSelectedIndex == -1 && (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptDesc}>No contract selected.</Text>
+                      </View>) || (<View style={{flex:1,padding:10}}>
+                        <Text style={styles.selectedPromptTitle}>{contracts[contractSelectedIndex].Title}</Text>
+                        <Text style={[styles.selectedPromptDesc,styles.link]}>
+                          <a href={contracts[contractSelectedIndex].File} target="_blank" rel="noreferrer">
+                            View Contract Here
+                          </a>
+                        </Text>
+                      </View>)}
+                    </View>
+                    <View style={styles.promptsData}>
+                      <View style={hasSearchContents[2] == 1 && [styles.searchHighlight] || [styles.searchHighlight,{borderColor:colors.headerBorder}]}>
+                        <View style={styles.searchIcon}>
+                          <Icon
+                            name='search'
+                            type='ionicon'
+                            size={28}
+                            color={hasSearchContents[2] == 1 && colors.mainTextColor || colors.headerBorder}
+                            style={[{marginLeft:5,marginTop:2}]}
+                          />
+                        </View>
+                        <TextInput 
+                          placeholder='Filter contracts...'
+                          style={styles.searchInput}
+                          onChange={(e) => {
+                            searchSection(2, e.currentTarget.value)
+                          }}
+                          className='custom-textinput'
+                        />
+                      </View>
+                      {contracts.length > 0 && (<ScrollView horizontal={true} contentContainerStyle={styles.innerRow}>
+                        {contracts.map((contract, index) => {
+      
+                          if (contract.Visible == true) {
+
+                            var promptIcon = 'card'
+                            var name = contract.Title
+                            if (name.length > 25) {
+                              name = name.slice(0,25) + '...'
+                            }
+
+                            return (<View style={styles.taskBox} key={index + '-'}>
+                              <View style={styles.taskPreview}>
+                                <View style={styles.taskPreviewHeader}>
+                                  <View style={styles.taskPreviewHeaderIcon}>
+                                    <Icon
+                                      name={promptIcon}
+                                      type='ionicon'
+                                      size={22}
+                                      color={colors.mainTextColor}
+                                    />
+                                  </View>
+                                  {contract.Title.length > 15 && (<Popup 
+                                    trigger={<Text style={styles.taskPreviewTitle}>{name}</Text>}
+                                    content={contract.Title}
+                                    inverted
+                                    position={'top left'}
+                                  />) || (<Text style={styles.taskPreviewTitle}>{name}</Text>)}
+                                </View>
+                                <Text style={[styles.taskPreviewText,styles.link]}>
+                                  <a href={contract.File} target="_blank" rel="noreferrer">
+                                    View {contract.Title} Here
+                                  </a>
+                                </Text>
+                                {contractSelectedIndex == index && (<>
+                                  <Button 
+                                    title='Active'
+                                    titleStyle={styles.taskSelectedTitle}
+                                    buttonStyle={styles.taskSelectedButton}
+                                  />
+                                </>) || (<>
+                                  <Button 
+                                    title='Select'
+                                    titleStyle={styles.taskSelectTitle}
+                                    buttonStyle={styles.taskSelectButton}
+                                    onPress={() => selectPrompt(2, index)}
+                                  />
+                                </>)}
+                              </View>
+                            </View>)
+                          }
+                        })}
+                      </ScrollView>) || (<View style={styles.helpBox}>
+                        <Text style={styles.helpBoxText}>No contracts created yet.</Text>
+                      </View>)}
+                    </View>
+                  </View>)}
+                </View>
+
               </View>
 
             </ScrollView>
           </View>)}
+
+          
 
         </View>
       </View>

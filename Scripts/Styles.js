@@ -5862,7 +5862,7 @@ export const messagesLight = StyleSheet.create({
     alignItems:'center',
     marginBottom:10
   },
-  deleteTemplatesButton: {
+  deleteTemplatesButtonf: {
     backgroundColor:btnColors.danger,
     marginRight:10,
     padding:5,
@@ -5877,6 +5877,10 @@ export const messagesLight = StyleSheet.create({
 export const onboardingStylesLight = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  link:{
+    textDecorationLine: 'underline',
+    color:btnColors.primary
   },
   main: {
     flex:1,
@@ -5929,19 +5933,28 @@ export const onboardingStylesLight = StyleSheet.create({
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
+    flex:1,
+    alignItems:'center'
+  },
+  stepText: {
+    width:'100%',
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+
   },
   promptHeader: {
     flexDirection:'row',
-    justifyContent:'flex-start',
+    justifyContent:'space-between',
     alignItems:'center',
-    paddingBottom:5
+    paddingBottom:5,
+    width:'100%'
   },
   promptHeaderTitle: {
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
-    fontSize:24,
-    paddingLeft:5,
-    paddingRight:10,
+    fontSize:22,
+    flex:1
   },
   promptHeaderDesc: {
     fontFamily:'Poppins',
@@ -5956,15 +5969,19 @@ export const onboardingStylesLight = StyleSheet.create({
   },
   promptsRow: {
     paddingTop:10,
-    flexDirection:'row'
+    flexDirection:'column',
+    alignItems:'center',
+    flex:1,
+    width:'100%'
   },
   promptsData: {
-    flex:1
+    flex:1,
+    width:'100%'
   },
   selectedPrompt: {
-    width:200,
+    width:'100%',
     marginRight:10,
-    height:248,
+    height:130,
     borderWidth:1,
     borderRadius:10,
     borderColor:colorsLight.headerBorder,
@@ -5984,7 +6001,8 @@ export const onboardingStylesLight = StyleSheet.create({
     fontSize:14,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor,
-    textAlign: 'center'
+    textAlign: 'center',
+    marginTop:3
   },
   selectedPromptTitle: {
     fontFamily:'PoppinsSemiBold',
@@ -6016,16 +6034,18 @@ export const onboardingStylesLight = StyleSheet.create({
     width:'70%'
   },
   innerRow: {
-    flexDirection:'row',
+    flexDirection:'column',
+    alignItems:'center',
+    flex:1
   },
   taskBox: {
-    width:200,
     height:200,
     borderWidth:1,
     borderColor:colorsLight.headerBorder,
     borderRadius:10,
     overflow:'hidden',
-    marginRight:10
+    marginBottom:10,
+    width:'100%'
   },
   taskPreview: {
     flex:1,
@@ -6053,7 +6073,7 @@ export const onboardingStylesLight = StyleSheet.create({
     padding:10,
     flex:1,
     color:colorsLight.mainTextColor,
-    textAlign:'left',
+    textAlign:'center',
     fontFamily:'Poppins'
   },
   taskWarningText: {
@@ -6102,8 +6122,9 @@ export const onboardingStylesLight = StyleSheet.create({
     borderColor:colorsLight.mainTextColor,
     borderRadius:25,
     paddingRight:10,
+    marginTop:10,
     marginBottom:10,
-    width:'50%'
+    width:'100%'
   },
   searchInput: {
     flex:1,
@@ -6122,6 +6143,15 @@ export const onboardingStylesLight = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center'
   },
+  saveOnboardingSpacer: {
+    flex:1,
+  },
+  saveOnboardingInfo: {
+    flex:3,
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  }
 })
 
 export const basic = StyleSheet.create({

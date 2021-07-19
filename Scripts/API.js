@@ -188,6 +188,39 @@ export async function check() {
 
 */
 
+export async function updateOnboarding(type, ids, id, token) {
+
+  var ret = false
+  var arr = {
+    Type:type, 
+    Survey:ids[0], 
+    Payment:ids[1], 
+    Contract:ids[2], 
+    CoachId:id, 
+    Token:token
+  }
+
+  console.log('Updating onboarding...')
+  const res = await fetch(url + '/user/coach/update-onboarding', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success) {
+    console.log('Success!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function getOnboardingData(id, token) {
 
   var ret = false
