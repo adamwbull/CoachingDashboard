@@ -28,7 +28,7 @@ export const boxColors = {
   primary:'#38A2E8',
   caution:'#FFCF0F',
   danger: '#fb7161',
-  success:'#2ecc71',
+  success:'#27ae60',
   info:'#48dbfb',
   default:'#FAFAFA'
 }
@@ -5882,6 +5882,27 @@ export const onboardingStylesLight = StyleSheet.create({
     textDecorationLine: 'underline',
     color:btnColors.primary
   },
+  alertSuccess: {
+    backgroundColor:boxColors.success,
+    borderRadius:10,
+    justifyContent:'center',
+    alignItems:'center',
+    padding:10,
+    marginBottom:20
+  },
+  alertDanger: {
+    backgroundColor:boxColors.danger,
+    borderRadius:10,
+    justifyContent:'center',
+    alignItems:'center',
+    padding:10,
+    marginBottom:20
+  },
+  alertText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:'#fff'
+  },
   main: {
     flex:1,
     flexDirection:'row',
@@ -6063,7 +6084,7 @@ export const onboardingStylesLight = StyleSheet.create({
   },
   taskPreviewTitle: {
     flex:1,
-    marginLeft:10,
+    marginLeft:10,  
     fontSize:13,
     color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold'

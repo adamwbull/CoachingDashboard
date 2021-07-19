@@ -7,7 +7,7 @@ import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
-import { getOnboardingData } from './API.js'
+import { getOnboardingData, updateOnboarding } from './API.js'
 import { Icon, Button } from 'react-native-elements'
 import { Popup, Dropdown, Tab, Checkbox } from 'semantic-ui-react'
 import { TextInput } from 'react-native-web'
@@ -25,6 +25,8 @@ export default function Onboarding() {
   // Main stage controls.
   const [showActivityIndicator, setActivityIndicator] = useState(true)
   const [showMain, setShowMain] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [showError, setShowError] = useState(false)
 
   // Main variables.
   const [coach, setCoach] = useState(user)
@@ -277,6 +279,12 @@ export default function Onboarding() {
 
     var updated = await updateOnboarding(type, idsToSend, coach.Id, coach.Token)
 
+    if (updated) {
+      setShowSuccess(true)
+    } else {
+      setShowError(true)
+    }
+
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -293,6 +301,14 @@ export default function Onboarding() {
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
+          {showSuccess && (<View style={styles.alertSuccess}>
+            <Text style={styles.alertText}>Your onboarding settings have been updated! All new clients will use this flow.</Text>
+          </View>)}
+
+          {showError && (<View style={styles.alertDanger}>
+            <Text style={styles.alertText}>An error occured while saving. Please try again.</Text>
+          </View>)}
+
           {showMain && (<View style={styles.main}>
             <ScrollView contentContainerStyle={{flex:1}}>
               
@@ -307,11 +323,11 @@ export default function Onboarding() {
                   size={30}
                   color={colors.mainTextColor}
                   style={{marginRight:10}}
-                  onPress={() => window.open('https://wiki.coachsync.me/en/account/credits', '_blank')}
+                  onPress={() => window.open('https://wiki.coachsync.me/en/programs/onboarding', '_blank')}
                 />
                 <Text style={styles.saveOnboardingInfo}>
                   Make changes below to your onboarding flow, then save to the right. Onboarding will be shown to new clients after they sign up with your coaching link. 
-                  <Text style={[styles.link,{marginLeft:5}]}><a href="https://wiki.coachsync.me/en/account/credits" target="_blank" rel="noreferrer">Click here to learn more.</a></Text>
+                  <Text style={[styles.link,{marginLeft:5}]}><a href="https://wiki.coachsync.me/en/programs/onboarding" target="_blank" rel="noreferrer">Click here to learn more.</a></Text>
                 </Text>
                 <View style={styles.saveOnboardingSpacer}></View>
                 <Button 
