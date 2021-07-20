@@ -1084,7 +1084,7 @@ export default function Prompts() {
   const submitPayment = async () => {
     setCreateButtonActivityIndicator(true)
     setCreateButtonDisabled(true)
-    var post = await createPayment(coach.Token, coach.Id, parseInt(paymentAmount)*100, paymentTitle, paymentMemo, paymentType, 0)
+    var post = await createPayment(coach.Token, coach.Id, parseInt(paymentAmount)*100, paymentTitle, paymentMemo, 0, 0)
     if (post) {
       refreshPayments(coach.Id, coach.Token)
       setCreateButtonActivityIndicator(false)
@@ -1220,7 +1220,7 @@ export default function Prompts() {
     setCreateButtonDisabled(true)
     setCreateButtonActivityIndicator(true)
     var fileUploaded = await getPDFAttachment()
-    var created = await createContract(coach.Token, coach.Id, pdfTitle, fileUploaded, pdfType, canBeOptedOut)
+    var created = await createContract(coach.Token, coach.Id, pdfTitle, fileUploaded, 0, canBeOptedOut)
     if (created) {
       refreshContracts(coach.Id, coach.Token)
       setPDF(false)
@@ -1241,7 +1241,7 @@ export default function Prompts() {
   const updatePDF = async () => {
     setCreateButtonDisabled(true)
     setCreateButtonActivityIndicator(true)
-    var created = await updateContract(coach.Token, coach.Id, viewPDF.Id, pdfType, canBeOptedOut)
+    var created = await updateContract(coach.Token, coach.Id, viewPDF.Id, viewPDF.Type, canBeOptedOut)
     if (created) {
       var cs = JSON.parse(JSON.stringify(contracts))
       if (pdfType == 1) {
@@ -1249,7 +1249,6 @@ export default function Prompts() {
           cs[i].Type = 0
         }
       }
-      cs[viewPDF.Index].Type = pdfType
       cs[viewPDF.Index].CanBeOptedOut = canBeOptedOut
       setContracts(cs)
       setPDF(false)
@@ -1508,10 +1507,6 @@ export default function Prompts() {
                         text = text.slice(0,80) + '...'
                       }
                       var iconColor = colors.mainTextColor
-                      if (payment.Type == 1) {
-                        icon = 'star'
-                        iconColor = btnColors.caution
-                      }
                       return (<View style={styles.taskBox} key={index + '-'}>
                         <View style={styles.taskPreview}>
                           <View style={styles.taskPreviewHeader}>
@@ -1552,7 +1547,7 @@ export default function Prompts() {
                               <Text style={styles.taskButtonText}>Options</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.taskButtonRight,{backgroundColor:colors.header}]} onPress={() => viewPaymentTrigger(index)}>
-                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>Edit</Text>
+                              <Text style={[styles.taskButtonText,{color:colors.mainTextColor}]}>View</Text>
                             </TouchableOpacity>
                           </View></>)}
                         </>)}
@@ -1586,10 +1581,6 @@ export default function Prompts() {
                     }
                     var icon = 'document'
                     var iconColor = colors.mainTextColor
-                    if (contract.Type == 1) {
-                      icon = 'star'
-                      iconColor = btnColors.caution
-                    }
                     return (<View style={styles.taskBox} key={'contract_'+index}>
                       <View style={styles.taskPreview}>
                         <View style={styles.taskPreviewHeader}>
@@ -2323,7 +2314,7 @@ export default function Prompts() {
                         setPaymentAmount(v)
                       }}
                     />
-                    <Checkbox 
+                    {false && (<Checkbox 
                       label='Set as onboarding payment' 
                       className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
                       checked={paymentType == 1} 
@@ -2334,7 +2325,7 @@ export default function Prompts() {
                         }
                         setPaymentType(checked)
                       }}
-                    />
+                    />)}
                   </View>
                 </View>
               </View>
@@ -2376,27 +2367,6 @@ export default function Prompts() {
                 <Text style={styles.newPromptDescTitle}>{viewPayment.Title} (${viewPayment.Amount})</Text>
               </View>
               <View style={styles.newPromptBody}>
-                <View style={{flexDirection:'row',alignItems:'center',paddingTop:10,paddingBottom:10}}>
-                  <Checkbox 
-                    label='Set as onboarding payment' 
-                    className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
-                    checked={paymentTypeUpdate == 1} 
-                    onChange={(event, data) => {
-                      var checked = 0
-                      if (data.checked) {
-                        checked = 1
-                      }
-                      setPaymentTypeUpdate(checked)
-                    }}
-                  />
-                  <Button
-                    title='Update'
-                    titleStyle={styles.newContractAddButtonTitle}
-                    buttonStyle={{borderRadius:10}}
-                    onPress={updatePaymentTrigger}
-                    disabled={paymentTypeUpdate == viewPayment.Type}
-                  />
-                </View>
                 <View style={styles.newPromptBodyLeft}>
                   <Text style={[styles.newPromptTitleLabel,{fontSize:20}]}>Memo</Text>
                   <Text style={styles.viewPromptBodyText}>{viewPayment.Memo}</Text>
@@ -2450,7 +2420,7 @@ export default function Prompts() {
                     placeholder='ex. Base Program Agreement'
                     onChangeText={(text) => setPDFTitle(text)}
                   />
-                  <Checkbox 
+                  {false && (<Checkbox 
                     label='Set as onboarding contract' 
                     className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
                     checked={pdfType == 1} 
@@ -2461,7 +2431,7 @@ export default function Prompts() {
                       }
                       setPDFType(checked)
                     }}
-                  />
+                  />)}
                   <Checkbox 
                     label='Client can opt out in app'
                     className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
@@ -2559,18 +2529,6 @@ export default function Prompts() {
               <View style={styles.newContractBodyView}>
                 <View style={styles.viewContractInfo}>
                   <View>
-                    <Checkbox 
-                      label='Set as onboarding contract' 
-                      className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
-                      checked={pdfType == 1} 
-                      onChange={(event, data) => {
-                        var checked = 0
-                        if (data.checked) {
-                          checked = 1
-                        }
-                        setPDFType(checked)
-                      }}
-                    />
                     <Checkbox 
                       label='Client can opt out in app'
                       className={coach.Theme == 0 && 'checkbox-custom-light' || 'checkbox-custom-dark'}
