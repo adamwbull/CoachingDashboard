@@ -2746,17 +2746,22 @@ export const addProgramLight = StyleSheet.create({
     paddingTop:15,
     justifyContent:'flex-start',
     alignItems:'flex-start',
+    flex:1,
+    width:'100%'
   },
   addProgramMainSearch: {
-    zIndex:999
+    zIndex:999,
+  },
+  chosenTaskContainer: {
+    marginRight:20,
+    flex:1,
   },
   chosenTask: {
     flex:1,
-    marginLeft:20,
   },
   chosenTaskTitle: {
     fontSize:22,
-    marginTop:10,
+    marginTop:0,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor
   },
@@ -2766,15 +2771,96 @@ export const addProgramLight = StyleSheet.create({
     marginTop:5,
     color:colorsLight.mainTextColor
   },
-  searchTaskText: {
-    fontFamily:'PoppinsSemiBold',
+  chosenTaskSettingsRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'flex-start',
+    marginTop:10
+  },
+  chosenTaskSettingText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    marginLeft:10,
+    color:colorsLight.mainTextColor,
+  },
+  chosenTaskSettingTextDetail: {
+    marginLeft:5,
+    marginRight:5,
+    fontFamily:'Poppins',
     fontSize:14,
+    color:colorsLight.mainTextColor,
+  },
+  searchTaskText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    textAlign:'center',
+    paddingTop:20,
+    paddingBottom:20,
     color:colorsLight.mainTextColor,
   },
   addProgramFooter: {
     flexDirection:'row',
     borderTopWidth:1,
     borderTopColor:colorsLight.headerBorder,
+  },
+  addTaskSearchList: {
+    width:250,
+    maxHeight:600,
+    flex:1,
+    height:'100%',
+    backgroundColor:colorsLight.header,
+  },
+  addTaskSearchElements: {
+    flex:1,
+  },
+  searchElement: {
+    padding:10,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginLeft:10,
+    marginRight:10,
+    marginBottom:10
+  },
+  searchElementTitle: {
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center'
+  },
+  searchElementText: {
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    textAlign:'center'
+  },
+  searchHighlight: {
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    borderWidth:2,
+    borderColor:colorsLight.mainTextColor,
+    borderRadius:25,
+    paddingRight:10,
+    marginBottom:10,
+    marginLeft:10,
+    marginRight:10,
+  },
+  searchInput: {
+    flex:1,
+    marginLeft:4,
+    fontSize:16,
+    color:colorsLight.mainTextColor,
+    outline:'none',
+    paddingLeft:5,
+    paddingTop:5,
+    paddingBottom:5,
+    outlineWidth:0,
+    width:'100%'
+  },
+  searchIcon: {
+    width:34,
+    justifyContent:'center',
+    alignItems:'center'
   },
 })
 

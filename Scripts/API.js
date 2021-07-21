@@ -14,6 +14,29 @@ export const monthNames = ["January", "February", "March", "April", "May", "June
   "July", "August", "September", "October", "November", "December"
 ];
 
+export function getTimezoneName() {
+  const today = new Date();
+  const short = today.toLocaleDateString(undefined);
+  const full = today.toLocaleDateString(undefined, { timeZoneName: 'short' });
+
+  // Trying to remove date from the string in a locale-agnostic way
+  const shortIndex = full.indexOf(short);
+  if (shortIndex >= 0) {
+    const trimmed = full.substring(0, shortIndex) + full.substring(shortIndex + short.length);
+    
+    // by this time `trimmed` should be the timezone's name with some punctuation -
+    // trim it from both sides
+    return trimmed.replace(/^[\s,.\-:;]+|[\s,.\-:;]+$/g, '');
+
+  } else {
+    // in some magic case when short representation of date is not present in the long one, just return the long one as a fallback, since it should contain the timezone's name
+    return full;
+  }
+}
+
+export function getTimezoneOffset() {
+  return (new Date()).getTimezoneOffset()/60
+}
 export function currentDate() {
   var date = new Date()
   var pad = function(num) { return ('00'+num).slice(-2) }
@@ -187,6 +210,26 @@ export async function check() {
 }
 
 */
+
+export async function getAddProgramData(id, token) {
+
+  var ret = false
+
+  console.log('Getting add program data...')
+  const res = await fetch(url + '/user/coach/add-program-data/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Data found!')
+    ret = payload
+  }
+
+  return ret
+
+}
 
 export async function updateOnboarding(type, ids, id, token) {
 

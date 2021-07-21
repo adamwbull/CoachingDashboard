@@ -1,10 +1,10 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
 import { StatusBar } from 'expo-status-bar'
-import React, { useState, useEffect, createContext, useContext } from 'react'
+import React, { useState, useEffect, createContext, useContext, createRef } from 'react'
 import { TouchableOpacity, Animated, StyleSheet, Text, View } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { NavigationContainer, useLinkTo, Link } from '@react-navigation/native'
+import { NavigationContainer, useLinkTo, Link, useRoute } from '@react-navigation/native'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { Icon } from 'react-native-elements'
 import { drawerLight, colorsLight, navLogo, btnColors, windowHeight } from '../Styles.js'
@@ -28,7 +28,7 @@ const Drawer = createDrawerNavigator()
 export default function Main() {
 
   const user = useContext(userContext)
-
+  const route = useRoute();
   const [styles, setStyles] = useState(drawerLight)
   const [colors, setColors] = useState(colorsLight)
   const [opacity, setOpacity] = useState(new Animated.Value(0))
@@ -40,10 +40,18 @@ export default function Main() {
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [fromWelcome, setFromWelcome] = useState(false)
   const [showMain, setMain] = useState(false)
-
+  const [routeData] = useState({})
   const linkTo = useLinkTo()
 
+  const getRoute = () => {
+    var route = window.location.href.split('/')
+    route = route[3]
+    console.log(route)
+  }
   useEffect(() => {
+
+    getRoute()
+    console.log('main loading')
     if (coach != null) {
       setTimeout(() => {
         if (coach.Theme == 1) {
