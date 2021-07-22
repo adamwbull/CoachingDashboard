@@ -42,7 +42,7 @@ export default function AddProgram() {
   const [hoverBackground3, setHoverBackground3] = useState({})
   const [hoverBackground4, setHoverBackground4] = useState({})
   const [hoverBackground5, setHoverBackground5] = useState({})
-  
+
   // Task controls.
   const [taskCategory, setTaskCategory] = useState(0)
   const [task, setTask] = useState({})
@@ -55,7 +55,8 @@ export default function AddProgram() {
   const [taskList, setTaskList] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-
+  const [error, setError] = useState('')
+  
   // Search data.
   const [loading, setLoading] = useState(false)
   const [searchList, setSearchList] = useState([]) 
@@ -131,14 +132,56 @@ export default function AddProgram() {
   const addProgram = () => {
     console.log ('Add new program...')
     // Need to add ProgramId and ItemOrder to each Task.
+    var program = {
+      CoachId:coach.Id,
+      IsEditable:1,
+      Title:title,
+      Description:description
+    }
+    var programTasks = []
+    var itemOrder = 1
+    for (var i = 0; i < taskList.length; i++) {
+      var task = taskList[i]
+      task.ItemOrder = itemOrder
+      itemOrder++
+      programTasks.push(task)
+    }
+
+    console.log('program:', program)
+    console.log('programTasks:',programTasks)
   }
 
-  const onTitle = (t) => {
-    setTitle(t)
+  const publishCheck = (t, d, l) => {
+    var publishAllowed = true
+    // Check title/description.
+    if (t.length == 0 || d.length == 0) {
+      publishAllowed = false
+    }
+    // Check tasks.
+    if (l.length == 0) {
+      publishAllowed = false
+    } else {
+      for (var i = 0; i < l.length; i++) {
+        if (l[i].TaskId == 0) {
+          publishAllowed = false
+          break
+        }
+      }
+    }
+    setCanPublish(publishAllowed)
   }
 
-  const onDescription = (t) => {
-    setDescription(t)
+  const handleBlur = (type, e) => {
+    
+    var t = e.target.value
+    if (type == 0) {
+      setTitle(t)
+      publishCheck(t, description, taskList)
+    } else {
+      setDescription(t)
+      publishCheck(title, t, taskList)
+    }
+
   }
 
   const toggleDropdown = () => {
@@ -191,6 +234,7 @@ export default function AddProgram() {
       list[currentIndex].Text = searchList[index].Memo
     }
     properlySetTaskList(list)
+    publishCheck(title, description, list)
   }
 
   const search = (text) => {
@@ -264,8 +308,8 @@ export default function AddProgram() {
       TaskId:0,
       Title:title,
       DueAfterDays:1,
-      DueAtTime:'00:00 am',
-      DueAtTimeValue:null,
+      DueAtTime:'12:00 am',
+      DueAtTimeValue:moment('12:00 am', 'HH:mm a'),
       SendNotification:1,
       ReleaseOnAssign:1,
     }
@@ -315,7 +359,7 @@ export default function AddProgram() {
   }
 
   const deleteTask = () => {
-    var list = taskList
+    var list = JSON.parse(JSON.stringify(taskList))
     if (list.length == 1) {
       setMain(false)
       setCurrentIndex(0)
@@ -328,18 +372,25 @@ export default function AddProgram() {
     } else {
       setCurrentIndex(currentIndex-1)
     }
+    publishCheck(title, description, list)
   }
 
   // Update Task settings.
   const updateReleaseOnAssign = () => {
-    var list = taskList
+    var list = JSON.parse(JSON.stringify(taskList))
     list[currentIndex].ReleaseOnAssign = (list[currentIndex].ReleaseOnAssign == 1) ? 0 : 1
     properlySetTaskList(list)
   }
 
   const updateSendNotification = () => {
-    var list = taskList
+    var list = JSON.parse(JSON.stringify(taskList))
     list[currentIndex].SendNotification = (list[currentIndex].SendNotification == 1) ? 0 : 1
+    properlySetTaskList(list)
+  }
+
+  const updateHasDueDate = () => {
+    var list = JSON.parse(JSON.stringify(taskList))
+    list[currentIndex].DueAfterDays = (list[currentIndex].DueAfterDays == 0) ? 1 : 0
     properlySetTaskList(list)
   }
 
@@ -375,18 +426,16 @@ export default function AddProgram() {
               <Text style={styles.addProgramLabel}>Program Title</Text>
               <TextInput
                 style={styles.inputStyle}
-                value={title}
                 placeholder='ex. 30 Days to a Growth Mindset'
-                onChangeText={onTitle}
+                onBlur={(e) => handleBlur(0, e)}
               />
               <Text style={[styles.addProgramLabel,{marginTop:10}]}>Description</Text>
               <TextInput
                 style={styles.inputStyle}
-                value={description}
                 multiline={true}
                 numberOfLines={3}
                 placeholder='ex. Your awesome program description! Only seen by you.'
-                onChangeText={onDescription}
+                onBlur={(e) => handleBlur(1, e)}
               />
             </View>
 
@@ -547,12 +596,19 @@ export default function AddProgram() {
                               <Text style={styles.chosenTaskSettingText}>Show Mobile Notification</Text>
                             </View>
                             <View style={styles.chosenTaskSettingsRow}>
-                              <Text style={[styles.chosenTaskSettingText,{marginLeft:0,marginRight:10}]}>Due Date</Text>
-                              <InputNumber min={1} max={365} defaultValue={1} onChange={changeDueAfterDays} value={taskList[currentIndex].DueAfterDays}/>
-                              <Text style={styles.chosenTaskSettingTextDetail}>days after assigned at</Text>
-                              <TimePicker use12Hours format="hh:mm a" onChange={changeDueAtTime} value={taskList[currentIndex].DueAtTimeValue} />
-                              <Text style={styles.chosenTaskSettingTextDetail}>{getTimezoneName()}</Text>
+                              <Checkbox 
+                                checked={taskList[currentIndex].DueAfterDays !== 0}
+                                toggle 
+                                onChange={() => updateHasDueDate()}
+                              />
+                              <Text style={styles.chosenTaskSettingText}>Due Date</Text>
                             </View>
+                            {taskList[currentIndex].DueAfterDays !== 0 && (<View style={styles.chosenTaskSettingsRow}>
+                              <InputNumber min={1} max={365} defaultValue={1} onChange={changeDueAfterDays} value={taskList[currentIndex].DueAfterDays}/>
+                              <Text style={styles.chosenTaskSettingTextDetail}>day{taskList[currentIndex].DueAfterDays > 1 && '' || ''} after assigned at</Text>
+                              <TimePicker use12Hours format="hh:mm a" onChange={changeDueAtTime} defaultValue={moment('12:00 am', 'HH:mm a')} value={taskList[currentIndex].DueAtTimeValue} />
+                              <Text style={styles.chosenTaskSettingTextDetail}>{getTimezoneName()}</Text>
+                            </View>)}
                           </View>
                         </View>
                       </View>)
@@ -619,16 +675,19 @@ export default function AddProgram() {
               <View style={{flex:1}}>
                 {canPublish && (<>
                   <Button
-                    title='Publish Program'
+                    title='Create Program'
                     buttonStyle={[styles.addProgramListButton]}
                     containerStyle={styles.addProgramListButtonContainer}
+                    onPress={() => addProgram()}
                   />
                 </>)
                 || (<>
-                  <Popup content='Cannot be published until Title/Description are filled out and all created Tasks are chosen.'
+                  <Popup content='Cannot be created until Title/Description are filled out and all created Tasks are chosen.'
                   trigger={<Button
-                    title='Publish Program'
+                    title='Create Program'
                     disabled={true}
+                    position={'top center'}
+                    inverted
                     buttonStyle={[styles.addProgramListButton]}
                     containerStyle={styles.addProgramListButtonContainer} />}
                     style={{backgroundColor:colors.secondaryBackground,padding:5,borderRadius:10,fontFamily:'Poppins',marginBottom:-10,marginLeft:10}}
@@ -636,24 +695,7 @@ export default function AddProgram() {
                 </>)}
               </View>
               <View style={{flex:1}}>
-                {title.length > 0 && (<>
-                  <Button
-                    title='Create Draft'
-                    buttonStyle={[styles.addProgramListButton,{backgroundColor:btnColors.caution}]}
-                    containerStyle={styles.addProgramListButtonContainer}
-                  />
-                </>)
-                || (<>
-                  <Popup content='At least the Title needs to be filled out before a draft can be created.'
-                  trigger={<Button
-                      title='Create Draft'
-                      disabled={true}
-                      buttonStyle={[styles.addProgramListButton,{backgroundColor:btnColors.caution}]}
-                      containerStyle={styles.addProgramListButtonContainer}
-                    />}
-                    style={{backgroundColor:colors.secondaryBackground,padding:5,borderRadius:10,fontFamily:'Poppins',marginBottom:-10,marginRight:10}}
-                  />
-                </>)}
+                {}
               </View>
             </View>
 
