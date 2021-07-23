@@ -8,6 +8,7 @@ export const url = 'https://api.coachsync.me'
 export const uploadUrl = 'https://db.coachsync.me'
 export const key = 'c75c8309094b9bcc21fbcabeb17e0f7a1a4c4f547f041376bfdb71826bcc84db'
 export const captchaKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+export const stripeKey = 'pk_test_51Ibda0Doo38J0s0VtHeC0WxsqtMWNxu6xy9FcAwt9Tch77641I6LeIAmWHcbzVSeiFh6m2smQt3C9OgSYIlo4RAK00ZPlZhqub'
 
 // Helper functions
 export const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -210,6 +211,31 @@ export async function check() {
 }
 
 */
+
+export async function completeRegistration(id, token) {
+
+  var ret = false
+  var arr = {CoachId:id, Token:token}
+  console.log('Completing registration for free plan...')
+  const res = await fetch(url + '/user/coach/complete-registration', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Completed!')
+    ret = true
+  }
+
+  return ret
+
+}
 
 export async function getAddProgramData(id, token) {
 

@@ -740,7 +740,33 @@ export const innerDrawerLight = StyleSheet.create({
     borderBottomWidth:2,
     color:colorsLight.mainTextColor,
     borderBottomColor:colorsLight.mainTextColor
+  },
+  pageInfo: {
+    width:200,
+    borderTopWidth:2,
+    borderTopColor:colorsLight.headerBorder,
+    marginTop:'auto',
+    padding:10,
+  },
+  pageInfoHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+  },
+  pageInfoHeaderText: {
+    fontFamily:'Poppins',
+    fontSize:18,
+    marginLeft:6,
+    color:colorsLight.mainTextColor
+  },
+  pageInfoBody: {
+    padding:3,
+  },
+  pageInfoBodyText: {
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor
   }
+
 })
 
 export const homeLight = StyleSheet.create({
@@ -763,7 +789,8 @@ export const homeLight = StyleSheet.create({
   },
   h1: {
     color:colorsLight.darkGray
-  }
+  },
+
 });
 
 export const promptsLight = StyleSheet.create({

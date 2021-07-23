@@ -56,7 +56,7 @@ export default function AddProgram() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
-  
+
   // Search data.
   const [loading, setLoading] = useState(false)
   const [searchList, setSearchList] = useState([]) 
@@ -695,7 +695,7 @@ export default function AddProgram() {
                 </>)}
               </View>
               <View style={{flex:1}}>
-                {}
+                {error == ''}
               </View>
             </View>
 

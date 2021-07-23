@@ -8,7 +8,7 @@ import { Button, Icon, PricingCard, ButtonGroup } from 'react-native-elements'
 import { useLinkTo, Link } from '@react-navigation/native'
 import { TextInput } from 'react-native-web'
 import { set, get, getTTL, ttl } from '../Scripts/Storage.js'
-import { refreshCoach, url, createAccount, getActiveDiscount, getNumCoaches, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate, getPlans } from '../Scripts/API.js'
+import { stripeKey, completeRegistration, refreshCoach, url, createAccount, getActiveDiscount, getNumCoaches, verifyCaptcha, containsSpecialCharacters, hasUpperCase, emailCheck, sqlToJsDate, parseDateText, toFullDate, getPlans } from '../Scripts/API.js'
 import Recaptcha from 'react-grecaptcha'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import DatePicker from 'react-date-picker/dist/entry.nostyle'
@@ -486,6 +486,15 @@ export default function SignUp() {
       amount = (plans[0].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
       priceBase = plans[0].BasePrice*annual
       style = btnColors.primary
+      const coach = get('Coach')
+      var updateRegistrationCompleted = await completeRegistration(coach.Id, coach.Token);
+      var updated = await refreshCoach(coach.Id, coach.Token);
+      set('Coach',updated,ttl)
+      setShowPricingForm(false)
+      setShowActivityIndicator(true)
+      await delay(300)
+      setShowActivityIndicator(false)
+      setShowCongrats(true)
     } else {
       if (type == 1) {
         name = 'Standard Plan'
@@ -499,9 +508,7 @@ export default function SignUp() {
         style = btnColors.danger
       }
       dateType = (selectedIndex == 0) ? 'Monthly' : 'Annual'
-      lengthText = (selectedIndex == 0) ? '/mo for ' + activeDiscountMonths + ' ' + ((activeDiscountMonths > 1) ? 'months ' : 'month ') : ' for a year '
-      discountLine = (activeDiscountExpire != false) ? `${"\n"}$` + amount + lengthText + 'then $' + priceBase + ' after' : ''
-      memo = dateType + ' Subscription' + discountLine
+      memo = dateType + ' ' + name + ' Subscription'
       setChosenPlan(plans[type])
       setPriceName(name)
       setPriceStyle(style)
@@ -524,6 +531,9 @@ export default function SignUp() {
     } else if (type == 2) {
       name = 'Professional Plan'
       style = btnColors.danger
+    } else {
+      name = 'Free Plan'
+      style = btnColors.primary
     }
     setPriceName(name)
     setPriceStyle(style)
@@ -542,7 +552,8 @@ export default function SignUp() {
     setPaymentIndex(i)
   }
 
-  const stripePromise = loadStripe('pk_test_51Ibda0Doo38J0s0VtHeC0WxsqtMWNxu6xy9FcAwt9Tch77641I6LeIAmWHcbzVSeiFh6m2smQt3C9OgSYIlo4RAK00ZPlZhqub')
+  const stripePromise = loadStripe(stripeKey)
+  
 
   const handleFinish = async () => {
     const coach = get('Coach')
@@ -555,6 +566,7 @@ export default function SignUp() {
     setShowCongrats(true)
 
   }
+  
   const dashboard = async () => {
     linkTo('/clients')
   }

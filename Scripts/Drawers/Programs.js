@@ -9,9 +9,48 @@ import { homeDark, colorsDark, innerDrawerDark } from '../StylesDark.js';
 import { useLinkTo } from '@react-navigation/native';
 import LoadingScreen from '../LoadingScreen.js';
 import { Icon } from 'react-native-elements'
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer'
 import { set, get, getTTL, ttl } from '../Storage.js'
 
+// Create Drawer Content.
+function DrawerContent(props) {
+
+  const [colors, setColors] = useState(colorsLight)
+  const [drawerStyles, setDrawerStyles] = useState(innerDrawerLight)
+  const [info, setInfo] = useState({
+    Header:'',
+    Body:'',
+    Wiki:''
+  })
+
+  useEffect(() => {
+    console.log('loc:',props.loc)
+  }, [props.loc])
+
+  return (<View style={{justifyContent:'space-between',height:'100%'}}>
+    <DrawerContentScrollView {...props} contentContainerStyle={{
+      flex:1
+    }}>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+    <View style={drawerStyles.pageInfo}>
+      <TouchableOpacity style={drawerStyles.pageInfoHeader} onPress={() => window.open('https://wiki.coachsync.me/en/programs/creating-programs', '_blank')}>
+        <Icon
+          name='help-circle-outline'
+          type='ionicon'
+          size={25}
+          color={colors.mainTextColor}
+          style={{}}
+        />
+        <Text style={drawerStyles.pageInfoHeaderText}>New Program</Text>
+      </TouchableOpacity>
+      <View style={drawerStyles.pageInfoBody}>
+        <Text style={drawerStyles.pageInfoBodyText}>Create a new program to add Clients to.</Text>
+      </View>
+    </View>
+  </View>)
+
+}
 // Create drawer.
 const Drawer = createDrawerNavigator()
 
@@ -30,6 +69,8 @@ export default function Programs() {
   const [drawerStyles, setDrawerStyles] = useState(innerDrawerLight)
   const [coach, setCoach] = useState({})
 
+  const [loc, setLoc] = useState('AllPrograms')
+
   useEffect(() => {
     const sCoach = get('Coach')
     if (sCoach != null) {
@@ -39,7 +80,6 @@ export default function Programs() {
         setColors(colorsDark)
       }
     }
-
   }, [])
 
   return (<View style={{height:'100%',justifyContent:'space-between'}}>
@@ -48,6 +88,7 @@ export default function Programs() {
         <Text style={drawerStyles.drawerTopTitle}>Programs</Text>
       </View>
       <Drawer.Navigator
+        drawerContent={props => <DrawerContent {...props} loc={loc} />}
         drawerType='permanent'
         drawerStyle={drawerStyles.drawer}
         sceneContainerStyle={{
@@ -73,95 +114,93 @@ export default function Programs() {
           }
         }}
       >
-      <Drawer.Screen name="AllPrograms" component={AllPrograms}
-        options={{
-          title:'All Programs - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='clipboard'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>All Programs</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="Prompts" component={Prompts}
-        options={{
-          title:'Prompts - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='compass'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Prompts</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="Concepts" component={Concepts}
-        options={{
-          title:'Concepts - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='library'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Concepts</Text>)
-          }
-        }}
-      />
-      <Drawer.Screen name="AddProgram" component={AddProgram}
-        options={{
-          title:'New Program - CoachSync',
-          drawerIcon: ({focused, size}) => (
-            <Icon
-              name='add'
-              type='ionicon'
-              size={20}
-              style={{backgroundColor:''}}
-              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
-            />
-          ),
-          drawerLabel:({focused}) => {
-            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>New Program</Text>)
-          }
-        }}
-      />
+        <Drawer.Screen name="AllPrograms" component={AllPrograms}
+          listeners={{
+            focus: () => {
+              console.log('navTo AllPrograms')
+              setLoc('AllPrograms')
+            }
+          }}
+          options={{
+            title:'All Programs - CoachSync',
+            drawerIcon: ({focused, size}) => (
+              <Icon
+                name='clipboard'
+                type='ionicon'
+                size={20}
+                style={{backgroundColor:''}}
+                color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+              />
+            ),
+            drawerLabel:({focused}) => {
+              const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>All Programs</Text>)
+            }
+          }}
+        />
+        <Drawer.Screen name="Prompts" component={Prompts}
+          listeners={{
+            focus: () => {
+              console.log('navTo Prompts')
+              setLoc('Prompts')
+            }
+          }}
+          options={{
+            title:'Prompts - CoachSync',
+            drawerIcon: ({focused, size}) => (
+              <Icon
+                name='compass'
+                type='ionicon'
+                size={20}
+                style={{backgroundColor:''}}
+                color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+              />
+            ),
+            drawerLabel:({focused}) => {
+              const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Prompts</Text>)
+            }
+          }}
+        />
+        <Drawer.Screen name="Concepts" component={Concepts}
+          options={{
+            title:'Concepts - CoachSync',
+            drawerIcon: ({focused, size}) => (
+              <Icon
+                name='library'
+                type='ionicon'
+                size={20}
+                style={{backgroundColor:''}}
+                color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+              />
+            ),
+            drawerLabel:({focused}) => {
+              const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Concepts</Text>)
+            }
+          }}
+        />
+        <Drawer.Screen name="AddProgram" component={AddProgram}
+          options={{
+            title:'New Program - CoachSync',
+            drawerIcon: ({focused, size}) => (
+              <Icon
+                name='add'
+                type='ionicon'
+                size={20}
+                style={{backgroundColor:''}}
+                color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+              />
+            ),
+            drawerLabel:({focused}) => {
+              const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>New Program</Text>)
+            }
+          }}
+        />
       </Drawer.Navigator>
     </View>
-    <View style={styles.pageInfo}>
-      <TouchableOpacity style={styles.pageInfoHeader} onPress={() => window.open('https://wiki.coachsync.me/en/programs/creating-programs', '_blank')}>
-        <Icon
-          name='help-circle-outline'
-          type='ionicon'
-          size={25}
-          color={colors.mainTextColor}
-          style={{}}
-        />
-        <Text style={styles.pageInfoHeaderText}>New Program</Text>
-      </TouchableOpacity>
-      <View style={styles.pageInfoBody}>
-        <Text style={styles.pageInfoBodyText}>Create a new program to add Clients to.</Text>
-      </View>
-    </View>
+    
   </View>)
 
 }

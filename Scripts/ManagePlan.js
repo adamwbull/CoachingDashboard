@@ -2,15 +2,15 @@
 /* eslint-disable react/display-name */
 import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, ScrollView, Text, View, Linking, Image } from 'react-native'
-import { messageBox, managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
-import { managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
+import { signUpLight, messageBox, managePlanLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
+import { signUpDark, managePlanDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { TextInput } from 'react-native-web'
 import { Icon, Button, ButtonGroup, Chip } from 'react-native-elements'
-import { sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData, updatePaymentMethod } from './API.js'
+import { refreshCoach, url, stripeKey, sqlToJsDate, parseSimpleDateText, getPlans, getActiveCoachDiscount, getUpcomingSwitchPeriodProration, getUpcomingChangePlanProration, switchSubscription, invoiceData, updatePaymentMethod } from './API.js'
 import { confirmAlert } from 'react-confirm-alert' // Import
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 import AmEx from '../assets/cards/amex.png'
@@ -26,6 +26,195 @@ import {
 import { loadStripe } from '@stripe/stripe-js';
 
 import userContext from './Context.js'
+
+const SubscribeForm = ({memo, onFinished, planId, annual, priceAmount}) => {
+
+  // Get the lookup key for the price from the previous page redirect.
+  const linkTo = useLinkTo()
+  const [name, setName] = useState('');
+  const [messages, setMessages] = useState('');
+  const [subscription, setSubscription] = useState({status:'inactive'});
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Styling.
+  const [signUp, setStyle] = useState(signUpLight)
+  const [colors, setColors] = useState(colorsLight)
+
+  // helper for displaying status messages.
+  const setMessage = (message) => {
+    if (messages == '') {
+      setMessages(`${message}`);
+    } else {
+      setMessages(`${messages}\n${message}`);
+    }
+  }
+
+  const cardInputStyle = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: colorsLight.mainTextColor,
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: btnColors.danger,
+      },
+    },
+  };
+
+  // Initialize an instance of stripe.
+  const stripe = useStripe();
+  const elements = useElements();
+
+  if (!stripe || !elements) {
+    // Stripe.js has not loaded yet. Make sure to disable
+    // form submission until Stripe.js has loaded.
+    return '';
+  }
+
+  // When the subscribe-form is submitted we do a few things:
+  //
+  //   1. Tokenize the payment method
+  //   2. Create the subscription
+  //   3. Handle any next actions like 3D Secure that are required for SCA.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Get a reference to a mounted CardElement. Elements knows how
+    // to find your CardElement because there can only ever be one of
+    // each type of element.
+    const cardElement = elements.getElement(CardElement);
+
+    // Use card Element to tokenize payment details
+    let { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+      billing_details: {
+        name: name,
+      }
+    });
+
+    if (error) {
+      // show error and collect new card details.
+      setMessage(error.message);
+      return;
+    }
+
+    setRefreshing(true)
+    var coach = get('Coach')
+    var arr = {
+      memo,
+      planId,
+      annual,
+      paymentMethodId: paymentMethod.id,
+      CoachId:coach.Id,
+      Token:coach.Token
+    };
+    console.log(arr)
+    // Create the subscription.
+    let { subError, subscription } = await fetch(url + '/user/coach/create-stripe-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(arr),
+    }).then(r => r.json());
+
+    if(subError) {
+      // show error and collect new card details.
+      setRefreshing(false)
+      setMessage(subError.message);
+      return;
+    }
+
+    setSubscription(subscription);
+
+    // This sample only supports a Subscription with payment
+    // upfront. If you offer a trial on your subscription, then
+    // instead of confirming the subscription's latest_invoice's
+    // payment_intent. You'll use stripe.confirmCardSetup to confirm
+    // the subscription's pending_setup_intent.
+    switch(subscription.status) {
+      case 'active':
+        // Redirect to account page
+        onFinished()
+        break;
+
+      case 'incomplete':
+
+        // Handle next actions
+        //
+        // If the status of the subscription is `incomplete` that means
+        // there are some further actions required by the customer. In
+        // the case of upfront payment (not trial) the payment is confirmed
+        // by passing the client_secret of the subscription's latest_invoice's
+        // payment_intent.
+        //
+        // For trials, this works a little differently and requires a call to
+        // `stripe.confirmCardSetup` and passing the subscription's
+        // pending_setup_intent's client_secret like so:
+        //
+        //   const {error, setupIntent} = await stripe.confirmCardSetup(
+        //     subscription.pending_setup_intent.client_secret
+        //   )
+        //
+        // then handling the resulting error and setupIntent as we do below.
+        //
+        // This sample does not support subscriptions with trials. Instead, use these docs:
+        // https://stripe.com/docs/billing/subscriptions/trials
+        setRefreshing(false)
+        const {error} = await stripe.confirmCardPayment(
+          subscription.latest_invoice.payment_intent.client_secret,
+        )
+
+        if(error) {
+          setMessage(error.message);
+        } else {
+          setMessage("Success! Redirecting to your account.");
+          setSubscription({ status: 'active' });
+        }
+        break;
+
+
+      default:
+        setMessage(`Unknown Subscription status: ${subscription.status}`);
+    }
+
+  }
+
+  if(subscription && subscription.status === 'active') {
+    onFinished()
+  }
+
+  return (<View>
+    {refreshing && (<ActivityIndicatorView />)}
+    {refreshing == false && (<View>
+      {messages.length > 0 && (<View style={[messageBox.errorBox,{marginTop:10,marginLeft:10,marginRight:10}]}>
+          <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+          <Text style={messageBox.text}>{messages}</Text>
+        </View>) || (<View></View>)}
+      <TextInput
+        style={signUp.inputCardName}
+        value={name}
+        placeholder='Cardholder Name'
+        placeholderTextColor='#aab7c4'
+        keyboardType='default'
+        onChangeText={(t) => { setName(t) }}
+      />
+      <View style={signUp.cardWrapper}>
+        <CardElement options={cardInputStyle} />
+      </View>
+      <Button
+      title={'Pay $' + priceAmount}
+      buttonStyle={signUp.paymentSubmitButton}
+      containerStyle={signUp.paymentSubmitButtonContainer}
+      onPress={handleSubmit} />
+      <Text style={signUp.paymentBottomText}>You can unsubscribe or adjust your plan later.</Text>
+    </View>)}
+  </View>)
+}
 
 const UpdatePaymentMethodForm = ({coach, styles, onClose, updatePaymentMethodVar}) => {
   const [paymentMethodName, setPaymentMethodName] = useState('')
@@ -122,12 +311,13 @@ const UpdatePaymentMethodForm = ({coach, styles, onClose, updatePaymentMethodVar
 
 export default function ManagePlan() {
 
-  const stripePromise = loadStripe('pk_test_51Ibda0Doo38J0s0VtHeC0WxsqtMWNxu6xy9FcAwt9Tch77641I6LeIAmWHcbzVSeiFh6m2smQt3C9OgSYIlo4RAK00ZPlZhqub')
+  const stripePromise = loadStripe(stripeKey)
   const linkTo = useLinkTo()
   const user = useContext(userContext)
 
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(managePlanLight)
+  const [signUp, setSignUp] = useState(signUpLight)
   const [colors, setColors] = useState(colorsLight)
 
   // Main stage controls.
@@ -138,6 +328,8 @@ export default function ManagePlan() {
   const [showPayments, setShowPayments] = useState(false)
   const [paymentsNav, setPaymentsNav] = useState(true)
   const [firstPaymentsNav, setFirstPaymentsNav] = useState(true)
+  const [showPlansAsFree, setShowPlansAsFree] = useState(false)
+  const [showSubscribeForm, setShowSubscribeForm] = useState(false)
 
   // Main variables.
   const [coach, setCoach] = useState(user)
@@ -147,9 +339,15 @@ export default function ManagePlan() {
   const [plans, setPlans] = useState([])
   const [activePlan, setActivePlan] = useState({})
   const [curAnnual, setCurAnnual] = useState(1)
+  const [cardError, setMessage] = useState(false)
 
   // Plans variables.
+  const [planType, setPlanType] = useState(0)
   const [planAnnual, setPlanAnnual] = useState(1)
+  const [priceMemo, setPriceMemo] = useState('')
+  const [priceName, setPriceName] = useState('')
+  const [priceBase, setPriceBase] = useState(0)
+  const [priceAmount, setPriceAmount] = useState(0)
   const [planPeriodIndex, setPlanPeriodIndex] = useState(0)
   const [activeDiscount, setActiveDiscount] = useState({})
   const [plansButtonIndicators, setPlansButtonIndicators] = useState([false, false, false])
@@ -172,9 +370,11 @@ export default function ManagePlan() {
         var discount = await getActiveCoachDiscount(t, a)
         setActiveDiscount(discount)
         for (var i = 0; i < refresh.length; i++) {
+          refresh[i].OldPrice = refresh[i].BasePrice
           refresh[i].BasePrice = (refresh[i].BasePrice*(1-(discount.Percent/100))).toFixed(2)
         }
       }
+      console.log('plans:',refresh)
       setPlans(refresh)
       setActivePlan(refresh[plan])
     }
@@ -202,8 +402,18 @@ export default function ManagePlan() {
         setPlanTitleStyle({backgroundColor:btnColors.primary})
       }
       setActivityIndicator(false)
-      setBar(true)
-      navToPayments()
+
+      if (coach.Plan == 0 ) {
+        if (coach.StripeSubscriptionId == 0) {
+          setShowPlansAsFree(true)
+        } else {
+          setBar(true)
+          navToPayments()
+        }
+      } else {
+        setBar(true)
+        navToPayments()
+      }
     } else {
       linkTo('/welcome')
     }
@@ -712,6 +922,54 @@ export default function ManagePlan() {
     })
   }
 
+  // As free functions. 
+  const onBackPayment = () => {
+    setShowSubscribeForm(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowPlansAsFree(true)
+    }, 500)
+  }
+
+  const upgradeToPlanAsFree = (type) => {
+    setPlanType(type)
+    var activeDiscountPerc = 0
+    if (activeDiscount.Percent != undefined) {
+      activeDiscountPerc = activeDiscount.Percent
+    }
+    var name, amount, priceBase, style
+    if (type == 1) {
+      name = 'Standard Plan'
+      amount = plans[1].BasePrice*planAnnual
+      priceBase = plans[1].OldPrice*planAnnual
+      style = btnColors.success
+    } else if (type == 2) {
+      name = 'Professional Plan'
+      amount = plans[2].BasePrice*planAnnual
+      priceBase = plans[2].OldPrice*planAnnual
+      style = btnColors.danger
+    }
+    var dateType = (planPeriodIndex == 0) ? 'Monthly' : 'Annual'
+    var memo = dateType + ' Subscription'
+    setPriceMemo(memo)
+    setPriceName(name)
+    setPriceAmount(amount)
+    setPriceBase(priceBase)
+    setShowPlansAsFree(false)
+    setActivityIndicator(true)
+    setTimeout(() => {
+      setActivityIndicator(false)
+      setShowSubscribeForm(true)
+    }, 500)
+  }
+
+  const handleFinish = async () => {
+    var updated = await refreshCoach(coach.Id, coach.Token);
+    set('Coach',updated,ttl)
+    window.location.reload()
+  }
+
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -1131,6 +1389,142 @@ export default function ManagePlan() {
               </View>
             </View>
           </>)}
+
+          {showPlansAsFree && (<>
+            <View style={[styles.bodyContainer,{alignItems:'center'}]}>
+              <Text style={styles.bodyTitle}>We hope you are enjoying the Free Plan...</Text>
+              <Text style={styles.bodyDesc}>Upgrade below to unlock more features, storage, client capacity, and more!</Text>
+              <View style={{alignItems:'center',marginTop:10}}>
+                <ButtonGroup
+                  onPress={selectPlanPeriod}
+                  buttons={['Monthly Plans','Annual Plans']}
+                  selectedIndex={planPeriodIndex}
+                  containerStyle={{width:400,height:40,marginBottom:20}}
+                />
+              </View>
+              <View style={{flexDirection:'row',marginTop:20,flex:1,width:'100%'}}>
+                {plans.map((plan, index) => {
+
+                  var planTitleColor = {color:btnColors.primary}
+
+                  if (plan.Type == 1) {
+                    planTitleColor = {color:btnColors.success}
+                  } else if (plan.Type == 2) {
+                    planTitleColor = {color:btnColors.danger}
+                  }
+
+                  var info = plan.Info.split(',')
+
+                  var currentPlan = (plan.Type == coach.Plan)
+
+                  var periodText = ' /month'
+                  var periodNum = 1
+                  if (planPeriodIndex == 1) {
+                    periodText = ' /year'
+                    periodNum = 12
+                  }
+
+                  var isDiscounted = false
+                  var activeDiscountPrice = 0
+
+                  if (activeDiscount.Percent != undefined) {
+                    isDiscounted = true
+                    activeDiscountPrice = (parseFloat(plan.BasePrice)*(100/(100-activeDiscount.Percent))*planAnnual).toFixed(2)
+                  }
+
+                  return (<View key={index} style={{flex:1,marginBottom:20}}>
+                    <Text style={[styles.planTitle]}><Text style={planTitleColor}>{plan.Title}</Text> Plan</Text>
+                    <View>
+                      <View>
+                        {info.map((infoItem, infoIndex) => {
+                          return (<Text key={infoIndex + '_'} style={styles.planDesc}>
+                            - {infoItem}
+                          </Text>)
+                        })}
+                      </View>
+                      <View style={{flexDirection:'column',marginTop:10,alignItems:'center',justifyContent:'center'}}>
+                        {isDiscounted && (<View>
+                          <Text style={styles.originalPrice}>${activeDiscountPrice}</Text>
+                          <Text style={styles.discountTitle}>{activeDiscount.Description}:</Text>
+                        </View>)}
+                        <Text style={styles.planTitleAmount}>
+                          ${(parseFloat(plan.BasePrice)*planAnnual).toFixed(2) + periodText}
+                        </Text>
+                      </View>
+                      <View style={{flexDirection:'column',marginTop:10,alignItems:'center',justifyContent:'center'}}>
+                        {index == 0 && (<>
+                          <Text style={styles.planCurrent}>Current Plan</Text>
+                        </>) || (<>
+                          {plansButtonIndicators[index] == false && currentPlan && coach.PaymentPeriod == periodNum && (<>
+                            <Text style={styles.planCurrent}>Current Plan</Text>
+                          </>)}
+                          {plansButtonIndicators[index] == false && currentPlan == false && coach.Plan < plan.Type && (<>
+                            <Button
+                              title='Upgrade'
+                              buttonStyle={styles.upgradeToPlanButton}
+                              containerStyle={styles.upgradeToPlanButtonContainer}
+                              titleStyle={{color:'#fff'}}
+                              onPress={() => upgradeToPlanAsFree(plan.Type)}
+                              disabled={plansButtonIndicators[index]}
+                            />
+                          </>)}
+                          {plansButtonIndicators[index] && (<View style={{}}>
+                            <ActivityIndicatorView />
+                          </View>)}
+                        </>)}
+                      </View>
+                    </View>
+                  </View>)
+
+                })}
+              </View>
+            </View>
+          </>)}
+
+          {showSubscribeForm && (<View style={[signUp.paymentFormContainer,{width:'100%'}]}>
+            <TouchableOpacity style={[signUp.backContainer,{flex:1,width:'100%',justifyContent:'flex-start'}]} onPress={onBackPayment}>
+              <Icon containerStyle={signUp.iconStyle} color={colors.mainTextColor} type='ionicon' name='arrow-back-circle-outline'/>
+              <Text style={signUp.backText}>Go Back</Text>
+            </TouchableOpacity>
+            <View style={[signUp.paymentForm]}>
+              <View style={[signUp.paymentInfo]}>
+                <View style={signUp.paymentIcon}>
+                  <Icon size={40} color='#fff' name='cart-outline' type='ionicon' />
+                </View>
+                <View style={signUp.paymentItem}>
+                  <View style={signUp.paymentItemDetails}>
+                    <Text style={signUp.paymentItemTitle}>{priceName}</Text>
+                    <Text style={signUp.paymentItemMemo}>{priceMemo}</Text>
+                  </View>
+                  <View style={signUp.paymentItemAmount}>
+                    <Text style={signUp.paymentDiscountAmount}>${activeDiscount.Percent != undefined && (priceBase)}</Text>
+                    <Text style={signUp.paymentPrimaryAmount}>${priceAmount}</Text>
+                  </View>
+                </View>
+                <View style={signUp.stripeSection}>
+                  <Image
+                      source={require('../assets/stripe.png')}
+                      resizeMode="contain"
+                      style={[
+                        signUp.paymentStripe
+                      ]}
+                  />
+                </View>
+              </View>
+              <View style={signUp.paymentMain}>
+                <Text style={{fontSize:14,textAlign:'center',fontFamily:'Poppins',color:colorsLight.mainTextColor}}>
+                  By subscribing you agree to our <a href="https://coachsync.me/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="https://coachsync.me/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                </Text>
+                {cardError && (<View style={messageBox.errorBox}>
+                    <View style={messageBox.icon}><Icon name='close-circle-outline' size={30} type='ionicon' color={colorsLight.darkGray}/></View>
+                    <Text style={messageBox.text}>{cardError}</Text>
+                  </View>) || (<View></View>)}
+                <Elements stripe={stripePromise}>
+                  <SubscribeForm memo={priceMemo} onFinished={handleFinish} planId={planType} annual={planAnnual} priceAmount={priceAmount} />
+                </Elements>
+              </View>
+            </View>
+          </View>)}
 
         </View>
       </View>
