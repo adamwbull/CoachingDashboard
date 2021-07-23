@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useCallback } from 'react'
@@ -24,6 +25,8 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { confirmAlert } from 'react-confirm-alert' // Import
+import 'react-confirm-alert/src/react-confirm-alert.css' 
 
 const delay = ms => new Promise(res => setTimeout(res, ms))
 
@@ -245,7 +248,7 @@ export default function SignUp() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [paymentIndex, setPaymentIndex] = useState(0)
   const [priceUnit, setPriceUnit] = useState('mo')
-  const [priceStyle, setPriceStyle] = useState(btnColors.success)
+  const [priceStyle, setPriceStyle] = useState(btnColors.primary)
   const [priceAmount, setPriceAmount] = useState(0)
   const [priceMemo, setPriceMemo] = useState('')
   const [priceBase, setPriceBase] = useState(0)
@@ -486,15 +489,42 @@ export default function SignUp() {
       amount = (plans[0].BasePrice*((100-activeDiscountPerc)/100.0)*annual).toFixed(2)
       priceBase = plans[0].BasePrice*annual
       style = btnColors.primary
-      const coach = get('Coach')
-      var updateRegistrationCompleted = await completeRegistration(coach.Id, coach.Token);
-      var updated = await refreshCoach(coach.Id, coach.Token);
-      set('Coach',updated,ttl)
-      setShowPricingForm(false)
-      setShowActivityIndicator(true)
-      await delay(300)
-      setShowActivityIndicator(false)
-      setShowCongrats(true)
+      confirmAlert({
+        customUI: ({ onClose }) => {
+          return (<View style={signUp.popup}>
+            <Text style={signUp.popupText}>Subscribe to the <Text style={{color:btnColors.primary}}>Free Plan</Text>?</Text>
+            <View style={signUp.popupButtons}>
+              <Button 
+                title='Cancel'
+                buttonStyle={signUp.popupCancel}
+                titleStyle={[signUp.popupButtonTitle,{color:colors.mainTextColor}]}
+                containerStyle={[signUp.popupButtonContainer,{marginRight:10}]}
+                onPress={onClose}
+              />
+              <Button 
+                title='Confirm'
+                buttonStyle={signUp.popupConfirm}
+                titleStyle={signUp.popupButtonTitle}
+                onPress={async () => {
+                  const coach = get('Coach')
+                var updateRegistrationCompleted = await completeRegistration(coach.Id, coach.Token);
+                var updated = await refreshCoach(coach.Id, coach.Token);
+                set('Coach',updated,ttl)
+                setShowPricingForm(false)
+                setShowActivityIndicator(true)
+                onClose()
+                await delay(300)
+                setShowActivityIndicator(false)
+                setShowCongrats(true)
+                }}
+                containerStyle={[signUp.popupButtonContainer,{marginLeft:10}]}
+              />
+            </View>
+          </View>)
+        },
+        closeOnEscape: true,
+        closeOnClickOutside: true
+      })
     } else {
       if (type == 1) {
         name = 'Standard Plan'
@@ -566,7 +596,7 @@ export default function SignUp() {
     setShowCongrats(true)
 
   }
-  
+
   const dashboard = async () => {
     linkTo('/clients')
   }
@@ -681,7 +711,7 @@ export default function SignUp() {
           </View>)}
           {showPricingForm && (<View style={{flexShrink:1}}>
             <Text style={signUp.pricingTitle}>Welcome to CoachSync, {firstName}!</Text>
-            <Text style={signUp.pricingIntro}>The next step is to choose the perfect package for you. You can also upgrade later.</Text>
+            <Text style={signUp.pricingIntro}>The next step is to choose the perfect package. You can also change your subscription later.</Text>
             {false && (<Text style={signUp.timeLeft}>Time left on sale: {activeDiscountExpire && (<View style={signUp.countdown}><DateCountdown dateTo={activeDiscountExpire} mostSignificantFigure='day' locales={['y','m','d','h','m','s']} callback={()=>discount()} /></View>)}</Text>)}
             {coachCount > 10 && (<Text style={signUp.timeLeft}>Beta Sale lasts for first 50 sign ups! <Text style={signUp.countdown}>{50-coachCount} spaces left</Text></Text>)}
             {true && (<View style={signUp.toggleAnnual}>

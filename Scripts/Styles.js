@@ -566,6 +566,47 @@ export const signUpLight = StyleSheet.create({
     width:'50%',
     marginTop:20,
     marginLeft:'25%'
+  },
+  popup: {
+    width:300,
+    height:150,
+    padding:10,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    borderWidth:2,
+    borderColor:colorsLight.headerBorder,
+    justifyContent:'center'
+  },
+  popupText: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    fontSize:18,
+    textAlign:'center'
+  },
+  popupButtons: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    marginTop:10
+  },
+  popupConfirm: {
+    backgroundColor:btnColors.success,
+    padding:5,
+    borderRadius:10,
+    marginRight:10,
+  },
+  popupCancel: {
+    backgroundColor:colorsLight.secondaryBackground,
+    padding:5,
+    borderRadius:10,
+    marginLeft:10
+  },
+  popupButtonTitle: {
+    color:'#fff',
+    fontSize:18,
+    fontFamily:'Poppins'
+  },
+  popupButtonContainer: {
+    flex:1
   }
 });
 
@@ -716,7 +757,7 @@ export const drawerLight = StyleSheet.create({
     fontSize:14,
     color:btnColors.danger,
     marginLeft:3
-  }
+  },
 })
 
 export const innerDrawerLight = StyleSheet.create({

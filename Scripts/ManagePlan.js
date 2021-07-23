@@ -986,8 +986,10 @@ export default function ManagePlan() {
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>
               {(showPayments || paymentsNav == false) && (<Text style={styles.barSelected}>Payments</Text>)
                         || (<Text onPress={navToPayments} style={styles.barUnselected}>Payments</Text>)}
-              {showPlans && (<Text style={styles.barSelected}>Plans</Text>)
+              {showActivityIndicator == false && (<>
+                {showPlans && (<Text style={styles.barSelected}>Plans</Text>)
                         || (<Text onPress={navToPlans} style={styles.barUnselected}>Plans</Text>)}
+              </>)}
             </View>
           </>)}
 
