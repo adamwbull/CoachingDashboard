@@ -2,15 +2,84 @@
 /* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native';
 ;
 import { homeLight, colorsLight, innerDrawerLight } from '../Styles.js';
 import { homeDark, colorsDark, innerDrawerDark } from '../StylesDark.js';
-import { useLinkTo } from '@react-navigation/native';
+import { useLinkTo, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import LoadingScreen from '../LoadingScreen.js';
 import { Icon } from 'react-native-elements'
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer'
 import { set, get, getTTL, ttl } from '../Storage.js'
+import { Popup } from 'semantic-ui-react'
+
+// Create Drawer Content.
+function DrawerContent(props) {
+
+  const [colors, setColors] = useState(colorsLight)
+  const [drawerStyles, setDrawerStyles] = useState(innerDrawerLight)
+  const [info, setInfo] = useState({
+    Header:'',
+    Body:'',
+    Wiki:''
+  })
+  
+  useEffect(() => {
+    var loc = props.loc
+    var i = {
+      Header:'',
+      Body:'',
+      Wiki:''
+    }
+    if (loc == 'BrandDesign') {
+      i = {
+        Header:'Brand Design',
+        Body:'Customize your Client&apos;s in-app experience. Click to learn more!',
+        Wiki:''
+      } 
+    } else if (loc == 'SocialFeed') {
+      i = {
+        Header:'Social Feed',
+        Body:'Customize and add posts seen by all Clients. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/mobile-app/social-feed'
+      } 
+    } else if (loc == 'Onboarding') {
+      i = {
+        Header:'Onboarding',
+        Body:'Customize the onboarding experience for your clients. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/mobile-app/onboarding'
+      } 
+    }
+    setInfo(i)
+  }, [props.loc])
+
+  return (<View style={{justifyContent:'space-between',height:'100%'}}>
+    <DrawerContentScrollView {...props} contentContainerStyle={{
+      flex:1
+    }}>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+    <View style={drawerStyles.pageInfo}>
+      <Popup
+        trigger={<TouchableOpacity style={drawerStyles.pageInfoHeader} onPress={() => window.open(info.Wiki, '_blank')}>
+          <Icon
+            name='help-circle-outline'
+            type='ionicon'
+            size={25}
+            color={colors.mainTextColor}
+            style={{}}
+          />
+          <Text style={drawerStyles.pageInfoHeaderText}>{info.Header}</Text>
+        </TouchableOpacity>}
+        position={'top center'}
+        content={info.Body}
+        inverted
+        style={{textAlign:'center'}}
+      />
+    </View>
+  </View>)
+
+}
 
 // Create drawer.
 const Drawer = createDrawerNavigator()
@@ -29,8 +98,17 @@ export default function MobileApp() {
   const [colors, setColors] = useState(colorsLight)
   const [drawerStyles, setDrawerStyles] = useState(innerDrawerLight)
   const [coach, setCoach] = useState({})
+  
+  const [loc, setLoc] = useState('')
+  var route = useRoute()
+  const routeName = getFocusedRouteNameFromRoute(route)
+
+  const getRoute = () => {
+    setLoc(routeName)
+  }
 
   useEffect(() => {
+    getRoute()
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
@@ -47,6 +125,7 @@ export default function MobileApp() {
       <Text style={drawerStyles.drawerTopTitle}>Mobile App</Text>
     </View>
     <Drawer.Navigator
+      drawerContent={props => <DrawerContent {...props} loc={loc} />}
       drawerType='permanent'
       drawerStyle={drawerStyles.drawer}
       sceneContainerStyle={{
@@ -73,6 +152,11 @@ export default function MobileApp() {
       }}
     >
       <Drawer.Screen name="BrandDesign" component={BrandDesign}
+        listeners={{
+          focus: () => {
+            setLoc('BrandDesign')
+          }
+        }}
         options={{
           title:'Brand - CoachSync',
           drawerIcon: ({focused, size}) => (
@@ -91,6 +175,11 @@ export default function MobileApp() {
         }}
       />
       <Drawer.Screen name="SocialFeed" component={SocialFeed}
+        listeners={{
+          focus: () => {
+            setLoc('SocialFeed')
+          }
+        }}
         options={{
           title:'Social Feed - CoachSync',
           drawerIcon: ({focused, size}) => (
@@ -109,6 +198,11 @@ export default function MobileApp() {
         }}
       />
       <Drawer.Screen name="Onboarding" component={Onboarding}
+        listeners={{
+          focus: () => {
+            setLoc('Onboarding')
+          }
+        }}
         options={{
           title:'Onboarding - CoachSync',
           drawerIcon: ({focused, size}) => (

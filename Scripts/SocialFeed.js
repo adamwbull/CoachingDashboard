@@ -38,13 +38,6 @@ export default function SocialFeed() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Social Feed</Text>
-              <Text style={styles.bodyDesc}>Customize and add posts seen by all Clients.</Text>
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
         </View>

@@ -212,6 +212,40 @@ export async function check() {
 
 */
 
+export async function createProgram(coachId, token, title, description, tasks) {
+
+  var ret = false
+  var arr = {
+    CoachId:coachId,
+    Token:token,
+    Title:title,
+    Description:description,
+    Tasks:tasks
+  }
+
+  console.log('arr:',arr)
+
+  console.log('Creating program...')
+  const res = await fetch(url + '/program/create', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.affectedRows > 0) {
+    console.log('Program created!')
+    ret = true
+  }
+
+  return ret
+
+}
+
 export async function completeRegistration(id, token) {
 
   var ret = false

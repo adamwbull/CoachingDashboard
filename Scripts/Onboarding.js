@@ -292,13 +292,6 @@ export default function Onboarding() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Onboarding</Text>
-              <Text style={styles.bodyDesc}>Customize the onboarding experience for your clients.</Text>
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showSuccess && (<View style={styles.alertSuccess}>
@@ -323,11 +316,11 @@ export default function Onboarding() {
                   size={30}
                   color={colors.mainTextColor}
                   style={{marginRight:10}}
-                  onPress={() => window.open('https://wiki.coachsync.me/en/programs/onboarding', '_blank')}
+                  onPress={() => window.open('https://wiki.coachsync.me/en/mobile-app/onboarding', '_blank')}
                 />
                 <Text style={styles.saveOnboardingInfo}>
                   Make changes below to your onboarding flow, then save to the right. Onboarding will be shown to new clients after they sign up with your coaching link. 
-                  <Text style={[styles.link,{marginLeft:5}]}><a href="https://wiki.coachsync.me/en/programs/onboarding" target="_blank" rel="noreferrer">Click here to learn more.</a></Text>
+                  <Text style={[styles.link,{marginLeft:5}]}><a href="https://wiki.coachsync.me/en/mobile-app/onboarding" target="_blank" rel="noreferrer">Click here to learn more.</a></Text>
                 </Text>
                 <View style={styles.saveOnboardingSpacer}></View>
                 <Button 

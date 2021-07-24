@@ -12,7 +12,7 @@ import { TextInput } from 'react-native-web'
 import _ from 'lodash'
 import { Search, Popup, Checkbox } from 'semantic-ui-react'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
-import { getTimezoneName, getTimezoneOffset, getAddProgramData } from '../Scripts/API.js'
+import { createProgram, getTimezoneName, getTimezoneOffset, getAddProgramData } from '../Scripts/API.js'
 import 'semantic-ui-css/semantic.min.css'
 import './CSS/custom-search.css'
 import { TimePicker, InputNumber } from 'antd';
@@ -42,6 +42,7 @@ export default function AddProgram() {
   const [hoverBackground3, setHoverBackground3] = useState({})
   const [hoverBackground4, setHoverBackground4] = useState({})
   const [hoverBackground5, setHoverBackground5] = useState({})
+  const [showSubmitActivityIndicator, setShowSubmitActivityIndicator] = useState(false)
 
   // Task controls.
   const [taskCategory, setTaskCategory] = useState(0)
@@ -55,7 +56,8 @@ export default function AddProgram() {
   const [taskList, setTaskList] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   // Search data.
   const [loading, setLoading] = useState(false)
@@ -128,8 +130,18 @@ export default function AddProgram() {
     }
   },[])
 
+  const calculateFinalTime = (time) => {
+    if (time < 0) {
+      time = time + 24
+    } else if (time > 24) {
+      time = time - 24
+    }
+    return time
+  }
+
   // Add Program controls.
-  const addProgram = () => {
+  const addProgram = async () => {
+    setShowSubmitActivityIndicator(true)
     console.log ('Add new program...')
     // Need to add ProgramId and ItemOrder to each Task.
     var program = {
@@ -140,15 +152,42 @@ export default function AddProgram() {
     }
     var programTasks = []
     var itemOrder = 1
+    var timeOffset = getTimezoneOffset()
     for (var i = 0; i < taskList.length; i++) {
-      var task = taskList[i]
-      task.ItemOrder = itemOrder
+      var oldTask = taskList[i]
+      var timeSpaced = oldTask.DueAtTime.split(' ')
+      var timeColon = timeSpaced[0].split(':')
+      var timeValues = [parseInt(timeColon[0]), parseInt(timeColon[1])]
+      if (timeSpaced[1] == 'pm') {
+        timeValues[0] = timeValues[0]+12
+      } else if (timeSpaced[1] == 'am' && timeValues[0] == 12) {
+        timeValues[0] = 0
+      }
+      timeValues[0] = calculateFinalTime(timeValues[0]+timeOffset)
+      var time = timeValues[0] + ':' + timeValues[1] + ':00'
+      var newTask = {
+        Type:oldTask.Type,
+        TaskId:oldTask.TaskId,
+        DueAfterDays:oldTask.DueAfterDays,
+        DueAtTime:time,
+        SendNotification:oldTask.SendNotification,
+        ReleaseOnAssign:oldTask.ReleaseOnAssign,
+        ItemOrder: itemOrder
+      }
       itemOrder++
-      programTasks.push(task)
+      programTasks.push(newTask)
     }
 
-    console.log('program:', program)
-    console.log('programTasks:',programTasks)
+    var created = await createProgram(coach.Id, coach.Token, title, description, programTasks)
+
+    setCanPublish(false)
+    setShowSubmitActivityIndicator(false)
+    if (created) {
+      setSuccess(true)
+      linkTo('/programs')
+    } else {
+      setError(false)
+    }
   }
 
   const publishCheck = (t, d, l) => {
@@ -262,6 +301,7 @@ export default function AddProgram() {
 
   // Add Task controls.
   const addTask = (type) => {
+    setCanPublish(false)
     closeDropdown()
     var title = ''
     var t = ''
@@ -414,14 +454,10 @@ export default function AddProgram() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>New Program</Text>
-              <Text style={styles.bodyDesc}>Create a new program to add Clients to.</Text>
-            </View>
-          </View>
-
           <View style={styles.addProgramContainer}>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>New Program</Text>
+            </View>
             <View style={styles.addProgramHeader}>
               <Text style={styles.addProgramLabel}>Program Title</Text>
               <TextInput
@@ -672,30 +708,38 @@ export default function AddProgram() {
             </View>
 
             <View style={styles.addProgramFooter}>
-              <View style={{flex:1}}>
+              <View>
                 {canPublish && (<>
-                  <Button
+                  {showSubmitActivityIndicator && (<View style={{paddingTop:15,paddingBottom:15,flex:1}}>
+                    <ActivityIndicatorView />
+                  </View>) || (<Button
                     title='Create Program'
-                    buttonStyle={[styles.addProgramListButton]}
+                    buttonStyle={{width:400,borderRadius:50}}
                     containerStyle={styles.addProgramListButtonContainer}
                     onPress={() => addProgram()}
-                  />
+                  />)}
                 </>)
                 || (<>
-                  <Popup content='Cannot be created until Title/Description are filled out and all created Tasks are chosen.'
+                  <Popup content='Cannot be created until Title/Description are filled out and all Tasks are chosen.'
                   trigger={<Button
                     title='Create Program'
                     disabled={true}
-                    position={'top center'}
-                    inverted
-                    buttonStyle={[styles.addProgramListButton]}
-                    containerStyle={styles.addProgramListButtonContainer} />}
-                    style={{backgroundColor:colors.secondaryBackground,padding:5,borderRadius:10,fontFamily:'Poppins',marginBottom:-10,marginLeft:10}}
+                    buttonStyle={{width:400,borderRadius:50}}
+                    containerStyle={styles.addProgramListButtonContainer} 
+                  />}
+                  position={'top center'}
+                  inverted
+                  style={{textAlign:'center'}}
                   />
                 </>)}
               </View>
-              <View style={{flex:1}}>
-                {error == ''}
+              <View style={{flex:1,justifyContent:'center'}}>
+                {error && (<Text style={styles.error}>
+                  An error occured. Please try again.
+                </Text>)}
+                {success && (<Text style={styles.success}>
+                  Program created! Redirecting...
+                </Text>)}
               </View>
             </View>
 

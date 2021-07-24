@@ -293,7 +293,7 @@ const UpdatePaymentMethodForm = ({coach, styles, onClose, updatePaymentMethodVar
         containerStyle={styles.alertCancelContainer}
         titleStyle={{color:'#fff'}}
         onPress={() => {
-          
+          onClose()
         }}
       />
       <Button
@@ -511,8 +511,8 @@ export default function ManagePlan() {
           <UpdatePaymentMethodForm coach={coach} styles={styles} onClose={onClose} updatePaymentMethodVar={updatePaymentMethodVar} />
         </Elements>)
       },
-      closeOnEscape: false,
-      closeOnClickOutside: false
+      closeOnEscape: true,
+      closeOnClickOutside: true
     })
   }
   
@@ -974,13 +974,6 @@ export default function ManagePlan() {
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
-
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Manage Plan</Text>
-              <Text style={styles.bodyDesc}>View invoices, upgrade, or downgrade your CoachSync plan.</Text>
-            </View>
-          </View>
 
           {showBar && (<>
             <View style={[styles.bodyContainer,{flexDirection:'row'}]}>

@@ -210,158 +210,154 @@ export default function BrandDesign() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Brand Design</Text>
-              <Text style={styles.bodyDesc}>Customize your Client&apos;s in-app experience.</Text>
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
-          {showBrandLogin && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>Testing the App</Text>
-            <Text style={styles.sectionContent}>You can login as a Client to test changes within the app with your Dashboard credentials.</Text>
-            <View style={[styles.brandColoringRow,{backgroundColor:'#fff',borderRadius:10}]}>
-              <View style={{flex:1,alignItems:'center'}}>
-                <Text style={styles.testAccLabel}>Client App for iOS</Text>
-                <TouchableOpacity style={{width:200,height:77,paddingTop:10}} onPress={() => console.log('iOS')}>
-                  <img src={IOSAppDownload} style={{width:200,height:50,marginLeft:'auto',marginRight:'auto'}} />
-                </TouchableOpacity>
-              </View>
-              <View style={{flex:1,alignItems:'center'}}>
-                <Text style={styles.testAccLabel}>Client App for Android</Text>
-                <TouchableOpacity style={{width:200,height:77}} onPress={() => console.log('Android')}>
-                  <img src={AndroidAppDownload} style={{width:200,height:77,marginLeft:'auto',marginRight:'auto'}} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>)}
+          <View style={{flexDirection:'row',justifyContent: 'space-between'}}>
+            <View style={{width:'73%'}}>
+              {showBrandColoring && (<View style={styles.brandContainer}>
+                <Text style={styles.sectionTitle}>Brand Colors</Text>
+                <Text style={styles.sectionContent}>Choose a color scheme that appears within the Dashboard and on the mobile app for your Clients.</Text>
+                <View style={styles.brandColoringRow}>
+                  <View style={styles.brandColoringGroup}>
+                    <Text style={styles.brandColoringGroupTitle}>Primary Color</Text>
+                    <TouchableOpacity style={[styles.brandColoringTouch,{backgroundColor:primaryColor}]}
+                      onPress={() => toggleColoringPicker(0)}>
+                      <Icon
+                        name={(showPrimaryColoringPicker) ? 'close' : 'eyedrop-outline'}
+                        type='ionicon'
+                        size={22}
+                        color={colors.mainBackground}
+                      />
+                    </TouchableOpacity>
+                    {showPrimaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
+                      color={primaryColor}
+                      triangle='hide'
+                      onChangeComplete={(color) => setColoring(0, color.hex)}
+                      colors={['#2ecc71', '#7CF2A1', '#FCB900', '#FF6900', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#C50BD9']}
+                    /></View>)}
+                  </View>
+                  <View style={{width:20,height:10}}></View>
+                  <View style={styles.brandColoringGroup}>
+                    <Text style={styles.brandColoringGroupTitle}>Secondary Color</Text>
+                    <TouchableOpacity style={[styles.brandColoringTouch,{backgroundColor:secondaryColor}]}
+                      onPress={() => toggleColoringPicker(1)}>
+                      <Icon
+                        name={(showSecondaryColoringPicker) ? 'close' : 'eyedrop-outline'}
+                        type='ionicon'
+                        size={22}
+                        color={colors.mainBackground}
+                      />
+                    </TouchableOpacity>
+                    {showSecondaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
+                      color={secondaryColor}
+                      triangle='hide'
+                      onChangeComplete={(color) => setColoring(1, color.hex)}
+                      colors={['#27ae60', '#7BDCB5', '#E6950B', '#E8470C', '#759DE6', '#0560FA', '#929CA6', '#D41608', '#E8849D', '#9900EF']}
+                    /></View>)}
+                  </View>
+                  <View style={{flex:1}}></View>
+                  <View style={{flex:1,justifyContent:'flex-end'}}>
+                    <Button
+                      title='Save Coloring'
+                      titleStyle={styles.saveColoringText}
+                      buttonStyle={styles.saveColoringButton}
+                      containerStyle={styles.saveColoringContainer}
+                      onPress={saveColorChoices}
+                    />
+                  </View>
+                </View>
+              </View>)}
 
-          {showBrandColoring && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>Brand Colors</Text>
-            <Text style={styles.sectionContent}>Choose a color scheme that appears within the Dashboard and on the mobile app for your Clients.</Text>
-            <View style={styles.brandColoringRow}>
-              <View style={styles.brandColoringGroup}>
-                <Text style={styles.brandColoringGroupTitle}>Primary Color</Text>
-                <TouchableOpacity style={[styles.brandColoringTouch,{backgroundColor:primaryColor}]}
-                  onPress={() => toggleColoringPicker(0)}>
-                  <Icon
-                    name={(showPrimaryColoringPicker) ? 'close' : 'eyedrop-outline'}
-                    type='ionicon'
-                    size={22}
-                    color={colors.mainBackground}
-                  />
-                </TouchableOpacity>
-                {showPrimaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
-                  color={primaryColor}
-                  triangle='hide'
-                  onChangeComplete={(color) => setColoring(0, color.hex)}
-                  colors={['#2ecc71', '#7CF2A1', '#FCB900', '#FF6900', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#C50BD9']}
-                /></View>)}
-              </View>
-              <View style={{width:20,height:10}}></View>
-              <View style={styles.brandColoringGroup}>
-                <Text style={styles.brandColoringGroupTitle}>Secondary Color</Text>
-                <TouchableOpacity style={[styles.brandColoringTouch,{backgroundColor:secondaryColor}]}
-                  onPress={() => toggleColoringPicker(1)}>
-                  <Icon
-                    name={(showSecondaryColoringPicker) ? 'close' : 'eyedrop-outline'}
-                    type='ionicon'
-                    size={22}
-                    color={colors.mainBackground}
-                  />
-                </TouchableOpacity>
-                {showSecondaryColoringPicker && (<View style={{position:'absolute',marginBottom:80}}><TwitterPicker
-                  color={secondaryColor}
-                  triangle='hide'
-                  onChangeComplete={(color) => setColoring(1, color.hex)}
-                  colors={['#27ae60', '#7BDCB5', '#E6950B', '#E8470C', '#759DE6', '#0560FA', '#929CA6', '#D41608', '#E8849D', '#9900EF']}
-                /></View>)}
-              </View>
-              <View style={{flex:1}}></View>
-              <View style={{flex:1,justifyContent:'flex-end'}}>
-                <Button
-                  title='Save Coloring'
-                  titleStyle={styles.saveColoringText}
-                  buttonStyle={styles.saveColoringButton}
-                  containerStyle={styles.saveColoringContainer}
-                  onPress={saveColorChoices}
-                />
-              </View>
-            </View>
-          </View>)}
+              {showBrandLogo && (<View style={styles.brandContainer}>
+                <Text style={styles.sectionTitle}>App Header Logo</Text>
+                <Text style={styles.sectionContent}>Specify a custom logo to show up within the mobile app for your Clients.</Text>
+                <View style={[styles.brandColoringRow,{alignItems:'flex-end'}]}>
+                  <View style={{flex:1}}>
+                    <Text style={styles.testAccLabel}>Current Header Logo</Text>
+                    <Image source={customLogo} style={{width:200,height:100,margin:'auto',tintColor:coach.SecondaryHighlight}} />
+                    <Text style={styles.logoBelow}>recommended size{"\n"}200px by 100px</Text>
+                  </View>
+                  <View style={{flex:2}}></View>
+                  <View style={{flex:1}}>
+                    <Text style={styles.errorText}>{logoError}</Text>
+                    <TouchableOpacity onPress={resetToDefault} style={{margin:10}}>
+                      <Text style={styles.resetToDefault}>Reset to Default</Text>
+                    </TouchableOpacity>
+                    <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
+                    <Button
+                      title='Change Logo'
+                      titleStyle={styles.saveColoringText}
+                      buttonStyle={styles.saveColoringButton}
+                      containerStyle={styles.saveColoringContainer}
+                      onPress={handleClick}
+                    />
+                  </View>
+                </View>
+              </View>)}
 
-          {showBrandLogo && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>App Header Logo</Text>
-            <Text style={styles.sectionContent}>Specify a custom logo to show up within the mobile app for your Clients.</Text>
-            <View style={[styles.brandColoringRow,{alignItems:'flex-end'}]}>
-              <View style={{flex:1}}>
-                <Text style={styles.testAccLabel}>Current Header Logo</Text>
-                <Image source={customLogo} style={{width:200,height:100,margin:'auto',tintColor:coach.SecondaryHighlight}} />
-                <Text style={styles.logoBelow}>recommended size{"\n"}200px by 100px</Text>
-              </View>
-              <View style={{flex:2}}></View>
-              <View style={{flex:1}}>
-                <Text style={styles.errorText}>{logoError}</Text>
-                <TouchableOpacity onPress={resetToDefault} style={{margin:10}}>
-                  <Text style={styles.resetToDefault}>Reset to Default</Text>
-                </TouchableOpacity>
-                <input type="file" ref={hiddenFileInput} onChange={handleFile} style={{display:'none'}} />
-                <Button
-                  title='Change Logo'
-                  titleStyle={styles.saveColoringText}
-                  buttonStyle={styles.saveColoringButton}
-                  containerStyle={styles.saveColoringContainer}
-                  onPress={handleClick}
-                />
-              </View>
+              {showBrandHeaders && (<View style={styles.brandContainer}>
+                <Text style={styles.sectionTitle}>Headers</Text>
+                <Text style={styles.sectionContent}>Set custom headers to appear above sections on the app.</Text>
+                <View style={styles.brandColoringRow}>
+                  <View style={{flex:1}}>
+                    <Text style={styles.testAccLabel}>Home</Text>
+                    <TextInput
+                      style={styles.headerInputStyle}
+                      value={homeSectionName}
+                      placeholder='ex. Home'
+                      onChangeText={(text) => setHomeSectionName(text)}
+                    />
+                    <Text style={styles.testAccLabel}>Prompts</Text>
+                    <TextInput
+                      style={styles.headerInputStyle}
+                      value={promptsSectionName}
+                      placeholder='ex. Prompts'
+                      onChangeText={(text) => setPromptsSectionName(text)}
+                    />
+                    <Text style={styles.testAccLabel}>Concepts</Text>
+                    <TextInput
+                      style={styles.headerInputStyle}
+                      value={conceptsSectionName}
+                      placeholder='ex. Concepts'
+                      onChangeText={(text) => setConceptsSectionName(text)}
+                    />
+                  </View>
+                  <View style={{flex:2}}></View>
+                  <View style={{flex:1}}>
+                    <Text style={styles.errorText}>{headersError}</Text>
+                    <TouchableOpacity onPress={() => updateHeaders(0)} style={{margin:10}}>
+                      <Text style={styles.resetToDefault}>Reset to Default</Text>
+                    </TouchableOpacity>
+                    <Button
+                      title='Save Headers'
+                      titleStyle={styles.saveColoringText}
+                      buttonStyle={styles.saveColoringButton}
+                      containerStyle={styles.saveColoringContainer}
+                      onPress={() => updateHeaders(1)}
+                    />
+                  </View>
+                </View>
+              </View>)}
             </View>
-          </View>)}
-
-          {showBrandHeaders && (<View style={styles.brandContainer}>
-            <Text style={styles.sectionTitle}>Headers</Text>
-            <Text style={styles.sectionContent}>Set custom headers to appear above sections on the app.</Text>
-            <View style={styles.brandColoringRow}>
-              <View style={{flex:1}}>
-                <Text style={styles.testAccLabel}>Home</Text>
-                <TextInput
-                  style={styles.headerInputStyle}
-                  value={homeSectionName}
-                  placeholder='ex. Home'
-                  onChangeText={(text) => setHomeSectionName(text)}
-                />
-                <Text style={styles.testAccLabel}>Prompts</Text>
-                <TextInput
-                  style={styles.headerInputStyle}
-                  value={promptsSectionName}
-                  placeholder='ex. Prompts'
-                  onChangeText={(text) => setPromptsSectionName(text)}
-                />
-                <Text style={styles.testAccLabel}>Concepts</Text>
-                <TextInput
-                  style={styles.headerInputStyle}
-                  value={conceptsSectionName}
-                  placeholder='ex. Concepts'
-                  onChangeText={(text) => setConceptsSectionName(text)}
-                />
+            {showBrandLogin && (<View style={[styles.brandContainer,{width:'25%'}]}>
+              <Text style={[styles.sectionTitle,{textAlign:'center'}]}>Testing the App</Text>
+              <Text style={[styles.sectionContent,{textAlign:'center'}]}>You can login as a Client to test changes within the app with your Dashboard credentials.</Text>
+              <View style={[{backgroundColor:'#fff',borderRadius:10}]}>
+                <View style={{flex:1,alignItems:'center'}}>
+                  <Text style={styles.testAccLabel}>Client App for iOS</Text>
+                  <TouchableOpacity style={{width:200,height:77,paddingTop:10}} onPress={() => console.log('iOS')}>
+                    <img src={IOSAppDownload} style={{width:200,height:50,marginLeft:'auto',marginRight:'auto'}} />
+                  </TouchableOpacity>
+                </View>
+                <View style={{flex:1,alignItems:'center',marginTop:10}}>
+                  <Text style={styles.testAccLabel}>Client App for Android</Text>
+                  <TouchableOpacity style={{width:200,height:77}} onPress={() => console.log('Android')}>
+                    <img src={AndroidAppDownload} style={{width:200,height:77,marginLeft:'auto',marginRight:'auto'}} />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={{flex:2}}></View>
-              <View style={{flex:1}}>
-                <Text style={styles.errorText}>{headersError}</Text>
-                <TouchableOpacity onPress={() => updateHeaders(0)} style={{margin:10}}>
-                  <Text style={styles.resetToDefault}>Reset to Default</Text>
-                </TouchableOpacity>
-                <Button
-                  title='Save Headers'
-                  titleStyle={styles.saveColoringText}
-                  buttonStyle={styles.saveColoringButton}
-                  containerStyle={styles.saveColoringContainer}
-                  onPress={() => updateHeaders(1)}
-                />
-              </View>
-            </View>
-          </View>)}
+            </View>)}
+          </View>
 
         </View>
       </View>

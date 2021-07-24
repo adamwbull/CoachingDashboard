@@ -3,14 +3,14 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native';
-;
 import { homeLight, colorsLight, innerDrawerLight } from '../Styles.js';
 import { homeDark, colorsDark, innerDrawerDark } from '../StylesDark.js';
-import { useLinkTo } from '@react-navigation/native';
+import { useLinkTo, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import LoadingScreen from '../LoadingScreen.js';
 import { Icon } from 'react-native-elements'
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer'
 import { set, get, getTTL, ttl } from '../Storage.js'
+import { Popup } from 'semantic-ui-react'
 
 // Create Drawer Content.
 function DrawerContent(props) {
@@ -22,9 +22,40 @@ function DrawerContent(props) {
     Body:'',
     Wiki:''
   })
-
+  
   useEffect(() => {
-    console.log('loc:',props.loc)
+    var loc = props.loc
+    var i = {
+      Header:'',
+      Body:'',
+      Wiki:''
+    }
+    if (loc == 'AllPrograms') {
+      i = {
+        Header:'Programs',
+        Body:'Courses built from Prompts and Concepts. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/programs/managing-programs'
+      } 
+    } else if (loc == 'Prompts') {
+      i = {
+        Header:'Prompts',
+        Body:'Content for Clients to interact with. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/programs/prompts'
+      } 
+    } else if (loc == 'Concepts') {
+      i = {
+        Header:'Concepts',
+        Body:'Knowledge and PDFs for Clients to view. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/programs/concepts'
+      } 
+    } else if (loc == 'AddProgram') {
+      i = {
+        Header:'New Program',
+        Body:'Create a program for Clients. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/programs/creating-programs'
+      } 
+    }
+    setInfo(i)
   }, [props.loc])
 
   return (<View style={{justifyContent:'space-between',height:'100%'}}>
@@ -34,23 +65,27 @@ function DrawerContent(props) {
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
     <View style={drawerStyles.pageInfo}>
-      <TouchableOpacity style={drawerStyles.pageInfoHeader} onPress={() => window.open('https://wiki.coachsync.me/en/programs/creating-programs', '_blank')}>
-        <Icon
-          name='help-circle-outline'
-          type='ionicon'
-          size={25}
-          color={colors.mainTextColor}
-          style={{}}
-        />
-        <Text style={drawerStyles.pageInfoHeaderText}>New Program</Text>
-      </TouchableOpacity>
-      <View style={drawerStyles.pageInfoBody}>
-        <Text style={drawerStyles.pageInfoBodyText}>Create a new program to add Clients to.</Text>
-      </View>
+      <Popup
+        trigger={<TouchableOpacity style={drawerStyles.pageInfoHeader} onPress={() => window.open(info.Wiki, '_blank')}>
+          <Icon
+            name='help-circle-outline'
+            type='ionicon'
+            size={25}
+            color={colors.mainTextColor}
+            style={{}}
+          />
+          <Text style={drawerStyles.pageInfoHeaderText}>{info.Header}</Text>
+        </TouchableOpacity>}
+        position={'top center'}
+        content={info.Body}
+        inverted
+        style={{textAlign:'center'}}
+      />
     </View>
   </View>)
 
 }
+
 // Create drawer.
 const Drawer = createDrawerNavigator()
 
@@ -69,9 +104,16 @@ export default function Programs() {
   const [drawerStyles, setDrawerStyles] = useState(innerDrawerLight)
   const [coach, setCoach] = useState({})
 
-  const [loc, setLoc] = useState('AllPrograms')
+  const [loc, setLoc] = useState('')
+  var route = useRoute()
+  const routeName = getFocusedRouteNameFromRoute(route)
+
+  const getRoute = () => {
+    setLoc(routeName)
+  }
 
   useEffect(() => {
+    getRoute()
     const sCoach = get('Coach')
     if (sCoach != null) {
       setCoach(sCoach)
@@ -117,7 +159,6 @@ export default function Programs() {
         <Drawer.Screen name="AllPrograms" component={AllPrograms}
           listeners={{
             focus: () => {
-              console.log('navTo AllPrograms')
               setLoc('AllPrograms')
             }
           }}
@@ -134,14 +175,13 @@ export default function Programs() {
             ),
             drawerLabel:({focused}) => {
               const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
-              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>All Programs</Text>)
+              return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Programs</Text>)
             }
           }}
         />
         <Drawer.Screen name="Prompts" component={Prompts}
           listeners={{
             focus: () => {
-              console.log('navTo Prompts')
               setLoc('Prompts')
             }
           }}
@@ -163,6 +203,11 @@ export default function Programs() {
           }}
         />
         <Drawer.Screen name="Concepts" component={Concepts}
+          listeners={{
+            focus: () => {
+              setLoc('Concepts')
+            }
+          }}
           options={{
             title:'Concepts - CoachSync',
             drawerIcon: ({focused, size}) => (
@@ -181,6 +226,11 @@ export default function Programs() {
           }}
         />
         <Drawer.Screen name="AddProgram" component={AddProgram}
+          listeners={{
+            focus: () => {
+              setLoc('AddProgram')
+            }
+          }}
           options={{
             title:'New Program - CoachSync',
             drawerIcon: ({focused, size}) => (

@@ -443,22 +443,6 @@ export default function Concepts() {
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Concepts</Text>
-              <Text style={styles.bodyDesc}>Knowledge and documents for Clients to view.</Text>
-            </View>
-            <View style={styles.bodyHeaderNav}>
-              <Link to='/programs' style={styles.bodyHeaderNavLink}>Programs</Link>
-              <Icon
-                name='chevron-forward'
-                type='ionicon'
-                size={22}
-                color={colors.mainTextColor}
-              />
-              <Link to='/concepts' style={styles.bodyHeaderNavLink}>Concepts</Link>
-            </View>
-          </View>
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 

@@ -1,38 +1,42 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { programsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
-import { useLinkTo, Link } from '@react-navigation/native'
+import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 
+import userContext from './Context.js'
+
 export default function AllPrograms() {
+
   const linkTo = useLinkTo()
+  const user = useContext(userContext)
+  
   const [refreshing, setRefreshing] = useState(true)
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
-  const [coach, setCoach] = useState({})
-
-  // Stage controls.
-  const [paymentsDisabled, setPaymentsDisabled] = useState(true)
-  const [contractsDisabled, setContractsDisabled] = useState(true)
-
-  // Data.
-  const [concepts, setConcepts] = useState([])
-  const [pdfs, setPDFs] = useState([])
+  const [coach, setCoach] = useState(user)
 
   useEffect(() => {
-    const sCoach = get('Coach')
-    if (sCoach != null) {
-      setCoach(sCoach)
+    if (coach != null) {
+      getData() 
     }
   },[])
 
-  // Text prompt controls.
+  useFocusEffect(() => {
+    getData()
+  })
+
+  // Main programs page functions.
+  const getData = () => {
+    console.log('getting that sweet data')
+  }
+
   const addProgram = () => {
     console.log ('Add new program...')
   }
@@ -41,12 +45,6 @@ export default function AllPrograms() {
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Programs</Text>
-              <Text style={styles.bodyDesc}>Courses built from Prompts and Concepts.</Text>
-            </View>
-          </View>
 
           <View style={styles.promptListContainer}>
             <View style={styles.promptHeader}>

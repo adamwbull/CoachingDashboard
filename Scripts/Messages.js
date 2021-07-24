@@ -725,7 +725,7 @@ export default function Messages() {
       } else {
         linkTo('/welcome')
       }
-    } else {
+    } else if (userList.length > 0) {
       if (chatIndex != -1) {
         textInput.current.value = messages[chatIndex]
       }
@@ -1536,7 +1536,7 @@ export default function Messages() {
             </View>
           </View>)}
         </>) || (<View>
-          <Text style={styles.infoTitle}>Add clients to message.</Text>
+          <Text style={styles.infoTitle}><Text style={{textDecorationLine:'underline',color:btnColors.primary}} onPress={() => linkTo('/invite-clients')}>Invite clients</Text> to message.</Text>
         </View>)}
       </View>)}
     </ScrollView>

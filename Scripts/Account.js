@@ -134,13 +134,6 @@ export default function Account() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Account</Text>
-              <Text style={styles.bodyDesc}>Customize your account settings.</Text>
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showPasswordPrompt && (<View style={styles.bodyContainer}>

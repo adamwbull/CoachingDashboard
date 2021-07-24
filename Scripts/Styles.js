@@ -2607,6 +2607,16 @@ export const addProgramLight = StyleSheet.create({
   container: {
     flex: 1,
   },
+  success: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:btnColors.success
+  },
+  error: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:btnColors.danger
+  },
   main: {
     flex:1,
     flexDirection:'row',
@@ -2628,6 +2638,24 @@ export const addProgramLight = StyleSheet.create({
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
+  },
+  header: {
+    flexDirection:'row',
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    justifyContent:'space-between',
+    alignItems:'flex-end',
+    paddingBottom:5,
+    paddingTop:20,
+    marginLeft:20,
+    marginRight:20
+  },
+  headerTitle: {
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    paddingLeft:5,
+    paddingRight:10,
   },
   bodyTitleGroup: {
     flexDirection:'row',
@@ -2867,7 +2895,8 @@ export const addProgramLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
   },
   addProgramFooter: {
-    flexDirection:'row',
+    flexDirection:'column',
+    alignItems:'center',
     borderTopWidth:1,
     borderTopColor:colorsLight.headerBorder,
   },

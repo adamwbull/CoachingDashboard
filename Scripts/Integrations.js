@@ -89,13 +89,6 @@ export default function Integrations() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Integrations</Text>
-              <Text style={styles.bodyDesc}>Connect with other software.</Text>
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showPlanWarning && (<></>)}

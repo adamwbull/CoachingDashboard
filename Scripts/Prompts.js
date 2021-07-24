@@ -1290,31 +1290,6 @@ export default function Prompts() {
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.bodyHeader}>
-            <View style={styles.bodyTitleGroup}>
-              <Text style={styles.bodyTitle}>Prompts</Text>
-              <Text style={styles.bodyDesc}>Content for Clients to interact with.</Text>
-            </View>
-            <View style={styles.bodyHeaderNav}>
-              <Link to='/programs' style={styles.bodyHeaderNavLink}>Programs</Link>
-              <Icon
-                name='chevron-forward'
-                type='ionicon'
-                size={22}
-                color={colors.mainTextColor}
-              />
-              <Link to='/prompts' style={styles.bodyHeaderNavLink}>Prompts</Link>
-              {showMain == false && (<Icon
-                name='chevron-forward'
-                type='ionicon'
-                size={22}
-                color={colors.mainTextColor}
-              />)}
-              {showAddingTextPrompt && (<Text style={styles.bodyHeaderNavLink}>New Text Prompt</Text>)}
-              {showAddingSurveyPrompt && (<Text style={styles.bodyHeaderNavLink}>New Survey</Text>)}
-            </View>
-          </View>
-
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
           {showMain && (<>

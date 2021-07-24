@@ -46,8 +46,9 @@ export default function Main() {
   const getRoute = () => {
     var route = window.location.href.split('/')
     route = route[3]
-    console.log(route)
+    console.log('main route:',route)
   }
+
   useEffect(() => {
 
     getRoute()
