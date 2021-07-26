@@ -9,7 +9,8 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-
+import { getPrograms } from './API.js'
+ 
 import userContext from './Context.js'
 
 export default function AllPrograms() {
@@ -33,12 +34,14 @@ export default function AllPrograms() {
   })
 
   // Main programs page functions.
-  const getData = () => {
-    console.log('getting that sweet data')
+  const getData = async () => {
+    var data = await getPrograms(coach.Id, coach.Token)
+    
   }
 
   const addProgram = () => {
     console.log ('Add new program...')
+    linkTo('/new-program')
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>

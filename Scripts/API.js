@@ -212,6 +212,26 @@ export async function check() {
 
 */
 
+export async function getPrograms(id, token) {
+
+  var ret = false
+
+  console.log('Getting programs...')
+  const res = await fetch(url + '/programs/' + id + '/' + token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Program data found!')
+    ret = payload
+  }
+
+  return ret
+
+}
+
 export async function createProgram(coachId, token, title, description, tasks) {
 
   var ret = false

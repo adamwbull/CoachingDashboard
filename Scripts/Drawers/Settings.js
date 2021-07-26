@@ -34,7 +34,7 @@ function DrawerContent(props) {
       i = {
         Header:'Account',
         Body:'Customize your account settings. Click to learn more!',
-        Wiki:''
+        Wiki:'https://wiki.coachsync.me/en/account/settings'
       } 
     } else if (loc == 'ManagePlan') {
       i = {

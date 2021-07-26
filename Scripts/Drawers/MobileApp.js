@@ -34,9 +34,9 @@ function DrawerContent(props) {
     if (loc == 'BrandDesign') {
       i = {
         Header:'Brand Design',
-        Body:'Customize your Client&apos;s in-app experience. Click to learn more!',
-        Wiki:''
-      } 
+        Body:'Customize your Client\'s in-app experience. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/mobile-app/brand-design'
+      }
     } else if (loc == 'SocialFeed') {
       i = {
         Header:'Social Feed',
