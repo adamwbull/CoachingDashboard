@@ -52,17 +52,15 @@ export default function AllPrograms() {
           <View style={styles.promptListContainer}>
             <View style={styles.promptHeader}>
               <Text style={styles.promptHeaderTitle}>All Programs</Text>
-              <Text style={styles.promptHeaderCount}>{0} total</Text>
-            </View>
-            <View style={styles.promptsColumn}>
-              <View style={styles.addPromptContainer}>
-                <Button
-                title='Add Program'
+              <Button
+                title='New Program'
                 titleStyle={styles.promptAddButtonTitle}
                 buttonStyle={styles.promptAddButton}
                 containerStyle={styles.promptAddButtonContainer}
-                onPress={addProgram} />
-              </View>
+                onPress={addProgram} 
+              />
+            </View>
+            <View style={styles.promptsColumn}>
             </View>
           </View>
 

@@ -2537,7 +2537,7 @@ export const programsLight = StyleSheet.create({
     borderBottomWidth:1,
     borderBottomColor:colorsLight.headerBorder,
     justifyContent:'space-between',
-    alignItems:'flex-end',
+    alignItems:'center',
     paddingBottom:5
   },
   promptHeaderTitle: {
@@ -2567,7 +2567,8 @@ export const programsLight = StyleSheet.create({
   },
   promptAddButtonTitle: {
     fontSize:14,
-    fontFamily:'Poppins'
+    fontFamily:'Poppins',
+    color:'#fff'
   },
   promptAddButton: {
     backgroundColor:btnColors.primary,
@@ -2575,7 +2576,7 @@ export const programsLight = StyleSheet.create({
     padding:5,
   },
   promptAddButtonContainer: {
-    width:150
+    width:120
   },
   helpBox: {
     width:400,
