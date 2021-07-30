@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { programsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
@@ -27,6 +27,7 @@ export default function AllPrograms() {
   // Data.
   const [programs, setPrograms] = useState([])
   const [programGrads, setProgramGrads] = useState([])
+  const [clientList, setClientList] = useState([])
 
   // Display variables.
   const [showActivityIndicator, setShowActivityIndicator] = useState(true)
@@ -81,6 +82,7 @@ export default function AllPrograms() {
   const viewAddClient = (index) => {
     setViewProgramIndex(index)
     setShowAll(false)
+    setShowViewProgram(false)
     setShowActivityIndicator(true)
     setTimeout(() => {
       setShowActivityIndicator(false)
@@ -89,9 +91,12 @@ export default function AllPrograms() {
   }
   
   // View program functions.
-  const navToAll = () => {
-    setViewProgramIndex(-1)
+  // from: 0 - view program
+  //       1 - add client
+  // no use right now.
+  const navTo = (from) => {
     setShowViewProgram(false)
+    setShowAddClient(false)
     setShowActivityIndicator(true)
     setTimeout(() => {
       setShowActivityIndicator(false)
@@ -154,7 +159,7 @@ export default function AllPrograms() {
                         buttonStyle={styles.addProgramMemberButton}
                         containerStyle={styles.addProgramMemberButtonContainer}
                         titleStyle={styles.mainProgramButton}
-                        onPress={() => addClient(index)}
+                        onPress={() => viewAddClient(index)}
                       />
                     </View>
                   </View>
@@ -172,9 +177,74 @@ export default function AllPrograms() {
                   size={28}
                   color={colors.mainTextColor}
                   style={{marginRight:0}}
-                  onPress={() => navToAll()}
+                  onPress={() => navTo(0)}
                 />
                 <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
+              </View>
+            </View>
+            <Text style={[styles.programHeaderDescription,{marginTop:20}]}>{programs[viewProgramIndex].Description}</Text>
+            <View style={styles.programStats}>
+              <View style={[styles.programStatTop,{paddingRight:10}]}>
+                <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
+                <Text style={styles.programStatTopText}>Tasks</Text>
+              </View>
+              <View style={styles.programStatTop}>
+                <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Assocs.length}</Text>
+                <Text style={styles.programStatTopText}>Members</Text>
+              </View>
+              <View style={[styles.programStatTop,{borderRightWidth:2}]}>
+                <Text style={styles.programStatTopNumber}>{programGrads[viewProgramIndex]}</Text>
+                <Text style={styles.programStatTopText}>Graduates</Text>
+              </View>
+              <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
+                <Button 
+                  title='Add Client'
+                  buttonStyle={styles.addProgramMemberButton}
+                  containerStyle={styles.addProgramMemberButtonContainer}
+                  titleStyle={styles.mainProgramButton}
+                  onPress={() => viewAddClient(viewProgramIndex)}
+                />
+              </View>
+            </View>
+          </View>)}
+
+          {showAddClient && (<View style={styles.promptListContainer}>
+            <View style={styles.addClientHeader}>
+              <View style={styles.promptHeader}>
+                <View style={{flexDirection: 'row',alignItems:'center'}}>
+                  <Icon
+                    name='chevron-back'
+                    type='ionicon'
+                    size={28}
+                    color={colors.mainTextColor}
+                    style={{marginRight:0}}
+                    onPress={() => navTo(1)}
+                  />
+                  <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
+                </View>
+              </View>
+              <Text style={styles.addClientsEnroll}>Select clients to enroll:</Text>
+              <View style={styles.addClientList}>
+                {clientList.map((client, cIndex) => {
+                  return (<View key={'clientList_'+cIndex} style={styles.addClientListMember}>
+                    <View style={styles.clientListInfo}>
+                      <View style={styles.clientListAvatarContainer}>
+                        <Image 
+                          source={{uri:client.Avatar}}
+                          style={styles.clientListAvatar}
+                        />
+                      </View>
+                      <Text style={styles.clientListName}>{client.FirstName + ' ' + client.LastName}</Text>
+                    </View>
+                    <Icon
+                      name='chevron-back'
+                      type='ionicon'
+                      size={28}
+                      color={colors.mainTextColor}
+                      style={{marginRight:0}}
+                    />
+                  </View>)
+                })}
               </View>
             </View>
           </View>)}
