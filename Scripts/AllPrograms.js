@@ -9,8 +9,9 @@ import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { getPrograms } from './API.js'
- 
+import { getPrograms, parseSimpleDateText, sqlToJsDate } from './API.js'
+ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
+
 import userContext from './Context.js'
 
 export default function AllPrograms() {
@@ -23,20 +24,43 @@ export default function AllPrograms() {
   const [colors, setColors] = useState(colorsLight)
   const [coach, setCoach] = useState(user)
 
+  // Data.
+  const [programs, setPrograms] = useState([])
+  const [programGrads, setProgramGrads] = useState([])
+
+  // Display variables.
+  const [showActivityIndicator, setShowActivityIndicator] = useState(true)
+  const [showAll, setShowAll] = useState(false)
+  const [showAddClient, setShowAddClient] = useState(false)
+  const [showViewProgram, setShowViewProgram] = useState(false)
+  const [viewProgramIndex, setViewProgramIndex] = useState(-1)
+  
   useEffect(() => {
-    if (coach != null) {
-      getData() 
+    if (coach == null) {
+      linkTo('/welcome')
+    } else {
+      getData()
     }
   },[])
 
-  useFocusEffect(() => {
-    getData()
-  })
-
-  // Main programs page functions.
+  // All programs functions.
   const getData = async () => {
     var data = await getPrograms(coach.Id, coach.Token)
-    
+    console.log('data:',data)
+    var grads = []
+    for (var i = 0; i < data.length; i++) {
+      var num = 0
+      for (var j = 0; j < data[i].Assocs.length; j++) {
+        if (data[i].Assocs[j].CurrentTaskId == 0) {
+          num++
+        }
+      }
+      grads.push(num)
+    }
+    setProgramGrads(grads)
+    setPrograms(data)
+    setShowActivityIndicator(false)
+    setShowAll(true)
   }
 
   const addProgram = () => {
@@ -44,25 +68,116 @@ export default function AllPrograms() {
     linkTo('/new-program')
   }
 
+  const viewProgram = (index) => {
+    setViewProgramIndex(index)
+    setShowAll(false)
+    setShowActivityIndicator(true)
+    setTimeout(() => {
+      setShowActivityIndicator(false)
+      setShowViewProgram(true)
+    }, 500)
+  }
+
+  const viewAddClient = (index) => {
+    setViewProgramIndex(index)
+    setShowAll(false)
+    setShowActivityIndicator(true)
+    setTimeout(() => {
+      setShowActivityIndicator(false)
+      setShowAddClient(true)
+    }, 500)
+  }
+  
+  // View program functions.
+  const navToAll = () => {
+    setViewProgramIndex(-1)
+    setShowViewProgram(false)
+    setShowActivityIndicator(true)
+    setTimeout(() => {
+      setShowActivityIndicator(false)
+      setShowAll(true)
+    }, 500)
+  }
+
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
         <View style={styles.body}>
 
-          <View style={styles.promptListContainer}>
+          {showActivityIndicator && (<ActivityIndicatorView />)}
+
+          {showAll && (<View style={styles.promptListContainer}>
             <View style={styles.promptHeader}>
               <Text style={styles.promptHeaderTitle}>All Programs</Text>
               <Button
-                title='New Program'
+                title='Add New'
                 titleStyle={styles.promptAddButtonTitle}
                 buttonStyle={styles.promptAddButton}
                 containerStyle={styles.promptAddButtonContainer}
                 onPress={addProgram} 
               />
             </View>
-            <View style={styles.promptsColumn}>
+            {programs.length == 0 && (<View style={styles.programs}>
+              <Text style={styles.noProgramsText}>No programs yet!</Text>
+            </View>) || (<View style={styles.programs}>
+              {programs.map((program, index) => {
+                console.log('program:',program)
+                return (<View key={'program_'+index} style={styles.program}>
+                  <View style={styles.programHeader}>
+                    <Text style={styles.programHeaderTitle}>{program.Title}</Text>
+                    <Text style={styles.programHeaderCreated}>Created {parseSimpleDateText(sqlToJsDate(program.Created))}</Text>
+                  </View>
+                  <Text style={styles.programHeaderDescription}>{program.Description}</Text>
+                  <View style={styles.programStats}>
+                    <View style={[styles.programStatTop,{paddingRight:10}]}>
+                      <Text style={styles.programStatTopNumber}>{program.Tasks.length}</Text>
+                      <Text style={styles.programStatTopText}>Tasks</Text>
+                    </View>
+                    <View style={styles.programStatTop}>
+                      <Text style={styles.programStatTopNumber}>{program.Assocs.length}</Text>
+                      <Text style={styles.programStatTopText}>Members</Text>
+                    </View>
+                    <View style={[styles.programStatTop,{borderRightWidth:2}]}>
+                      <Text style={styles.programStatTopNumber}>{programGrads[index]}</Text>
+                      <Text style={styles.programStatTopText}>Graduates</Text>
+                    </View>
+                    <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
+                      <Button 
+                        title='View Data'
+                        buttonStyle={styles.viewProgramButton}
+                        containerStyle={styles.viewProgramButtonContainer}
+                        titleStyle={styles.mainProgramButton}
+                        onPress={() => viewProgram(index)}
+                      />
+                      <Button 
+                        title='Add Client'
+                        buttonStyle={styles.addProgramMemberButton}
+                        containerStyle={styles.addProgramMemberButtonContainer}
+                        titleStyle={styles.mainProgramButton}
+                        onPress={() => addClient(index)}
+                      />
+                    </View>
+                  </View>
+                </View>)
+              })}
+            </View>)} 
+          </View>)}
+
+          {showViewProgram && (<View style={styles.promptListContainer}>
+            <View style={styles.promptHeader}>
+              <View style={{flexDirection: 'row',alignItems:'center'}}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={28}
+                  color={colors.mainTextColor}
+                  style={{marginRight:0}}
+                  onPress={() => navToAll()}
+                />
+                <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
+              </View>
             </View>
-          </View>
+          </View>)}
 
         </View>
       </View>

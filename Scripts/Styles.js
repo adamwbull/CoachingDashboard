@@ -2478,7 +2478,6 @@ export const programsLight = StyleSheet.create({
   main: {
     flex:1,
     flexDirection:'row',
-
   },
   scrollView: {
     paddingTop:20,
@@ -2566,17 +2565,21 @@ export const programsLight = StyleSheet.create({
     alignItems:'center',
   },
   promptAddButtonTitle: {
-    fontSize:14,
+    fontSize:16,
+    lineHeight:16,
     fontFamily:'Poppins',
     color:'#fff'
   },
   promptAddButton: {
     backgroundColor:btnColors.primary,
     borderRadius:50,
-    padding:5,
+    paddingTop:10,
+    paddingBottom:10,
+    paddingLeft:10,
+    paddingRight:10
   },
   promptAddButtonContainer: {
-    width:120
+    marginRight:10
   },
   helpBox: {
     width:400,
@@ -2601,6 +2604,101 @@ export const programsLight = StyleSheet.create({
   },
   proPlanText: {
     color:btnColors.danger
+  },
+  noProgramsText: {
+    textAlign:'center',
+    fontFamily:'Poppins',
+    fontSize:18,
+    paddingTop:20,
+    color:colorsLight.mainTextColor
+  },
+  program: {
+    backgroundColor:colorsLight.header,
+    borderRadius:25,
+    marginTop:20,
+    marginLeft:10,
+    marginRight:10
+  },
+  programHeader: {
+    flexDirection:'row',
+    justifyContent: 'space-between',
+    alignItems:'center',
+    padding:20
+  },
+  programHeaderTitle: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:24
+  },
+  programHeaderDescription: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:16,
+    paddingLeft:20,
+    paddingRight:20,
+    paddingBottom:20
+  },
+  programHeaderCreated: {
+    fontFamily:'Poppins',
+    color:colorsLight.secondaryTextColor,
+    fontSize:16
+  },
+  programStats: {
+    flexDirection:'row',
+    alignItems:'center',
+    paddingLeft:20,
+    paddingRight:20,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderBottomLeftRadius:25,
+    borderBottomRightRadius:25,
+    flex:1
+  },
+  programStatTop: {
+    flex:1,
+    height:'100%',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    borderRightWidth:2,
+    borderRightColor:colorsLight.header,
+  },
+  programStatTopNumber: {
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    fontSize:24,
+    marginRight:5,
+  },
+  programStatTopText: {
+    fontFamily:'Poppins',
+    color:colorsLight.secondaryTextColor,
+    fontSize:18
+  },
+  viewProgramButton: {
+    backgroundColor:btnColors.primary,
+    borderRadius:25,
+    paddingLeft:15,paddingRight:15,
+    marginTop:20,
+    marginBottom:20,
+    marginLeft:20
+  },
+  viewProgramButtonContainer: {
+    flex:1
+  },
+  addProgramMemberButton: {
+    backgroundColor:btnColors.success,
+    borderRadius:25,
+    paddingLeft:15,paddingRight:15,
+    marginTop:20,
+    marginBottom:20,
+    marginLeft:20
+  },
+  addProgramMemberButtonContainer: {
+    flex:1
+  },
+  mainProgramButton: {
+    fontSize:14,
+    color:'#fff',
+    fontFamily:'Poppins'
   }
 });
 
