@@ -2487,6 +2487,7 @@ export const programsLight = StyleSheet.create({
   body: {
     flex:1,
     borderWidth:0,
+    alignItems: 'center'
   },
   bodyHeader: {
     flexDirection:'row',
@@ -2699,6 +2700,8 @@ export const programsLight = StyleSheet.create({
     fontSize:14,
     color:'#fff',
     fontFamily:'Poppins'
+  },
+  viewProgramMainHeader: {
   }
 });
 

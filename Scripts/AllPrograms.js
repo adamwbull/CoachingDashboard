@@ -1,16 +1,15 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
-
-import { programsLight, colorsLight, innerDrawerLight } from '../Scripts/Styles.js'
+import { programsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
-import { Helmet } from "react-helmet"
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { getPrograms, parseSimpleDateText, sqlToJsDate } from './API.js'
- import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
+import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate } from './API.js'
+import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
+import { Progress } from 'semantic-ui-react'
 
 import userContext from './Context.js'
 
@@ -20,22 +19,32 @@ export default function AllPrograms() {
   const user = useContext(userContext)
   
   const [refreshing, setRefreshing] = useState(true)
+  const [coach, setCoach] = useState(user)
+
+  // Styling
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
-  const [coach, setCoach] = useState(user)
+  const progressBarColors = [ // 0, 1, 2 index match from API on TasksProgressColor
+    btnColors.caution,
+    btnColors.primary,
+    btnColors.success
+  ]
 
   // Data.
   const [programs, setPrograms] = useState([])
   const [programGrads, setProgramGrads] = useState([])
   const [clientList, setClientList] = useState([])
 
-  // Display variables.
+  // Main display variables.
   const [showActivityIndicator, setShowActivityIndicator] = useState(true)
   const [showAll, setShowAll] = useState(false)
   const [showAddClient, setShowAddClient] = useState(false)
   const [showViewProgram, setShowViewProgram] = useState(false)
   const [viewProgramIndex, setViewProgramIndex] = useState(-1)
-  
+
+  // View program variables.
+  const [showFullClientList, setShowFullClientList] = useState(false)
+
   useEffect(() => {
     if (coach == null) {
       linkTo('/welcome')
@@ -79,15 +88,22 @@ export default function AllPrograms() {
     }, 500)
   }
 
+  const refreshClientList = async () => {
+    var clients = await getClientsData(coach.Id, coach.Token)
+    console.log('found clients:', clients[1])
+    setClientList(clients[1])
+    setShowActivityIndicator(false)
+    setShowAddClient(true)
+  }
+
   const viewAddClient = (index) => {
+    
     setViewProgramIndex(index)
     setShowAll(false)
     setShowViewProgram(false)
     setShowActivityIndicator(true)
-    setTimeout(() => {
-      setShowActivityIndicator(false)
-      setShowAddClient(true)
-    }, 500)
+    refreshClientList()
+
   }
   
   // View program functions.
@@ -100,7 +116,15 @@ export default function AllPrograms() {
     setShowActivityIndicator(true)
     setTimeout(() => {
       setShowActivityIndicator(false)
-      setShowAll(true)
+      if (from == 0) {
+        setShowAll(true)
+      } else {
+        if (viewProgramIndex == -1) {
+          setShowAll(true)
+        } else {
+          setShowViewProgram(true)
+        }
+      }
     }, 500)
   }
 
@@ -169,20 +193,22 @@ export default function AllPrograms() {
           </View>)}
 
           {showViewProgram && (<View style={styles.promptListContainer}>
-            <View style={styles.promptHeader}>
-              <View style={{flexDirection: 'row',alignItems:'center'}}>
-                <Icon
-                  name='chevron-back'
-                  type='ionicon'
-                  size={28}
-                  color={colors.mainTextColor}
-                  style={{marginRight:0}}
-                  onPress={() => navTo(0)}
-                />
-                <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
+            <View style={styles.viewProgramMainHeader}>
+              <View style={styles.promptHeader}>
+                <View style={{flexDirection: 'row',alignItems:'center'}}>
+                  <Icon
+                    name='chevron-back'
+                    type='ionicon'
+                    size={28}
+                    color={colors.mainTextColor}
+                    style={{marginRight:0}}
+                    onPress={() => navTo(0)}
+                  />
+                  <Text style={styles.promptHeaderTitle}>Viewing {programs[viewProgramIndex].Title}</Text>
+                </View>
               </View>
+              <Text style={[styles.programHeaderDescription,{marginTop:20}]}>{programs[viewProgramIndex].Description}</Text>
             </View>
-            <Text style={[styles.programHeaderDescription,{marginTop:20}]}>{programs[viewProgramIndex].Description}</Text>
             <View style={styles.programStats}>
               <View style={[styles.programStatTop,{paddingRight:10}]}>
                 <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
@@ -206,9 +232,49 @@ export default function AllPrograms() {
                 />
               </View>
             </View>
+            <View style={styles.viewProgramSection}>
+              <View style={styles.viewProgramSectionHeader}>
+                <Text style={styles.viewProgramSectionTitle}>Program Members</Text>
+                {showFullClientList && (<Text style={styles.viewProgramSectionClientToggle}>
+                  Show less members
+                </Text>) || 
+                (<>
+                  {programs[viewProgramIndex].Assocs.length > 6 && (<Text style={styles.viewProgramSectionClientToggle}>
+                    Show all {programs[viewProgramIndex].Assocs.length} members
+                  </Text>)}
+                </>)}
+              </View>
+              <View style={viewProgramSectionClientList}>
+                {programs[viewProgramIndex].Assocs.map((client, index) => {
+
+                  if (showFullClientList || index < 6) {
+
+                    return (<View key={'programClient_'+index}>
+                      <Image 
+                        source={{uri:client.Avatar}}
+                        style={styles.viewProgramSectionClientListAvatar}
+                      />
+                      <Text style={styles.viewProgramSectionClientListName}>
+                        {client.FirstName + ' ' + client.LastName}
+                      </Text>
+                      <Progress 
+                        percent={client.TasksProgressPercent}
+                        color={progressBarColors[client.TasksProgressColor]} 
+                      />
+                      <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                        <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                          {client.TasksCompleted} / {program.Tasks.length}
+                        </Text>
+                        Tasks Completed
+                      </Text>
+                    </View>)
+                  }
+                })}
+              </View>
+            </View>
           </View>)}
 
-          {showAddClient && (<View style={styles.promptListContainer}>
+          {showAddClient && (<View style={[styles.promptListContainer,{width:'50%'}]}>
             <View style={styles.addClientHeader}>
               <View style={styles.promptHeader}>
                 <View style={{flexDirection: 'row',alignItems:'center'}}>
