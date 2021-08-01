@@ -10,6 +10,7 @@ import { set, get, getTTL, ttl } from './Storage.js'
 import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate } from './API.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Progress } from 'semantic-ui-react'
+import { TextInput } from 'react-native-web'
 
 import userContext from './Context.js'
 
@@ -45,6 +46,9 @@ export default function AllPrograms() {
   // View program variables.
   const [showFullClientList, setShowFullClientList] = useState(false)
 
+  // Add client variables.
+  const [addClientHasSearchContents, setAddClientHasSearchContents] = useState(false) 
+  
   useEffect(() => {
     if (coach == null) {
       linkTo('/welcome')
@@ -90,9 +94,9 @@ export default function AllPrograms() {
 
   const refreshClientList = async () => {
     var clients = await getClientsData(coach.Id, coach.Token)
-    for (var i = 0; i < clients.length; i++) {
+    for (var i = 0; i < clients[1].length; i++) {
       clients[1][i].Added = 0 
-      clients[1][i].Visible = 0
+      clients[1][i].Visible = 1
     }
     setClientList(clients[1])
     setShowActivityIndicator(false)
@@ -131,6 +135,20 @@ export default function AllPrograms() {
     }, 500)
   }
 
+  const searchClients = (text) => {
+    console.log('searching with', text)
+    var tems = JSON.parse(JSON.stringify(clientList))
+    for (var i = 0; i < tems.length; i++) {
+      var str = tems[i].FirstName + ' ' + tems[i].LastName
+      if (str.toLowerCase().includes(text.toLowerCase()) || text.length == 0) {
+        tems[i].Visible = 1
+      } else {
+        tems[i].Visible = 0
+      }
+    }
+    setClientList(tems)
+  } 
+
   const toggleAddClient = (type, index) => {
     var clients = JSON.parse(JSON.stringify(clientList))
     for (var i = 0; i < clients.length; i++) {
@@ -140,6 +158,22 @@ export default function AllPrograms() {
       }
     }
     setClientList(clients)
+  }
+
+  const addClientsToProgram = async () => {
+    // Create PromptAssoc Data.
+    var assocs = []
+    for (var i = 0; i < clientList.length; i++) {
+      var client = clientList[i]
+      if (client.Added == 1) {
+        var assoc = {
+          ClientId:client.Id,
+          CoachId:coach.Id,
+          ProgramId:programs[viewProgramIndex].Id,
+        }
+      }
+    }
+    var created = await createPromptAssocs(coach.Token, coach.Id, assocs)
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -305,35 +339,66 @@ export default function AllPrograms() {
                 </View>
               </View>
               <Text style={styles.addClientsEnroll}>Select clients to enroll:</Text>
+              <View style={addClientHasSearchContents && [styles.createGroupAddHeaderHighlight,{margin:0,flex:1}] || [styles.createGroupAddHeader,{margin:0,flex:1}]}>
+                <View style={styles.createGroupAddIcon}>
+                  <Icon
+                    name='search'
+                    type='ionicon'
+                    size={28}
+                    color={addClientHasSearchContents && colors.mainTextColor || colors.headerBorder}
+                    style={[{marginLeft:5,marginTop:2}]}
+                  />
+                </View>
+                <TextInput 
+                  placeholder='Find clients...'
+                  style={styles.createGroupAddInput}
+                  onChange={(e) => {
+                    searchClients(e.currentTarget.value)
+                    setAddClientHasSearchContents((e.currentTarget.value.length > 0))
+                  }}
+                  className='custom-textinput'
+                />
+              </View>
               <View style={styles.addClientList}>
                 {clientList.map((client, cIndex) => {
-                  return (<View key={'clientList_'+cIndex} style={styles.addClientListMember}>
-                    <View style={styles.clientListInfo}>
-                      <View style={styles.clientListAvatarContainer}>
-                        <Image 
-                          source={{uri:client.Avatar}}
-                          style={styles.clientListAvatar}
-                        />
+                  if (client.Visible == 1) {
+                    return (<View key={'clientList_'+cIndex} style={styles.addClientListMember}>
+                      <View style={styles.clientListInfo}>
+                        <View style={styles.clientListAvatarContainer}>
+                          <Image 
+                            source={{uri:client.Avatar}}
+                            style={styles.clientListAvatar}
+                          />
+                        </View>
+                        <Text style={styles.clientListName}>{client.FirstName + ' ' + client.LastName}</Text>
                       </View>
-                      <Text style={styles.clientListName}>{client.FirstName + ' ' + client.LastName}</Text>
-                    </View>
-                    {client.Added == 1 && (<Icon
-                      name='checkmark'
-                      type='ionicon'
-                      size={32}
-                      color={btnColors.success}
-                      style={{marginRight:0}}
-                      onPress={() => toggleAddClient(0, cIndex)}
-                    />) || (<Icon
-                      name='add'
-                      type='ionicon'
-                      size={32}
-                      color={btnColors.primary}
-                      style={{marginRight:0}}
-                      onPress={() => toggleAddClient(1, cIndex)}
-                    />)}
-                  </View>)
+                      {client.Added == 1 && (<Icon
+                        name='checkmark'
+                        type='ionicon'
+                        size={32}
+                        color={btnColors.success}
+                        style={{marginRight:0}}
+                        onPress={() => toggleAddClient(0, cIndex)}
+                      />) || (<Icon
+                        name='add'
+                        type='ionicon'
+                        size={32}
+                        color={btnColors.primary}
+                        style={{marginRight:0}}
+                        onPress={() => toggleAddClient(1, cIndex)}
+                      />)}
+                    </View>)
+                  }
                 })}
+              </View>
+              <View style={styles.addClientListSubmitContainer}>
+                <Button 
+                  title='Add Clients to Program'
+                  onPress={() => addClientsToProgram()}
+                  buttonStyle={styles.addClientListSubmitButton}
+                  titleStyle={styles.addClientListSubmitTitle}
+                  containerStyle={styles.addClientListSubmitWrapper}
+                />
               </View>
             </View>
           </View>)}
