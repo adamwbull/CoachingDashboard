@@ -21,7 +21,7 @@ export default function AllPrograms() {
   const [refreshing, setRefreshing] = useState(true)
   const [coach, setCoach] = useState(user)
 
-  // Styling
+  // Styling.
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
   const progressBarColors = [ // 0, 1, 2 index match from API on TasksProgressColor
@@ -90,7 +90,10 @@ export default function AllPrograms() {
 
   const refreshClientList = async () => {
     var clients = await getClientsData(coach.Id, coach.Token)
-    console.log('found clients:', clients[1])
+    for (var i = 0; i < clients.length; i++) {
+      clients[1][i].Added = 0 
+      clients[1][i].Visible = 0
+    }
     setClientList(clients[1])
     setShowActivityIndicator(false)
     setShowAddClient(true)
@@ -126,6 +129,17 @@ export default function AllPrograms() {
         }
       }
     }, 500)
+  }
+
+  const toggleAddClient = (type, index) => {
+    var clients = JSON.parse(JSON.stringify(clientList))
+    for (var i = 0; i < clients.length; i++) {
+      if (i == index) {
+        clients[i].Added = type
+        break
+      }
+    }
+    setClientList(clients)
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -244,7 +258,7 @@ export default function AllPrograms() {
                   </Text>)}
                 </>)}
               </View>
-              <View style={viewProgramSectionClientList}>
+              <View style={styles.viewProgramSectionClientList}>
                 {programs[viewProgramIndex].Assocs.map((client, index) => {
 
                   if (showFullClientList || index < 6) {
@@ -268,6 +282,7 @@ export default function AllPrograms() {
                         Tasks Completed
                       </Text>
                     </View>)
+
                   }
                 })}
               </View>
@@ -302,13 +317,21 @@ export default function AllPrograms() {
                       </View>
                       <Text style={styles.clientListName}>{client.FirstName + ' ' + client.LastName}</Text>
                     </View>
-                    <Icon
-                      name='chevron-back'
+                    {client.Added == 1 && (<Icon
+                      name='checkmark'
                       type='ionicon'
-                      size={28}
-                      color={colors.mainTextColor}
+                      size={32}
+                      color={btnColors.success}
                       style={{marginRight:0}}
-                    />
+                      onPress={() => toggleAddClient(0, cIndex)}
+                    />) || (<Icon
+                      name='add'
+                      type='ionicon'
+                      size={32}
+                      color={btnColors.primary}
+                      style={{marginRight:0}}
+                      onPress={() => toggleAddClient(1, cIndex)}
+                    />)}
                   </View>)
                 })}
               </View>

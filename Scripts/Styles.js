@@ -2531,6 +2531,8 @@ export const programsLight = StyleSheet.create({
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
+    flex:1,
+    width:'100%'
   },
   promptHeader: {
     flexDirection:'row',
@@ -2702,6 +2704,46 @@ export const programsLight = StyleSheet.create({
     fontFamily:'Poppins'
   },
   viewProgramMainHeader: {
+  },
+  viewProgramSectionTitle: {
+    fontFamily:'Poppins',
+    fontSize:20,
+    color:colorsLight.mainTextColor,
+    marginTop:10,
+    marginBottom:20
+  },
+  addClientsEnroll: {
+    padding:10,
+    color:colorsLight.mainTextColor,
+    fontSize:18,
+    fontFamily:'Poppins'
+  },
+  addClientListMember: {
+    borderRadius:25,
+    backgroundColor:colorsLight.header,
+    padding:10,
+    marginBottom:10,
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  },
+  clientListInfo: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'flex-start'
+  },
+  clientListAvatar: {
+    width:40,
+    height:40,
+    borderRadius:40,
+    marginLeft:5
+  },
+  clientListName: {
+    marginLeft:10,
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.mainTextColor
   }
 });
 
