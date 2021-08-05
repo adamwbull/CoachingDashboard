@@ -207,9 +207,13 @@ export default function AllPrograms() {
     }
     var created = await createProgramAssocs(coach.Token, coach.Id, assocs)
 
-    set
     if (created) {
-
+      setShowAddClient(false)
+      setShowActivityIndicator(true)
+      setTimeout(() => {
+        setShowActivityIndicator(false)
+        setShowClientAddSuccessForm(true)
+      }, 500)
     }
   }
 
