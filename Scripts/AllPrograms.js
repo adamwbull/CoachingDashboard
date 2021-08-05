@@ -31,17 +31,19 @@ export default function AllPrograms() {
     btnColors.success
   ]
 
+  // Main display variables.
+  const [showActivityIndicator, setShowActivityIndicator] = useState(true)
+  const [showClientAddSuccessForm, setShowClientAddSuccessForm] = useState(false)
+  const [showAll, setShowAll] = useState(false)
+  const [showAddClient, setShowAddClient] = useState(false)
+  const [showViewProgram, setShowViewProgram] = useState(false)
+  const [viewProgramIndex, setViewProgramIndex] = useState(-1)
+
   // Data.
   const [programs, setPrograms] = useState([])
   const [programGrads, setProgramGrads] = useState([])
   const [clientList, setClientList] = useState([])
   const [clientAddedCount, setClientAddedCount] = useState(0)
-  // Main display variables.
-  const [showActivityIndicator, setShowActivityIndicator] = useState(true)
-  const [showAll, setShowAll] = useState(false)
-  const [showAddClient, setShowAddClient] = useState(false)
-  const [showViewProgram, setShowViewProgram] = useState(false)
-  const [viewProgramIndex, setViewProgramIndex] = useState(-1)
 
   // View program variables.
   const [showFullClientList, setShowFullClientList] = useState(false)
@@ -204,6 +206,20 @@ export default function AllPrograms() {
       }
     }
     var created = await createProgramAssocs(coach.Token, coach.Id, assocs)
+
+    set
+    if (created) {
+
+    }
+  }
+
+  const exitClientAddSuccessForm = () => {
+    setShowClientAddSuccessForm(false)
+    setShowActivityIndicator(true)
+    setTimeout(() => {
+      setShowActivityIndicator(false)
+      setShowViewProgram(true)
+    }, 500)
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -370,7 +386,7 @@ export default function AllPrograms() {
               {programs[viewProgramIndex].Tasks[0].ReleaseOnAssign == 1 && (<View>
                 <Text style={styles.addClientsReleaseOnAssignText}>
                   Clients will be immediately assigned the first Task:
-                  <Text style={styles.boldText}>{programs[viewProgramIndex].Tasks[0].Task.Title}</Text>
+                  <Text style={[styles.boldText,{marginLeft:5}]}>{programs[viewProgramIndex].Tasks[0].Task[0].Title}</Text>
                 </Text>
               </View>)}
               <View style={{flexDirection: 'row',alignItems:'center'}}>
@@ -438,6 +454,18 @@ export default function AllPrograms() {
                 })}
               </ScrollView>
             </View>
+          </View>)}
+
+          {showClientAddSuccessForm && (<View style={[styles.promptListContainer,{width:'50%',height:'60%'}]}>
+            <Text style={styles.clientAddSuccessTitle}>Success!</Text>
+            <Text style={styles.clientAddSuccessDesc}>{clientAddedCount} clients added to program.</Text>
+            <Button 
+              title='Continue'
+              onPress={() => exitClientAddSuccessForm()}
+              buttonStyle={styles.addClientListSubmitButton}
+              titleStyle={styles.addClientListSubmitTitle}
+              containerStyle={styles.addClientListSubmitWrapper}
+            />
           </View>)}
 
         </View>
