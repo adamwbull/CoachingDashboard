@@ -2718,6 +2718,16 @@ export const programsLight = StyleSheet.create({
     fontSize:18,
     fontFamily:'Poppins',
   },
+  addClientsReleaseOnAssignText: {
+    paddingBottom:10,
+    paddingLeft:10,
+    color:colorsLight.mainTextColor,
+    fontSize:14,
+    fontFamily:'Poppins',
+  },
+  boldText: {
+    fontFamily:'PoppinsSemiBold',
+  },
   addClientList: {
     marginTop:10,
   },
@@ -2773,7 +2783,7 @@ export const programsLight = StyleSheet.create({
     borderBottomWidth:2,
     borderBottomColor:colorsLight.headerBorder  
   },
-  createGroupAddHeader: {
+  searchClientsBar: {
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center',
@@ -2781,28 +2791,26 @@ export const programsLight = StyleSheet.create({
     borderColor:colorsLight.headerBorder,
     borderRadius:25,
     paddingRight:10,
-    marginBottom:10
+    flex:1,
   },
-  createGroupAddHeaderHighlight: {
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'center',
+  searchClientsBarHighlight: {
     borderWidth:2,
     borderColor:colorsLight.mainTextColor,
-    borderRadius:25,
-    paddingRight:10,
-    marginBottom:10
   },
   addClientListSubmitButton: {
     backgroundColor:btnColors.primary,
     color:colorsLight.mainTextColor,
     borderRadius:25,
-    padding:10,
+    paddingTop:5,
+    paddingBottom:5,
+    paddingLeft:10,
+    paddingRight:10,
+    marginLeft:10,
   },
   addClientListSubmitTitle: {
     color:'#fff',
     fontFamily:'Poppins',
-    fontSize:18,
+    fontSize:16,
   }
 });
 

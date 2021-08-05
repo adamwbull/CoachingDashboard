@@ -7,7 +7,7 @@ import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate } from './API.js'
+import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs } from './API.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Progress } from 'semantic-ui-react'
 import { TextInput } from 'react-native-web'
@@ -35,7 +35,7 @@ export default function AllPrograms() {
   const [programs, setPrograms] = useState([])
   const [programGrads, setProgramGrads] = useState([])
   const [clientList, setClientList] = useState([])
-
+  const [clientAddedCount, setClientAddedCount] = useState(0)
   // Main display variables.
   const [showActivityIndicator, setShowActivityIndicator] = useState(true)
   const [showAll, setShowAll] = useState(false)
@@ -78,7 +78,6 @@ export default function AllPrograms() {
   }
 
   const addProgram = () => {
-    console.log ('Add new program...')
     linkTo('/new-program')
   }
 
@@ -92,11 +91,29 @@ export default function AllPrograms() {
     }, 500)
   }
 
-  const refreshClientList = async () => {
+  const refreshClientList = async (index) => {
     var clients = await getClientsData(coach.Id, coach.Token)
     for (var i = 0; i < clients[1].length; i++) {
+
+      // Check if this client is already enrolled.
+      var alreadyEnrolled = false
+      for (var j = 0; j < programs[index].Assocs.length; j++) {
+        var assoc = programs[index].Assocs[j]
+        if (assoc.Client.Id == clients[1][i].Id) {
+          alreadyEnrolled = true
+          break
+        }
+      }
+
       clients[1][i].Added = 0 
-      clients[1][i].Visible = 1
+
+      if (alreadyEnrolled) {
+        clients[1][i].Visible = 0
+      } else {
+        clients[1][i].Visible = 1
+      }
+
+      
     }
     setClientList(clients[1])
     setShowActivityIndicator(false)
@@ -109,7 +126,7 @@ export default function AllPrograms() {
     setShowAll(false)
     setShowViewProgram(false)
     setShowActivityIndicator(true)
-    refreshClientList()
+    refreshClientList(index)
 
   }
   
@@ -136,11 +153,21 @@ export default function AllPrograms() {
   }
 
   const searchClients = (text) => {
-    console.log('searching with', text)
     var tems = JSON.parse(JSON.stringify(clientList))
     for (var i = 0; i < tems.length; i++) {
       var str = tems[i].FirstName + ' ' + tems[i].LastName
-      if (str.toLowerCase().includes(text.toLowerCase()) || text.length == 0) {
+
+      // Check if this client is already enrolled.
+      var alreadyEnrolled = false
+      for (var j = 0; j < programs[viewProgramIndex].Assocs.length; j++) {
+        var assoc = programs[viewProgramIndex].Assocs[j]
+        if (assoc.Client.Id == tems[i].Id) {
+          alreadyEnrolled = true
+          break
+        }
+      }
+
+      if (!alreadyEnrolled && (str.toLowerCase().includes(text.toLowerCase()) || text.length == 0 || tems[i].Added == 1)) {
         tems[i].Visible = 1
       } else {
         tems[i].Visible = 0
@@ -150,13 +177,15 @@ export default function AllPrograms() {
   } 
 
   const toggleAddClient = (type, index) => {
+    var addedClientCount = 0
     var clients = JSON.parse(JSON.stringify(clientList))
     for (var i = 0; i < clients.length; i++) {
       if (i == index) {
         clients[i].Added = type
-        break
       }
+      addedClientCount += clients[i].Added
     }
+    setClientAddedCount(addedClientCount)
     setClientList(clients)
   }
 
@@ -171,9 +200,10 @@ export default function AllPrograms() {
           CoachId:coach.Id,
           ProgramId:programs[viewProgramIndex].Id,
         }
+        assocs.push(assoc)
       }
     }
-    var created = await createPromptAssocs(coach.Token, coach.Id, assocs)
+    var created = await createProgramAssocs(coach.Token, coach.Id, assocs)
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -198,7 +228,6 @@ export default function AllPrograms() {
               <Text style={styles.noProgramsText}>No programs yet!</Text>
             </View>) || (<View style={styles.programs}>
               {programs.map((program, index) => {
-                console.log('program:',program)
                 return (<View key={'program_'+index} style={styles.program}>
                   <View style={styles.programHeader}>
                     <Text style={styles.programHeaderTitle}>{program.Title}</Text>
@@ -296,14 +325,13 @@ export default function AllPrograms() {
                 {programs[viewProgramIndex].Assocs.map((client, index) => {
 
                   if (showFullClientList || index < 6) {
-
                     return (<View key={'programClient_'+index}>
                       <Image 
-                        source={{uri:client.Avatar}}
+                        source={{uri:client.Client.Avatar}}
                         style={styles.viewProgramSectionClientListAvatar}
                       />
                       <Text style={styles.viewProgramSectionClientListName}>
-                        {client.FirstName + ' ' + client.LastName}
+                        {client.Client.FirstName + ' ' + client.Client.LastName}
                       </Text>
                       <Progress 
                         percent={client.TasksProgressPercent}
@@ -311,7 +339,7 @@ export default function AllPrograms() {
                       />
                       <Text style={styles.viewProgramSectionClientListTasksCompleted}>
                         <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
-                          {client.TasksCompleted} / {program.Tasks.length}
+                          {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
                         </Text>
                         Tasks Completed
                       </Text>
@@ -323,7 +351,7 @@ export default function AllPrograms() {
             </View>
           </View>)}
 
-          {showAddClient && (<View style={[styles.promptListContainer,{width:'50%'}]}>
+          {showAddClient && (<View style={[styles.promptListContainer,{width:'50%',height:'60%'}]}>
             <View style={styles.addClientHeader}>
               <View style={styles.promptHeader}>
                 <View style={{flexDirection: 'row',alignItems:'center'}}>
@@ -338,28 +366,46 @@ export default function AllPrograms() {
                   <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
                 </View>
               </View>
-              <Text style={styles.addClientsEnroll}>Select clients to enroll:</Text>
-              <View style={addClientHasSearchContents && [styles.createGroupAddHeaderHighlight,{margin:0,flex:1}] || [styles.createGroupAddHeader,{margin:0,flex:1}]}>
-                <View style={styles.createGroupAddIcon}>
-                  <Icon
-                    name='search'
-                    type='ionicon'
-                    size={28}
-                    color={addClientHasSearchContents && colors.mainTextColor || colors.headerBorder}
-                    style={[{marginLeft:5,marginTop:2}]}
+              <Text style={styles.addClientsEnroll}>Select clients to enroll!</Text>
+              {programs[viewProgramIndex].Tasks[0].ReleaseOnAssign == 1 && (<View>
+                <Text style={styles.addClientsReleaseOnAssignText}>
+                  Clients will be immediately assigned the first Task:
+                  <Text style={styles.boldText}>{programs[viewProgramIndex].Tasks[0].Task.Title}</Text>
+                </Text>
+              </View>)}
+              <View style={{flexDirection: 'row',alignItems:'center'}}>
+                <View style={addClientHasSearchContents && [styles.searchClientsBar,styles.searchClientsBarHighlight] || [styles.searchClientsBar]}>
+                  <View style={styles.createGroupAddIcon}>
+                    <Icon
+                      name='search'
+                      type='ionicon'
+                      size={28}
+                      color={addClientHasSearchContents && colors.mainTextColor || colors.headerBorder}
+                      style={[{marginLeft:5,marginTop:2}]}
+                    />
+                  </View>
+                  <TextInput 
+                    placeholder='Find clients...'
+                    style={styles.createGroupAddInput}
+                    onChange={(e) => {
+                      searchClients(e.currentTarget.value)
+                      setAddClientHasSearchContents((e.currentTarget.value.length > 0))
+                    }}
+                    className='custom-textinput'
                   />
                 </View>
-                <TextInput 
-                  placeholder='Find clients...'
-                  style={styles.createGroupAddInput}
-                  onChange={(e) => {
-                    searchClients(e.currentTarget.value)
-                    setAddClientHasSearchContents((e.currentTarget.value.length > 0))
-                  }}
-                  className='custom-textinput'
-                />
+                <View style={styles.addClientListSubmitContainer}>
+                  <Button 
+                    title={'Add ' + clientAddedCount + ' Clients'}
+                    onPress={() => addClientsToProgram()}
+                    buttonStyle={styles.addClientListSubmitButton}
+                    titleStyle={styles.addClientListSubmitTitle}
+                    containerStyle={styles.addClientListSubmitWrapper}
+                    disabled={clientAddedCount == 0}
+                  />
+                </View>
               </View>
-              <View style={styles.addClientList}>
+              <ScrollView contentContainerStyle={styles.addClientList}>
                 {clientList.map((client, cIndex) => {
                   if (client.Visible == 1) {
                     return (<View key={'clientList_'+cIndex} style={styles.addClientListMember}>
@@ -390,16 +436,7 @@ export default function AllPrograms() {
                     </View>)
                   }
                 })}
-              </View>
-              <View style={styles.addClientListSubmitContainer}>
-                <Button 
-                  title='Add Clients to Program'
-                  onPress={() => addClientsToProgram()}
-                  buttonStyle={styles.addClientListSubmitButton}
-                  titleStyle={styles.addClientListSubmitTitle}
-                  containerStyle={styles.addClientListSubmitWrapper}
-                />
-              </View>
+              </ScrollView>
             </View>
           </View>)}
 

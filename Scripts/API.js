@@ -212,6 +212,40 @@ export async function check() {
 
 */
 
+
+export async function createProgramAssocs(token, id, assocs) {
+
+  var ret = false
+  var arr = {
+    Token:token,
+    CoachId:id,
+    Assocs:assocs,
+  }
+
+  console.log('Creating program assocs:',arr)
+
+  const res = await fetch(url + '/program-assoc/create-set', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success) {
+    console.log('Created successfully!')
+    ret = true
+  } else {
+    console.log('Not created successfully.')
+  }
+
+  return ret
+
+}
+
 export async function getPrograms(id, token) {
 
   var ret = false
