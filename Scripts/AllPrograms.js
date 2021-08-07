@@ -192,6 +192,7 @@ export default function AllPrograms() {
   }
 
   const addClientsToProgram = async () => {
+
     // Create PromptAssoc Data.
     var assocs = []
     for (var i = 0; i < clientList.length; i++) {
@@ -214,6 +215,8 @@ export default function AllPrograms() {
         setShowActivityIndicator(false)
         setShowClientAddSuccessForm(true)
       }, 500)
+    } else {
+
     }
   }
 
@@ -471,7 +474,7 @@ export default function AllPrograms() {
               containerStyle={styles.addClientListSubmitWrapper}
             />
           </View>)}
-
+          
         </View>
       </View>
     </View>
