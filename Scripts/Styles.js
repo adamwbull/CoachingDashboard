@@ -2811,7 +2811,13 @@ export const programsLight = StyleSheet.create({
     color:'#fff',
     fontFamily:'Poppins',
     fontSize:16,
-  }
+  },
+  clientAddSuccessTitle: {
+    color:'#fff',
+    fontFamily:'PoppinsSemiBold',
+    textAlign:'center',
+    fontSize:18,
+  },
 });
 
 export const addProgramLight = StyleSheet.create({
