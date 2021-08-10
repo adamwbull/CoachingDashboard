@@ -2709,8 +2709,26 @@ export const programsLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:20,
     color:colorsLight.mainTextColor,
-    marginTop:10,
-    marginBottom:20
+    marginTop:20,
+    marginBottom:10
+  },
+  viewProgramSectionClientList: {
+    flexDirection: 'row',
+    flexWrap:'wrap'
+  },
+  viewProgramSectionClientListItem: {
+    width:'25%',
+    padding:10
+  },
+  viewProgramProgressOuter: {
+  },
+  viewProgramProgressInner: {
+  },
+  viewProgramSectionClientListAvatar: {
+  },
+  viewProgramSectionClientListName: {
+  },
+  viewProgramSectionClientListTasksCompleted: {
   },
   addClientsEnroll: {
     padding:10,
@@ -2813,11 +2831,24 @@ export const programsLight = StyleSheet.create({
     fontSize:16,
   },
   clientAddSuccessTitle: {
-    color:'#fff',
+    color:colorsLight.mainTextColor,
     fontFamily:'PoppinsSemiBold',
     textAlign:'center',
-    fontSize:18,
+    fontSize:20,
   },
+  clientAddSuccessDesc: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    textAlign:'center',
+    fontSize:16,
+    marginTop:10,
+    marginBottom:15
+  },
+  viewProgramNoMembersText: {
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    fontSize:16,
+  }
 });
 
 export const addProgramLight = StyleSheet.create({

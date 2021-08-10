@@ -235,6 +235,8 @@ export async function createProgramAssocs(token, id, assocs) {
 
   const payload = await res.json()
 
+  console.log('payload:', payload)
+
   if (payload.success) {
     console.log('Created successfully!')
     ret = true

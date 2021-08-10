@@ -206,8 +206,8 @@ export default function AllPrograms() {
         assocs.push(assoc)
       }
     }
-    var created = await createProgramAssocs(coach.Token, coach.Id, assocs)
 
+    var created = await createProgramAssocs(coach.Token, coach.Id, assocs)
     if (created) {
       setShowAddClient(false)
       setShowActivityIndicator(true)
@@ -216,7 +216,7 @@ export default function AllPrograms() {
         setShowClientAddSuccessForm(true)
       }, 500)
     } else {
-
+      console.log("Invalid creation.")
     }
   }
 
@@ -345,31 +345,37 @@ export default function AllPrograms() {
                 </>)}
               </View>
               <View style={styles.viewProgramSectionClientList}>
-                {programs[viewProgramIndex].Assocs.map((client, index) => {
-
-                  if (showFullClientList || index < 6) {
-                    return (<View key={'programClient_'+index}>
-                      <Image 
-                        source={{uri:client.Client.Avatar}}
-                        style={styles.viewProgramSectionClientListAvatar}
-                      />
-                      <Text style={styles.viewProgramSectionClientListName}>
-                        {client.Client.FirstName + ' ' + client.Client.LastName}
-                      </Text>
-                      <Progress 
-                        percent={client.TasksProgressPercent}
-                        color={progressBarColors[client.TasksProgressColor]} 
-                      />
-                      <Text style={styles.viewProgramSectionClientListTasksCompleted}>
-                        <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
-                          {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                {programs[viewProgramIndex].Assocs.length > 0 && (<>
+                  {programs[viewProgramIndex].Assocs.map((client, index) => {
+                    console.log('pClient:',client)
+                    if (showFullClientList || index < 6) {
+                      return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItem}>
+                        <Image 
+                          source={{uri:client.Client.Avatar}}
+                          style={styles.viewProgramSectionClientListAvatar}
+                        />
+                        <Text style={styles.viewProgramSectionClientListName}>
+                          {client.Client.FirstName + ' ' + client.Client.LastName}
                         </Text>
-                        Tasks Completed
-                      </Text>
-                    </View>)
+                        <Progress 
+                          percent={client.TasksProgressPercent}
+                          color={progressBarColors[client.TasksProgressColor]} 
+                        />
+                        <View style={styles.viewProgramProgressOuter}>
+                          <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%'}]}>
+                          </View>
+                        </View>
+                        <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                          <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                            {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                          </Text>
+                          Tasks Completed
+                        </Text>
+                      </View>)
+                    }
 
-                  }
-                })}
+                  })}
+                </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
               </View>
             </View>
           </View>)}
@@ -465,7 +471,7 @@ export default function AllPrograms() {
 
           {showClientAddSuccessForm && (<View style={[styles.promptListContainer,{width:'50%',height:'60%'}]}>
             <Text style={styles.clientAddSuccessTitle}>Success!</Text>
-            <Text style={styles.clientAddSuccessDesc}>{clientAddedCount} clients added to program.</Text>
+            <Text style={styles.clientAddSuccessDesc}>Added {clientAddedCount} client{clientAddedCount > 1 && 's'} to <Text style={{fontFamily:'PoppinsSemiBold'}}>{programs[viewProgramIndex].Title}</Text>.</Text>
             <Button 
               title='Continue'
               onPress={() => exitClientAddSuccessForm()}
