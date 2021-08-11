@@ -359,7 +359,7 @@ export default function AllPrograms() {
                         </Text>
                         <Progress 
                           percent={client.TasksProgressPercent}
-                          color={progressBarColors[client.TasksProgressColor]} 
+                          color={progressBarColors[client.TasksProgressColor,{}]} 
                         />
                         <View style={styles.viewProgramProgressOuter}>
                           <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%'}]}>
