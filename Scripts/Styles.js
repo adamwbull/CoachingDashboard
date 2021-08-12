@@ -2718,17 +2718,37 @@ export const programsLight = StyleSheet.create({
   },
   viewProgramSectionClientListItem: {
     width:'25%',
-    padding:10
+    padding:10,
+    justifyContent:'center',
+    alignItems: 'center'
   },
   viewProgramProgressOuter: {
+    flex:1,
+    width:'80%',
+    height:20,
+    margin:5,
+    borderRadius:25,
+    backgroundColor:colorsLight.secondaryBackground,
   },
   viewProgramProgressInner: {
+    height:20,
+    borderRadius:25
   },
   viewProgramSectionClientListAvatar: {
+    width:80,
+    height:80,
+    borderRadius:80
   },
   viewProgramSectionClientListName: {
+    fontSize:18,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
   },
   viewProgramSectionClientListTasksCompleted: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
   },
   addClientsEnroll: {
     padding:10,

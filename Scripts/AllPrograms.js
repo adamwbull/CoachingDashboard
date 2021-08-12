@@ -357,12 +357,8 @@ export default function AllPrograms() {
                         <Text style={styles.viewProgramSectionClientListName}>
                           {client.Client.FirstName + ' ' + client.Client.LastName}
                         </Text>
-                        <Progress 
-                          percent={client.TasksProgressPercent}
-                          color={progressBarColors[client.TasksProgressColor,{}]} 
-                        />
                         <View style={styles.viewProgramProgressOuter}>
-                          <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%'}]}>
+                          <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
                           </View>
                         </View>
                         <Text style={styles.viewProgramSectionClientListTasksCompleted}>
