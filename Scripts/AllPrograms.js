@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { programsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
@@ -136,6 +136,11 @@ export default function AllPrograms() {
   // from: 0 - view program
   //       1 - add client
   // no use right now.
+
+  const toggleViewAllClients = () => {
+    setShowFullClientList(!showFullClientList)
+  }
+
   const navTo = (from) => {
     setShowViewProgram(false)
     setShowAddClient(false)
@@ -304,51 +309,46 @@ export default function AllPrograms() {
                     style={{marginRight:0}}
                     onPress={() => navTo(0)}
                   />
-                  <Text style={styles.promptHeaderTitle}>Viewing {programs[viewProgramIndex].Title}</Text>
+                  <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
                 </View>
               </View>
-              <Text style={[styles.programHeaderDescription,{marginTop:20}]}>{programs[viewProgramIndex].Description}</Text>
-            </View>
-            <View style={styles.programStats}>
-              <View style={[styles.programStatTop,{paddingRight:10}]}>
-                <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
-                <Text style={styles.programStatTopText}>Tasks</Text>
-              </View>
-              <View style={styles.programStatTop}>
-                <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Assocs.length}</Text>
-                <Text style={styles.programStatTopText}>Members</Text>
-              </View>
-              <View style={[styles.programStatTop,{borderRightWidth:2}]}>
-                <Text style={styles.programStatTopNumber}>{programGrads[viewProgramIndex]}</Text>
-                <Text style={styles.programStatTopText}>Graduates</Text>
-              </View>
-              <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
-                <Button 
-                  title='Add Client'
-                  buttonStyle={styles.addProgramMemberButton}
-                  containerStyle={styles.addProgramMemberButtonContainer}
-                  titleStyle={styles.mainProgramButton}
-                  onPress={() => viewAddClient(viewProgramIndex)}
-                />
-              </View>
+              <Text style={[styles.programHeaderDescription]}><Text style={{fontFamily:'PoppinsSemiBold'}}>Description:</Text> {programs[viewProgramIndex].Description}</Text>
             </View>
             <View style={styles.viewProgramSection}>
               <View style={styles.viewProgramSectionHeader}>
-                <Text style={styles.viewProgramSectionTitle}>Program Members</Text>
-                {showFullClientList && (<Text style={styles.viewProgramSectionClientToggle}>
-                  Show less members
-                </Text>) || 
+                <Text style={styles.viewProgramSectionTitle}>Program Details</Text>
+                {showFullClientList && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                  onPress={() => toggleViewAllClients()}>
+                  <Text style={styles.viewProgramSectionClientToggle}>
+                    Show less members
+                  </Text>
+                  <Icon
+                    name='chevron-up'
+                    type='ionicon'
+                    size={28}
+                    color={btnColors.primary}
+                  />
+                </TouchableOpacity>) || 
                 (<>
-                  {programs[viewProgramIndex].Assocs.length > 6 && (<Text style={styles.viewProgramSectionClientToggle}>
-                    Show all {programs[viewProgramIndex].Assocs.length} members
-                  </Text>)}
+                  {programs[viewProgramIndex].Assocs.length > 6 && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                    onPress={() => toggleViewAllClients()}>
+                    <Text style={styles.viewProgramSectionClientToggle}>
+                      Show {programs[viewProgramIndex].Assocs.length-8} more
+                    </Text>
+                    <Icon
+                      name='chevron-down'
+                      type='ionicon'
+                      size={28}
+                      color={btnColors.primary}
+                    />
+                  </TouchableOpacity>)}
                 </>)}
               </View>
               <View style={styles.viewProgramSectionClientList}>
                 {programs[viewProgramIndex].Assocs.length > 0 && (<>
                   {programs[viewProgramIndex].Assocs.map((client, index) => {
                     console.log('pClient:',client)
-                    if (showFullClientList || index < 6) {
+                    if (showFullClientList || index < 8) {
                       return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItem}>
                         <Image 
                           source={{uri:client.Client.Avatar}}
@@ -372,6 +372,29 @@ export default function AllPrograms() {
 
                   })}
                 </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
+              </View>
+              <View style={styles.programStats}>
+                <View style={[styles.programStatTop]}>
+                  <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
+                  <Text style={styles.programStatTopText}>Tasks</Text>
+                </View>
+                <View style={styles.programStatTop}>
+                  <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Assocs.length}</Text>
+                  <Text style={styles.programStatTopText}>Members</Text>
+                </View>
+                <View style={[styles.programStatTop,{borderRightWidth:2}]}>
+                  <Text style={styles.programStatTopNumber}>{programGrads[viewProgramIndex]}</Text>
+                  <Text style={styles.programStatTopText}>Graduates</Text>
+                </View>
+                <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
+                  <Button 
+                    title='Add Client'
+                    buttonStyle={styles.addProgramMemberButton}
+                    containerStyle={styles.addProgramMemberButtonContainer}
+                    titleStyle={styles.mainProgramButton}
+                    onPress={() => viewAddClient(viewProgramIndex)}
+                  />
+                </View>
               </View>
             </View>
           </View>)}
