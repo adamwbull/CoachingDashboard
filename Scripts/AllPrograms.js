@@ -261,7 +261,7 @@ export default function AllPrograms() {
                     <Text style={styles.programHeaderTitle}>{program.Title}</Text>
                     <Text style={styles.programHeaderCreated}>Created {parseSimpleDateText(sqlToJsDate(program.Created))}</Text>
                   </View>
-                  <Text style={styles.programHeaderDescription}>{program.Description}</Text>
+                  <Text style={[styles.programHeaderDescription,{marginLeft:20}]}>{program.Description}</Text>
                   <View style={styles.programStats}>
                     <View style={[styles.programStatTop,{paddingRight:10}]}>
                       <Text style={styles.programStatTopNumber}>{program.Tasks.length}</Text>
@@ -347,7 +347,6 @@ export default function AllPrograms() {
               <View style={styles.viewProgramSectionClientList}>
                 {programs[viewProgramIndex].Assocs.length > 0 && (<>
                   {programs[viewProgramIndex].Assocs.map((client, index) => {
-                    console.log('pClient:',client)
                     if (showFullClientList || index < 8) {
                       return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItem}>
                         <Image 

@@ -2713,14 +2713,13 @@ export const programsLight = StyleSheet.create({
     marginBottom:10
   },
   viewProgramSectionClientList: {
-    flexDirection: 'row',
-    flexWrap:'wrap'
+    flexDirection: 'column'
   },
   viewProgramSectionClientListItem: {
-    width:'25%',
+    width:'100%',
     padding:10,
     justifyContent:'center',
-    alignItems: 'center'
+    alignItems: 'flex-start'
   },
   viewProgramProgressOuter: {
     flex:1,
@@ -2735,15 +2734,15 @@ export const programsLight = StyleSheet.create({
     borderRadius:25
   },
   viewProgramSectionClientListAvatar: {
-    width:80,
-    height:80,
+    width:40,
+    height:40,
     borderRadius:80
   },
   viewProgramSectionClientListName: {
     fontSize:18,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
-    textAlign:'center'
+    textAlign:'left'
   },
   viewProgramSectionClientListTasksCompleted: {
     fontSize:16,
