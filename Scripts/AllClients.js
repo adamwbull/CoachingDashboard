@@ -455,7 +455,7 @@ export default function AllClients() {
           <View style={styles.bodyHeader}>
             <View style={styles.bodyTitleGroup}>
               <Text style={styles.bodyTitle}>Clients</Text>
-              <Text style={styles.bodyDesc}>View and manage your clients.</Text>
+              <Text style={styles.bodyDesc}>View and manage your client database.</Text>
             </View>
             <Text>
             {showClientProfile && (<>
