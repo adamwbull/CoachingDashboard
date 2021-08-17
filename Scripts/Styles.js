@@ -2474,20 +2474,23 @@ export const conceptsLight = StyleSheet.create({
 export const programsLight = StyleSheet.create({
   container: {
     flex: 1,
+    width:'100%'
   },
   main: {
     flex:1,
     flexDirection:'row',
+    width:'100%'
   },
   scrollView: {
     paddingTop:20,
     paddingLeft:20,
-    paddingRight:20
+    paddingRight:20,
+    width:'100%'
   },
   body: {
     flex:1,
-    borderWidth:0,
-    alignItems: 'center'
+    width:'100%',
+    alignItems:'center'
   },
   bodyHeader: {
     flexDirection:'row',
@@ -2531,16 +2534,12 @@ export const programsLight = StyleSheet.create({
     borderRadius:10,
     backgroundColor:colorsLight.mainBackground,
     marginBottom:20,
-    flex:1,
     width:'100%'
   },
   promptHeader: {
     flexDirection:'row',
-    borderBottomWidth:1,
-    borderBottomColor:colorsLight.headerBorder,
     justifyContent:'space-between',
     alignItems:'center',
-    paddingBottom:5
   },
   promptHeaderTitle: {
     fontFamily:'PoppinsSemiBold',
@@ -2615,12 +2614,14 @@ export const programsLight = StyleSheet.create({
     paddingTop:20,
     color:colorsLight.mainTextColor
   },
+  programs: {
+    width:'100%',
+  },
   program: {
-    backgroundColor:colorsLight.header,
-    borderRadius:25,
-    marginTop:20,
-    marginLeft:10,
-    marginRight:10
+    backgroundColor:colorsLight.mainBackground,
+    borderRadius:10,
+    marginBottom:20,
+    width:'100%'
   },
   programHeader: {
     flexDirection:'row',
@@ -2651,11 +2652,10 @@ export const programsLight = StyleSheet.create({
     alignItems:'center',
     paddingLeft:20,
     paddingRight:20,
-    backgroundColor:colorsLight.secondaryBackground,
-    borderBottomLeftRadius:25,
-    borderBottomRightRadius:25,
+    backgroundColor:colorsLight.header,
+    borderBottomLeftRadius:10,
+    borderBottomRightRadius:10,
     flex:1,
-    marginTop:10
   },
   programStatTop: {
     flex:1,
@@ -2708,7 +2708,7 @@ export const programsLight = StyleSheet.create({
   },
   viewProgramSectionTitle: {
     fontFamily:'Poppins',
-    fontSize:20,
+    fontSize:22,
     color:colorsLight.mainTextColor,
     marginTop:10,
     marginBottom:10
@@ -2717,11 +2717,16 @@ export const programsLight = StyleSheet.create({
     flexDirection: 'row',
     flexWrap:'wrap'
   },
-  viewProgramSectionClientListItem: {
+  viewProgramSectionClientListItemContainer: {
     width:'25%',
+  },
+  viewProgramSectionClientListItem: {
+    margin:10,
     padding:10,
     justifyContent:'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor:colorsLight.header,
+    borderRadius:10
   },
   viewProgramProgressOuter: {
     flex:1,
@@ -2754,24 +2759,26 @@ export const programsLight = StyleSheet.create({
   viewProgramSectionHeader: {
     flexDirection:'row',
     alignItems:'center',
-    justifyContent:'space-between',
+    justifyContent:'flex-start',
     paddingLeft:20,
     paddingRight:20,
     backgroundColor:colorsLight.secondaryBackground,
     borderTopLeftRadius:25,
     borderTopRightRadius:25,
     flex:1,
-    marginBottom:10
   },
   viewProgramSectionClientToggle: {
-    fontSize:16,
+    fontSize:20,
     color:btnColors.primary,
     fontFamily:'Poppins',
+    textAlign:'center'
   },
   viewProgramSectionClientToggleMain: {
     flexDirection:'row',
     alignItems:'center',
-    justifyContent:'flex-end',
+    justifyContent:'center',
+    width:'100%',
+    marginTop:5
   },
   addClientsEnroll: {
     padding:10,
@@ -2891,6 +2898,73 @@ export const programsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
     fontSize:16,
+  },
+  tabListContainer: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent: 'center',
+    paddingBottom:10,
+  },
+  viewProgramTabHighlighted: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+    backgroundColor:btnColors.primary,
+  },
+  viewProgramTabHighlightedText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:'#fff'
+  },
+  viewProgramTab: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+  },
+  viewProgramTabText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  viewProgramSectionClientListButtons: {
+    flexDirection:'row',
+    alignItems:'center',
+    width:'100%',
+    marginTop:10,
+    marginBottom:10
+  },
+  clientListSelect: {
+    width:'100%',
+    padding:0,
+    borderRadius:25,
+    backgroundColor:btnColors.success
+  },
+  clientListDeselect: {
+    width:'100%',
+    padding:0,
+    borderRadius:25,
+    backgroundColor:btnColors.danger
+  },
+  clientListViewData: {
+    width:'100%',
+    padding:0,
+    borderRadius:25,
+    backgroundColor:colorsLight.secondaryBackground
+  },
+  clientListViewDataTitle: {
+    color:'#fff',
+    fontFamily:'Poppins',
+    fontSize:16
+  },
+  clientListViewDataContainer: { 
+    flex:1,
+    margin:5
   }
 });
 
@@ -6435,7 +6509,6 @@ export const onboardingStylesLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor,
-
   },
   promptHeader: {
     flexDirection:'row',

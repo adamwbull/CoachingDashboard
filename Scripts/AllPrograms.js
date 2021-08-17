@@ -27,7 +27,7 @@ export default function AllPrograms() {
   const [colors, setColors] = useState(colorsLight)
   const progressBarColors = [ // 0, 1, 2 index match from API on TasksProgressColor
     btnColors.caution,
-    btnColors.primary,
+    btnColors.info,
     btnColors.success
   ]
 
@@ -47,6 +47,12 @@ export default function AllPrograms() {
 
   // View program variables.
   const [showFullClientList, setShowFullClientList] = useState(false)
+  const [showClientListPage, setShowClientListPage] = useState(true)
+  const [showTaskListPage, setShowTaskListPage] = useState(false)
+  const [showClientData, setShowClientData] = useState(false)
+
+  // View client data variables.
+  const [selectedClientIndex, setSelectedClientIndex] = useState(false)
 
   // Add client variables.
   const [addClientHasSearchContents, setAddClientHasSearchContents] = useState(false) 
@@ -63,6 +69,7 @@ export default function AllPrograms() {
   const getData = async () => {
     var data = await getPrograms(coach.Id, coach.Token)
     console.log('data:',data)
+    // Get grads statistics.
     var grads = []
     for (var i = 0; i < data.length; i++) {
       var num = 0
@@ -234,6 +241,17 @@ export default function AllPrograms() {
     }, 500)
   }
 
+  // View program tab nav functions.
+  const viewProgramClientList = () => {
+    setShowTaskListPage(false)
+    setShowClientListPage(true)
+  }
+
+  const viewProgramTaskList = () => {
+    setShowClientListPage(false)
+    setShowTaskListPage(true)
+  }
+
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -241,19 +259,23 @@ export default function AllPrograms() {
 
           {showActivityIndicator && (<ActivityIndicatorView />)}
 
-          {showAll && (<View style={styles.promptListContainer}>
-            <View style={styles.promptHeader}>
-              <Text style={styles.promptHeaderTitle}>All Programs</Text>
-              <Button
-                title='Add New'
-                titleStyle={styles.promptAddButtonTitle}
-                buttonStyle={styles.promptAddButton}
-                containerStyle={styles.promptAddButtonContainer}
-                onPress={addProgram} 
-              />
+          {showAll && (<View style={styles.body}>
+            <View style={styles.promptListContainer}>
+              <View style={styles.promptHeader}>
+                <Text style={styles.promptHeaderTitle}>All Programs</Text>
+                <Button
+                  title='Add New'
+                  titleStyle={styles.promptAddButtonTitle}
+                  buttonStyle={styles.promptAddButton}
+                  containerStyle={styles.promptAddButtonContainer}
+                  onPress={addProgram} 
+                />
+              </View>
             </View>
-            {programs.length == 0 && (<View style={styles.programs}>
-              <Text style={styles.noProgramsText}>No programs yet!</Text>
+            {programs.length == 0 && (<View style={styles.promptListContainer}>
+              <View style={styles.programs}>
+                <Text style={styles.noProgramsText}>No programs yet!</Text>
+              </View>
             </View>) || (<View style={styles.programs}>
               {programs.map((program, index) => {
                 return (<View key={'program_'+index} style={styles.program}>
@@ -297,10 +319,10 @@ export default function AllPrograms() {
             </View>)} 
           </View>)}
 
-          {showViewProgram && (<View style={styles.promptListContainer}>
-            <View style={styles.viewProgramMainHeader}>
-              <View style={styles.promptHeader}>
-                <View style={{flexDirection: 'row',alignItems:'center'}}>
+          {showViewProgram && (<View style={styles.body}>
+            <View style={styles.program}>
+              <View style={styles.programHeader}>
+                <View style={{flexDirection: 'row',alignItems: 'center'}}>
                   <Icon
                     name='chevron-back'
                     type='ionicon'
@@ -309,69 +331,11 @@ export default function AllPrograms() {
                     style={{marginRight:0}}
                     onPress={() => navTo(0)}
                   />
-                  <Text style={styles.promptHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
+                  <Text style={styles.programHeaderTitle}>{programs[viewProgramIndex].Title}</Text>
                 </View>
+                <Text style={styles.programHeaderCreated}>Created {parseSimpleDateText(sqlToJsDate(programs[viewProgramIndex].Created))}</Text>
               </View>
-              <Text style={[styles.programHeaderDescription]}><Text style={{fontFamily:'PoppinsSemiBold'}}>Description:</Text> {programs[viewProgramIndex].Description}</Text>
-            </View>
-            <View style={styles.viewProgramSection}>
-              <View style={styles.viewProgramSectionHeader}>
-                <Text style={styles.viewProgramSectionTitle}>Program Details</Text>
-                {showFullClientList && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
-                  onPress={() => toggleViewAllClients()}>
-                  <Text style={styles.viewProgramSectionClientToggle}>
-                    Show less members
-                  </Text>
-                  <Icon
-                    name='chevron-up'
-                    type='ionicon'
-                    size={28}
-                    color={btnColors.primary}
-                  />
-                </TouchableOpacity>) || 
-                (<>
-                  {programs[viewProgramIndex].Assocs.length > 6 && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
-                    onPress={() => toggleViewAllClients()}>
-                    <Text style={styles.viewProgramSectionClientToggle}>
-                      Show {programs[viewProgramIndex].Assocs.length-8} more
-                    </Text>
-                    <Icon
-                      name='chevron-down'
-                      type='ionicon'
-                      size={28}
-                      color={btnColors.primary}
-                    />
-                  </TouchableOpacity>)}
-                </>)}
-              </View>
-              <View style={styles.viewProgramSectionClientList}>
-                {programs[viewProgramIndex].Assocs.length > 0 && (<>
-                  {programs[viewProgramIndex].Assocs.map((client, index) => {
-                    if (showFullClientList || index < 8) {
-                      return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItem}>
-                        <Image 
-                          source={{uri:client.Client.Avatar}}
-                          style={styles.viewProgramSectionClientListAvatar}
-                        />
-                        <Text style={styles.viewProgramSectionClientListName}>
-                          {client.Client.FirstName + ' ' + client.Client.LastName}
-                        </Text>
-                        <View style={styles.viewProgramProgressOuter}>
-                          <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
-                          </View>
-                        </View>
-                        <Text style={styles.viewProgramSectionClientListTasksCompleted}>
-                          <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
-                            {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
-                          </Text>
-                          Tasks Completed
-                        </Text>
-                      </View>)
-                    }
-
-                  })}
-                </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
-              </View>
+              <Text style={[styles.programHeaderDescription,{marginLeft:20}]}>{programs[viewProgramIndex].Description}</Text>
               <View style={styles.programStats}>
                 <View style={[styles.programStatTop]}>
                   <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
@@ -396,9 +360,112 @@ export default function AllPrograms() {
                 </View>
               </View>
             </View>
+            <View style={styles.promptListContainer}>
+              <View style={[styles.tabListContainer]}>
+                {showClientListPage && (<View style={styles.viewProgramTabHighlighted}>
+                  <Text style={styles.viewProgramTabHighlightedText}>
+                    Program Members
+                  </Text>
+                </View>) || (<TouchableOpacity style={styles.viewProgramTab} onPress={() => viewProgramClientList()}>
+                  <Text style={styles.viewProgramTabText}>
+                    Program Members
+                  </Text>
+                </TouchableOpacity>)}
+                {showTaskListPage && (<View style={styles.viewProgramTabHighlighted}>
+                  <Text style={styles.viewProgramTabHighlightedText}>
+                    Task Data
+                  </Text>
+                </View>) || (<TouchableOpacity style={styles.viewProgramTab} onPress={() => viewProgramTaskList()}>
+                  <Text style={styles.viewProgramTabText}>
+                    Task Data
+                  </Text>
+                </TouchableOpacity>)}
+              </View>
+              {showClientListPage && (<View style={styles.viewProgramSection}>
+                {showClientData && (<View>
+                  {programs[viewProgramIndex].Tasks.map((task, taskIndex) => {
+
+                    return (<View key={'taskRes_'+taskIndex}>
+                      {task.Responses.map((response, responseIndex) => {
+
+                        if (response.Client.Id == programs[viewProgramIndex].Assocs[selectedClientIndex].ClientId) {
+                          // The actual task response to show. Use both task and response vars.
+                          return (<View key={'taskResRes_'+responseIndex}>
+
+                          </View>)
+                        }
+
+                      })}
+                    </View>)
+
+                  })}
+                </View>) || (<View style={styles.viewProgramSectionClientList}>
+                  {programs[viewProgramIndex].Assocs.length > 0 && (<>
+                    {programs[viewProgramIndex].Assocs.map((client, index) => {
+                      if (showFullClientList || index < 8) {
+                        return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItemContainer}>
+                          <View style={styles.viewProgramSectionClientListItem}>
+                            <Image 
+                              source={{uri:client.Client.Avatar}}
+                              style={styles.viewProgramSectionClientListAvatar}
+                            />
+                            <Text style={styles.viewProgramSectionClientListName}>
+                              {client.Client.FirstName + ' ' + client.Client.LastName}
+                            </Text>
+                            <View style={styles.viewProgramProgressOuter}>
+                              <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
+                              </View>
+                            </View>
+                            <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                              <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                              </Text>
+                              Tasks Completed
+                            </Text>
+                            <View style={styles.viewProgramSectionClientListButtons}>
+                              <Button 
+                                title='Select'
+                                onPress={() => {}}
+                                buttonStyle={styles.clientListSelect}
+                                titleStyle={styles.clientListViewDataTitle}
+                                containerStyle={styles.clientListViewDataContainer}
+                              />
+                              <Button 
+                                title='View Data'
+                                onPress={() => {}}
+                                buttonStyle={styles.clientListViewData}
+                                titleStyle={[styles.clientListViewDataTitle,{color:colors.mainTextColor}]}
+                                containerStyle={[styles.clientListViewDataContainer,{flex:2}]}
+                              />
+                            </View>
+                          </View>
+                        </View>)
+                      }
+                    })}
+                    {showFullClientList && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                      onPress={() => toggleViewAllClients()}>
+                      <Text style={styles.viewProgramSectionClientToggle}>
+                        Show less members
+                      </Text>
+                    </TouchableOpacity>) || 
+                    (<>
+                      {programs[viewProgramIndex].Assocs.length > 6 && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                        onPress={() => toggleViewAllClients()}>
+                        <Text style={styles.viewProgramSectionClientToggle}>
+                          Show {programs[viewProgramIndex].Assocs.length-8} more
+                        </Text>
+                      </TouchableOpacity>)}
+                    </>)}
+                  </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
+                </View>)}
+              </View>)}
+              {showTaskListPage && (<View style={styles.viewProgramSection}>
+                <Text style={{width:'100%'}}>Hi</Text>
+              </View>)}
+            </View>
           </View>)}
 
-          {showAddClient && (<View style={[styles.promptListContainer,{width:'50%',height:'60%'}]}>
+          {showAddClient && (<View style={[styles.promptListContainer,{width:'50%',height:'60%',flex:1}]}>
             <View style={styles.addClientHeader}>
               <View style={styles.promptHeader}>
                 <View style={{flexDirection: 'row',alignItems:'center'}}>
