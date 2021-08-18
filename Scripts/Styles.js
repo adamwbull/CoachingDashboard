@@ -48,6 +48,7 @@ export const colorsLight = {
   secondaryTextColor: '#344150', // blueGray
   mainBackground: '#ffffff', // white
   header: '#FAFAFA',
+  headerShaded: 'F0F0F0',
   headerBorder: '#ebeef6',
 }
 
@@ -2904,6 +2905,15 @@ export const programsLight = StyleSheet.create({
     alignItems:'center',
     justifyContent: 'center',
     paddingBottom:10,
+    borderRadius:10,
+    paddingTop:10,
+    paddingLeft:5,
+    paddingRight:5,
+    margin:10,
+    backgroundColor:colorsLight.header,
+  },
+  viewProgramClientListOptions: {
+    margin:10
   },
   viewProgramTabHighlighted: {
     flex:1,

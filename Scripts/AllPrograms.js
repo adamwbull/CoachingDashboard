@@ -50,7 +50,8 @@ export default function AllPrograms() {
   const [showClientListPage, setShowClientListPage] = useState(true)
   const [showTaskListPage, setShowTaskListPage] = useState(false)
   const [showClientData, setShowClientData] = useState(false)
-
+  const [selectedCounts, setSelectedCounts] = useState([])
+  
   // View client data variables.
   const [selectedClientIndex, setSelectedClientIndex] = useState(false)
 
@@ -69,9 +70,11 @@ export default function AllPrograms() {
   const getData = async () => {
     var data = await getPrograms(coach.Id, coach.Token)
     console.log('data:',data)
-    // Get grads statistics.
+    // Get grads and selectedClients statistics.
     var grads = []
+    var selecteds = []
     for (var i = 0; i < data.length; i++) {
+      selecteds.push(0)
       var num = 0
       for (var j = 0; j < data[i].Assocs.length; j++) {
         if (data[i].Assocs[j].CurrentTaskId == 0) {
@@ -80,6 +83,7 @@ export default function AllPrograms() {
       }
       grads.push(num)
     }
+    setSelectedCounts(selecteds)
     setProgramGrads(grads)
     setPrograms(data)
     setShowActivityIndicator(false)
@@ -140,9 +144,15 @@ export default function AllPrograms() {
   }
   
   // View program functions.
-  // from: 0 - view program
-  //       1 - add client
-  // no use right now.
+  const viewProgramClientList = () => {
+    setShowTaskListPage(false)
+    setShowClientListPage(true)
+  }
+
+  const viewProgramTaskList = () => {
+    setShowClientListPage(false)
+    setShowTaskListPage(true)
+  }
 
   const toggleViewAllClients = () => {
     setShowFullClientList(!showFullClientList)
@@ -164,6 +174,19 @@ export default function AllPrograms() {
         }
       }
     }, 500)
+  }
+
+  const toggleSelectedClient = (index) => {
+
+    var newPrograms = JSON.parse(JSON.stringify(programs))
+    for (var i = 0; i < newPrograms[viewProgramIndex].Assocs.length; i++) {
+      if (i == index) {
+        newPrograms[viewProgramIndex].Assocs[i].Selected = (newPrograms[viewProgramIndex].Assocs[i].Selected == 0) ? 1 : 0
+        break
+      }
+    }
+    setPrograms(newPrograms)
+
   }
 
   const searchClients = (text) => {
@@ -241,16 +264,7 @@ export default function AllPrograms() {
     }, 500)
   }
 
-  // View program tab nav functions.
-  const viewProgramClientList = () => {
-    setShowTaskListPage(false)
-    setShowClientListPage(true)
-  }
 
-  const viewProgramTaskList = () => {
-    setShowClientListPage(false)
-    setShowTaskListPage(true)
-  }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
@@ -399,64 +413,71 @@ export default function AllPrograms() {
                     </View>)
 
                   })}
-                </View>) || (<View style={styles.viewProgramSectionClientList}>
-                  {programs[viewProgramIndex].Assocs.length > 0 && (<>
-                    {programs[viewProgramIndex].Assocs.map((client, index) => {
-                      if (showFullClientList || index < 8) {
-                        return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItemContainer}>
-                          <View style={styles.viewProgramSectionClientListItem}>
-                            <Image 
-                              source={{uri:client.Client.Avatar}}
-                              style={styles.viewProgramSectionClientListAvatar}
-                            />
-                            <Text style={styles.viewProgramSectionClientListName}>
-                              {client.Client.FirstName + ' ' + client.Client.LastName}
-                            </Text>
-                            <View style={styles.viewProgramProgressOuter}>
-                              <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
+                </View>) || (<View>
+                  <View style={styles.viewProgramClientListOptions}>
+                    <Text style={styles.}>
+                      {selectedCounts[viewProgramIndex]} selected
+                    </Text>
+                  </View>
+                  <View style={styles.viewProgramSectionClientList}>
+                    {programs[viewProgramIndex].Assocs.length > 0 && (<>
+                      {programs[viewProgramIndex].Assocs.map((client, index) => {
+                        if (showFullClientList || index < 8) {
+                          return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItemContainer}>
+                            <View style={styles.viewProgramSectionClientListItem}>
+                              <Image 
+                                source={{uri:client.Client.Avatar}}
+                                style={styles.viewProgramSectionClientListAvatar}
+                              />
+                              <Text style={styles.viewProgramSectionClientListName}>
+                                {client.Client.FirstName + ' ' + client.Client.LastName}
+                              </Text>
+                              <View style={styles.viewProgramProgressOuter}>
+                                <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
+                                </View>
+                              </View>
+                              <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                                <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                  {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                                </Text>
+                                Tasks Completed
+                              </Text>
+                              <View style={styles.viewProgramSectionClientListButtons}>
+                                <Button 
+                                  title={client.Selected == 0 && 'Select' || 'Deselect'}
+                                  onPress={() => toggleSelectedClient(index)}
+                                  buttonStyle={client.Selected == 0 && styles.clientListSelect || styles.clientListDeselect}
+                                  titleStyle={styles.clientListViewDataTitle}
+                                  containerStyle={styles.clientListViewDataContainer}
+                                />
+                                <Button 
+                                  title='View Data'
+                                  onPress={() => {}}
+                                  buttonStyle={styles.clientListViewData}
+                                  titleStyle={[styles.clientListViewDataTitle,{color:colors.mainTextColor}]}
+                                  containerStyle={[styles.clientListViewDataContainer,{flex:2}]}
+                                />
                               </View>
                             </View>
-                            <Text style={styles.viewProgramSectionClientListTasksCompleted}>
-                              <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
-                                {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
-                              </Text>
-                              Tasks Completed
-                            </Text>
-                            <View style={styles.viewProgramSectionClientListButtons}>
-                              <Button 
-                                title='Select'
-                                onPress={() => {}}
-                                buttonStyle={styles.clientListSelect}
-                                titleStyle={styles.clientListViewDataTitle}
-                                containerStyle={styles.clientListViewDataContainer}
-                              />
-                              <Button 
-                                title='View Data'
-                                onPress={() => {}}
-                                buttonStyle={styles.clientListViewData}
-                                titleStyle={[styles.clientListViewDataTitle,{color:colors.mainTextColor}]}
-                                containerStyle={[styles.clientListViewDataContainer,{flex:2}]}
-                              />
-                            </View>
-                          </View>
-                        </View>)
-                      }
-                    })}
-                    {showFullClientList && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
-                      onPress={() => toggleViewAllClients()}>
-                      <Text style={styles.viewProgramSectionClientToggle}>
-                        Show less members
-                      </Text>
-                    </TouchableOpacity>) || 
-                    (<>
-                      {programs[viewProgramIndex].Assocs.length > 6 && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                          </View>)
+                        }
+                      })}
+                      {showFullClientList && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
                         onPress={() => toggleViewAllClients()}>
                         <Text style={styles.viewProgramSectionClientToggle}>
-                          Show {programs[viewProgramIndex].Assocs.length-8} more
+                          Show less members
                         </Text>
-                      </TouchableOpacity>)}
-                    </>)}
-                  </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
+                      </TouchableOpacity>) || 
+                      (<>
+                        {programs[viewProgramIndex].Assocs.length > 6 && (<TouchableOpacity style={styles.viewProgramSectionClientToggleMain}
+                          onPress={() => toggleViewAllClients()}>
+                          <Text style={styles.viewProgramSectionClientToggle}>
+                            Show {programs[viewProgramIndex].Assocs.length-8} more
+                          </Text>
+                        </TouchableOpacity>)}
+                      </>)}
+                    </>) || (<Text style={styles.viewProgramNoMembersText}>No program members yet.</Text>)}
+                  </View>
                 </View>)}
               </View>)}
               {showTaskListPage && (<View style={styles.viewProgramSection}>
