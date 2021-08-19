@@ -182,6 +182,9 @@ export default function AllPrograms() {
     for (var i = 0; i < newPrograms[viewProgramIndex].Assocs.length; i++) {
       if (i == index) {
         newPrograms[viewProgramIndex].Assocs[i].Selected = (newPrograms[viewProgramIndex].Assocs[i].Selected == 0) ? 1 : 0
+        var newCounts = JSON.parse(JSON.stringify(selectedCounts)) 
+        newCounts[viewProgramIndex] += (newPrograms[viewProgramIndex].Assocs[i].Selected == 0) ? -1 : 1
+        setSelectedCounts(newCounts)
         break
       }
     }
@@ -414,17 +417,21 @@ export default function AllPrograms() {
 
                   })}
                 </View>) || (<View>
-                  <View style={styles.viewProgramClientListOptions}>
-                    <Text style={styles.}>
+                  {selectedCounts[viewProgramIndex] > 0 && (<View style={styles.viewProgramClientListOptions}>
+                    <Text style={styles.clientListOptionsCount}>
                       {selectedCounts[viewProgramIndex]} selected
                     </Text>
-                  </View>
+                    <Button 
+                      title='Advance to Next Task'
+                      buttonStyle={styles.advanceNextTaskButton}
+                    />
+                  </View>)}
                   <View style={styles.viewProgramSectionClientList}>
                     {programs[viewProgramIndex].Assocs.length > 0 && (<>
                       {programs[viewProgramIndex].Assocs.map((client, index) => {
                         if (showFullClientList || index < 8) {
                           return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItemContainer}>
-                            <View style={styles.viewProgramSectionClientListItem}>
+                            <View style={client.Selected == 0 && styles.viewProgramSectionClientListItem || styles.viewProgramSectionClientListItemSelected}>
                               <Image 
                                 source={{uri:client.Client.Avatar}}
                                 style={styles.viewProgramSectionClientListAvatar}

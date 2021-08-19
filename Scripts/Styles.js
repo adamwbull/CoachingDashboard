@@ -48,7 +48,6 @@ export const colorsLight = {
   secondaryTextColor: '#344150', // blueGray
   mainBackground: '#ffffff', // white
   header: '#FAFAFA',
-  headerShaded: 'F0F0F0',
   headerBorder: '#ebeef6',
 }
 
@@ -2727,7 +2726,18 @@ export const programsLight = StyleSheet.create({
     justifyContent:'center',
     alignItems: 'center',
     backgroundColor:colorsLight.header,
-    borderRadius:10
+    borderRadius:10,
+    borderWidth:2,
+    borderColor:colorsLight.header
+  },
+  viewProgramSectionClientListItemSelected: {
+    margin:10,
+    padding:10,
+    justifyContent:'center',
+    alignItems: 'center',
+    borderRadius:10,
+    borderWidth:2,
+    borderColor:btnColors.primary,
   },
   viewProgramProgressOuter: {
     flex:1,
@@ -2913,7 +2923,15 @@ export const programsLight = StyleSheet.create({
     backgroundColor:colorsLight.header,
   },
   viewProgramClientListOptions: {
-    margin:10
+    margin:10,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  clientListOptionsCount: {
+    fontFamily:'Poppins',
+    fontSize:20,
+    marginRight:10,
+    color:colorsLight.mainTextColor,
   },
   viewProgramTabHighlighted: {
     flex:1,
