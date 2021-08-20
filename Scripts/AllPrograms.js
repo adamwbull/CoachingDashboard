@@ -267,6 +267,10 @@ export default function AllPrograms() {
     }, 500)
   }
 
+  const advanceNextTasks = () => {
+    
+  }
+
 
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -424,6 +428,7 @@ export default function AllPrograms() {
                     <Button 
                       title='Advance to Next Task'
                       buttonStyle={styles.advanceNextTaskButton}
+                      onPress={() => advanceNextTasks()}
                     />
                   </View>)}
                   <View style={styles.viewProgramSectionClientList}>
