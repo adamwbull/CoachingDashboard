@@ -493,7 +493,23 @@ export default function AllPrograms() {
                 </View>)}
               </View>)}
               {showTaskListPage && (<View style={styles.viewProgramSection}>
-                <Text style={{width:'100%'}}>Hi</Text>
+                {programs[viewProgramIndex].Tasks.map((task, index) => {
+                  var memberCount = programs[viewProgramIndex].Assocs.length
+                  return (<View key={'taskIndex_'+index} style={styles.task}>
+                    <View style={styles.taskHeader}>
+                      <View style={styles.taskHeaderTitle}>
+                        <Text style={styles.taskHeaderTitleCount}>Task #{index+1}:</Text>
+                        <Text style={styles.taskHeaderTitleName}>{task.Task[0].Title}</Text>
+                      </View>
+                      {memberCount == task.Responses.length && 
+                      (<Text style={styles.taskHeaderStatusCompleted}>{memberCount + '/' + memberCount} Responses</Text>) || 
+                      (<Text style={styles.taskHeaderStatus}>{task.Responses.length + '/'  + memberCount} Responses</Text>)}
+                    </View>
+                    <View style={styles.taskData}>
+                      <Text>No responses yet.</Text>
+                    </View>
+                  </View>)
+                })}
               </View>)}
             </View>
           </View>)}

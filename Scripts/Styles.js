@@ -2999,6 +2999,43 @@ export const programsLight = StyleSheet.create({
   clientListViewDataContainer: { 
     flex:1,
     margin:5
+  },
+  task: {
+    margin:10,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+  },
+  taskHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between',
+    padding:15,
+    backgroundColor:colorsLight.header,
+    borderTopLeftRadius:10,
+    borderTopRightRadius:10,
+  },
+  taskHeaderTitleCount: {
+    fontSize:20,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  taskHeaderTitleName: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  taskHeaderStatusCompleted: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:btnColors.success
+  },
+  taskHeaderStatus: {
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  taskData: {
+    padding:15,
   }
 });
 
