@@ -2933,6 +2933,12 @@ export const programsLight = StyleSheet.create({
     marginRight:10,
     color:colorsLight.mainTextColor,
   },
+  advanceNextTaskButton: {
+    borderRadius:25,
+    backgroundColor:btnColors.primary,
+    paddingLeft:15,
+    paddingRight:15
+  },
   viewProgramTabHighlighted: {
     flex:1,
     padding:5,

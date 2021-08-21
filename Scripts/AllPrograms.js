@@ -268,7 +268,7 @@ export default function AllPrograms() {
   }
 
   const advanceNextTasks = () => {
-    
+
   }
 
 
@@ -426,7 +426,7 @@ export default function AllPrograms() {
                       {selectedCounts[viewProgramIndex]} selected
                     </Text>
                     <Button 
-                      title='Advance to Next Task'
+                      title='Assign Next Task'
                       buttonStyle={styles.advanceNextTaskButton}
                       onPress={() => advanceNextTasks()}
                     />
@@ -455,13 +455,13 @@ export default function AllPrograms() {
                                 Tasks Completed
                               </Text>
                               <View style={styles.viewProgramSectionClientListButtons}>
-                                <Button 
+                                {client.CurrentTaskId != 0 && (<Button 
                                   title={client.Selected == 0 && 'Select' || 'Deselect'}
                                   onPress={() => toggleSelectedClient(index)}
                                   buttonStyle={client.Selected == 0 && styles.clientListSelect || styles.clientListDeselect}
                                   titleStyle={styles.clientListViewDataTitle}
                                   containerStyle={styles.clientListViewDataContainer}
-                                />
+                                />)}
                                 <Button 
                                   title='View Data'
                                   onPress={() => {}}
