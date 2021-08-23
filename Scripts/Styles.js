@@ -3036,6 +3036,11 @@ export const programsLight = StyleSheet.create({
   },
   taskData: {
     padding:15,
+  },
+  noResponseText: {
+    fontSize:16,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
   }
 });
 

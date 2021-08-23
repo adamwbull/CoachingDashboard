@@ -426,7 +426,7 @@ export default function AllPrograms() {
                       {selectedCounts[viewProgramIndex]} selected
                     </Text>
                     <Button 
-                      title='Assign Next Task'
+                      title='Release Next Task'
                       buttonStyle={styles.advanceNextTaskButton}
                       onPress={() => advanceNextTasks()}
                     />
@@ -506,7 +506,11 @@ export default function AllPrograms() {
                       (<Text style={styles.taskHeaderStatus}>{task.Responses.length + '/'  + memberCount} Responses</Text>)}
                     </View>
                     <View style={styles.taskData}>
-                      <Text>No responses yet.</Text>
+                      {task.Responses.length == 0 &&
+                      (<Text style={styles.noResponseText}>No responses yet.</Text>) || 
+                      (<View>
+                        
+                      </View>)}
                     </View>
                   </View>)
                 })}
