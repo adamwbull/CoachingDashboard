@@ -7,10 +7,11 @@ import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Icon, Button } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs } from './API.js'
+import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs, lightenHex } from './API.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Progress } from 'semantic-ui-react'
 import { TextInput } from 'react-native-web'
+import { ResponsivePie } from '@nivo/pie'
 
 import userContext from './Context.js'
 
@@ -501,15 +502,250 @@ export default function AllPrograms() {
                         <Text style={styles.taskHeaderTitleCount}>Task #{index+1}:</Text>
                         <Text style={styles.taskHeaderTitleName}>{task.Task[0].Title}</Text>
                       </View>
-                      {memberCount == task.Responses.length && 
-                      (<Text style={styles.taskHeaderStatusCompleted}>{memberCount + '/' + memberCount} Responses</Text>) || 
-                      (<Text style={styles.taskHeaderStatus}>{task.Responses.length + '/'  + memberCount} Responses</Text>)}
+                      <Text style={styles.taskHeaderStatus}>{task.Responses.length} Responses</Text>
                     </View>
                     <View style={styles.taskData}>
                       {task.Responses.length == 0 &&
                       (<Text style={styles.noResponseText}>No responses yet.</Text>) || 
                       (<View>
-                        
+                        {task.Responses.map((response, rIndex) => {
+
+                          var view = null
+                          
+                          if (task.Type == 0) {
+                            // Prompt response.
+                            view = <View style={styles.promptResponse}>
+                            </View>
+                          } else if (task.Type == 1) {
+                            // Survey response.
+                            // Only show compiled data on first rIndex.
+                            if (rIndex == 0) {
+                              view = <View style={styles.surveyData}>
+                                {task.Task[0].Items.map((q, index) => {
+                                  var i;
+                                  // Get list of input responses.
+                                  var responses = []
+                                  for (i = 0; i < task.Responses.length; i++) {
+                                    var cur = task.Responses[i][index]
+                                    responses.push(cur)
+                                  }
+                                  if (q.Type == 0) {
+                                    return (<View style={styles.surveyDataRow} key={index + '-'}>
+                                      <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                      {responses.map((res, ind) => {
+                                        var line = {borderTopColor:colors.headerBorder,borderTopWidth:1}
+                                        if (ind == 0) {
+                                          line = {}
+                                        }
+                                        return (<Text key={ind + '--'} style={[styles.responseClientText,line]}>
+                                          {res.Response}
+                                        </Text>)
+                                      })}
+                                    </View>)
+                                  } else if (q.Type == 1) {
+                                    // Get range.
+                                    var rangeStrs = q.SliderRange.split(',')
+                                    var minRange = parseInt(rangeStrs[0])
+                                    var maxRange = parseInt(rangeStrs[1])
+                                    // Get average.
+                                    var top = 0
+                                    var cnt = 0
+                                    for (i = 0; i < task.Responses.length; i++) {
+                                      var cur = parseFloat(task.Responses[i][index].Response)
+                                      top += cur
+                                      cnt++
+                                    }
+                                    var average = parseFloat((top/cnt).toFixed(2))
+                                    var genWidth = parseInt((average/maxRange)*100)
+                                    genWidth = genWidth + '%'
+                                    var sliderInnerWidth = {width:genWidth}
+
+                                    return (<View style={[styles.surveyDataRow,{width:'100%',height:150}]} key={index + '-'}>
+                                      <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                      <View style={styles.sliderOuter}>
+                                        <View style={[styles.sliderInner,sliderInnerWidth]}>
+                                          <Text style={styles.sliderInnerText}>Average: {average}</Text>
+                                        </View>
+                                      </View>
+                                      <View style={{flexDirection:'row',justifyContent:'space-between',margin:10}}>
+                                        <View>
+                                          <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'left',margin:0}]}>{minRange}</Text>
+                                          <Text style={[styles.responseClientText,{textAlign:'left',margin:0}]}>{q.SliderLeft}</Text>
+                                        </View>
+                                        <View>
+                                          <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'right'}]}>{maxRange}</Text>
+                                          <Text style={[styles.responseClientText,{textAlign:'right'}]}>{q.SliderRight}</Text>
+                                        </View>
+                                      </View>
+                                    </View>)
+                                  } else if (q.Type == 2) {
+                                    var data = []
+                                    var ids = q.BoxOptionsArray.split(',')
+                                    for (i = 0; i < ids.length; i++) {
+                                      var color = colors.primaryHighlight
+                                      if (i >= 1 && i <= 5) {
+                                        var colorsArr = [colors.secondaryHighlight]
+                                        for (var k = 0; k < 4; k++) {
+                                          colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+                                        }
+                                        color = colorsArr[(i % 5)]
+                                      }
+                                      var total = 0
+                                      for (var j = 0; j < task.Responses.length; j++) {
+                                        var thisPersonsResponses = task.Responses[j][index].Response.split(',')
+                                        if (thisPersonsResponses[i] == 'true') {
+                                          total++;
+                                        }
+                                      }
+                                      var cur = {
+                                        "id":ids[i],
+                                        "label":ids[i],
+                                        "value":total,
+                                        "color":color
+                                      }
+                                      data.push(cur)
+                                    }
+                                    return (<View style={[styles.surveyDataRow]} key={index + '-'}>
+                                      <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                      <ResponsivePie
+                                        data={data}
+                                        colors={{ datum: 'data.color' }}
+                                        margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                                        innerRadius={0.5}
+                                        padAngle={0.7}
+                                        cornerRadius={3}
+                                        activeOuterRadiusOffset={8}
+                                        borderWidth={1}
+                                        borderColor={colors.headerBorder}
+                                        arcLinkLabelsSkipAngle={10}
+                                        arcLinkLabelsTextColor={colors.mainTextColor}
+                                        arcLinkLabelsThickness={2}
+                                        arcLinkLabelsColor={colors.mainTextColor}
+                                        arcLabelsSkipAngle={10}
+                                        arcLabelsTextColor={colors.mainTextColor}
+                                        legends={[
+                                            {
+                                                anchor: 'bottom',
+                                                direction: 'row',
+                                                justify: false,
+                                                translateX: 40,
+                                                translateY: 56,
+                                                itemsSpacing: 0,
+                                                itemWidth: 100,
+                                                itemHeight: 18,
+                                                itemTextColor: colors.mainTextColor,
+                                                itemDirection: 'left-to-right',
+                                                itemOpacity: 1,
+                                                symbolSize: 18,
+                                                symbolShape: 'circle',
+                                                effects: [
+                                                    {
+                                                        on: 'hover',
+                                                        style: {
+                                                            itemTextColor: '#000'
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]}
+                                    />
+                                    </View>)
+                                  } else {
+                                    console.log('q:',q)
+                                    var data = []
+                                    var ids = q.BoxOptionsArray.split(',')
+                                    for (i = 0; i < ids.length; i++) {
+                                      var color = colors.primaryHighlight
+                                      if (i >= 1 && i <= 5) {
+                                        var colorsArr = [colors.secondaryHighlight]
+                                        for (var k = 0; k < 4; k++) {
+                                          colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+                                        }
+                                        color = colorsArr[(i % 5)]
+                                      }
+                                      var total = 0
+                                      for (var j = 0; j < task.Responses.length; j++) {
+                                        var thisPersonsResponse = task.Responses[j][index].Response
+                                        if (thisPersonsResponse == ids[i]) {
+                                          total++;
+                                        }
+                                      }
+                                      var cur = {
+                                        "id":ids[i],
+                                        "label":ids[i],
+                                        "value":total,
+                                        "color":color
+                                      }
+                                      data.push(cur)
+                                    }
+                                    return (<View style={[styles.surveyDataRow,{width:'100%',height:300,marginBottom:30}]} key={index + '-'}>
+                                      <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                      <ResponsivePie
+                                        data={data}
+                                        colors={{ datum: 'data.color' }}
+                                        margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                                        innerRadius={0.5}
+                                        padAngle={0.7}
+                                        cornerRadius={3}
+                                        activeOuterRadiusOffset={8}
+                                        borderWidth={1}
+                                        borderColor={colors.headerBorder}
+                                        arcLinkLabelsSkipAngle={10}
+                                        arcLinkLabelsTextColor={colors.mainTextColor}
+                                        arcLinkLabelsThickness={2}
+                                        arcLinkLabelsColor={colors.mainTextColor}
+                                        arcLabelsSkipAngle={10}
+                                        arcLabelsTextColor={colors.mainTextColor}
+                                        legends={[
+                                            {
+                                                anchor: 'bottom',
+                                                direction: 'row',
+                                                justify: false,
+                                                translateX: 40,
+                                                translateY: 56,
+                                                itemsSpacing: 0,
+                                                itemWidth: 100,
+                                                itemHeight: 18,
+                                                itemTextColor: colors.mainTextColor,
+                                                itemDirection: 'left-to-right',
+                                                itemOpacity: 1,
+                                                symbolSize: 18,
+                                                symbolShape: 'circle',
+                                                effects: [
+                                                    {
+                                                        on: 'hover',
+                                                        style: {
+                                                            itemTextColor: '#000'
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]}
+                                    />
+                                    </View>)
+                                  }
+                                })}
+                              </View>
+                            } else {
+                              view = <View>
+                              </View>
+                            }
+                          } else if (task.Type == 2) {
+                            // Payment response.
+                            view = <View style={styles.paymentResponse}>
+                            </View>
+                          } else if (task.Type == 3) {
+                            // Contract response.
+                            view = <View style={styles.contractResponse}>
+                            </View>
+                          } else {
+                            view = <View>
+                            </View>
+                          }
+
+                          return view 
+
+                        })}
                       </View>)}
                     </View>
                   </View>)

@@ -48,6 +48,7 @@ export const colorsLight = {
   secondaryTextColor: '#344150', // blueGray
   mainBackground: '#ffffff', // white
   header: '#FAFAFA',
+  headerDarker: '#EDEDED',
   headerBorder: '#ebeef6',
 }
 
@@ -1427,9 +1428,6 @@ export const promptsLight = StyleSheet.create({
     fontFamily:'Poppins',
     fontSize:12,
     color:colorsLight.mainTextColor
-  },
-  inputSliderInfo: {
-
   },
   inputSliderInfoRange: {
     flexDirection:'row',
@@ -3002,7 +3000,7 @@ export const programsLight = StyleSheet.create({
   },
   task: {
     margin:10,
-    backgroundColor:colorsLight.secondaryBackground,
+    backgroundColor:colorsLight.header,
     borderRadius:10,
   },
   taskHeader: {
@@ -3010,7 +3008,7 @@ export const programsLight = StyleSheet.create({
     alignItems:'center',
     justifyContent:'space-between',
     padding:15,
-    backgroundColor:colorsLight.header,
+    backgroundColor:colorsLight.headerDarker,
     borderTopLeftRadius:10,
     borderTopRightRadius:10,
   },
@@ -3041,7 +3039,42 @@ export const programsLight = StyleSheet.create({
     fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
-  }
+  },
+  surveyData: {
+  },
+  surveyDataRow: {
+    marginBottom:10,
+  },
+  sliderOuter: {
+    flex:1,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    overflow:'hidden'
+  },
+  sliderInner: {
+    height:'100%',
+    padding:10,
+    justifyContent:'center',
+    backgroundColor:colorsLight.secondaryHighlight
+  },
+  sliderInnerText: {
+    fontFamily:'Poppins',
+    textAlign:'right',
+    fontSize:16,
+    color:'#fff'
+  },
+  surveyQuestion: {
+    fontSize:20,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+    marginBottom:10
+  },
+  responseClientText: {
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+    marginLeft:10,
+  },
 });
 
 export const addProgramLight = StyleSheet.create({

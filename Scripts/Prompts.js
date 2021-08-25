@@ -515,7 +515,7 @@ export default function Prompts() {
               </View>
             </View>
           </View>)
-        } else if (q.Type == 2 || q.Type == 3) {
+        } else if (q.Type == 2) {
           var data = []
           var ids = q.BoxOptionsArray.split(',')
           for (i = 0; i < ids.length; i++) {
@@ -531,6 +531,79 @@ export default function Prompts() {
             for (var j = 0; j < viewSurveyResponses.length; j++) {
               var thisPersonsResponses = viewSurveyResponses[j].Responses[index].Response.split(',')
               if (thisPersonsResponses[i] == 'true') {
+                total++;
+              }
+            }
+            var cur = {
+              "id":ids[i],
+              "label":ids[i],
+              "value":total,
+              "color":color
+            }
+            data.push(cur)
+          }
+          return (<View style={[styles.surveyDataRow,{width:'100%',height:300,marginBottom:30}]} key={index + '-'}>
+            <Text style={styles.surveyQuestion}>{q.Question}</Text>
+            <ResponsivePie
+              data={data}
+              colors={{ datum: 'data.color' }}
+              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+              innerRadius={0.5}
+              padAngle={0.7}
+              cornerRadius={3}
+              activeOuterRadiusOffset={8}
+              borderWidth={1}
+              borderColor={colors.headerBorder}
+              arcLinkLabelsSkipAngle={10}
+              arcLinkLabelsTextColor={colors.mainTextColor}
+              arcLinkLabelsThickness={2}
+              arcLinkLabelsColor={colors.mainTextColor}
+              arcLabelsSkipAngle={10}
+              arcLabelsTextColor={colors.mainTextColor}
+              legends={[
+                  {
+                      anchor: 'bottom',
+                      direction: 'row',
+                      justify: false,
+                      translateX: 40,
+                      translateY: 56,
+                      itemsSpacing: 0,
+                      itemWidth: 100,
+                      itemHeight: 18,
+                      itemTextColor: colors.mainTextColor,
+                      itemDirection: 'left-to-right',
+                      itemOpacity: 1,
+                      symbolSize: 18,
+                      symbolShape: 'circle',
+                      effects: [
+                          {
+                              on: 'hover',
+                              style: {
+                                  itemTextColor: '#000'
+                              }
+                          }
+                      ]
+                  }
+              ]}
+          />
+          </View>)
+        } else {
+          console.log('q:',q)
+          var data = []
+          var ids = q.BoxOptionsArray.split(',')
+          for (i = 0; i < ids.length; i++) {
+            var color = colors.primaryHighlight
+            if (i >= 1 && i <= 5) {
+              var colorsArr = [colors.secondaryHighlight]
+              for (var k = 0; k < 4; k++) {
+                colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+              }
+              color = colorsArr[(i % 5)]
+            }
+            var total = 0
+            for (var j = 0; j < viewSurveyResponses.length; j++) {
+              var thisPersonsResponse = viewSurveyResponses[j].Responses[index].Response
+              if (thisPersonsResponse == ids[i]) {
                 total++;
               }
             }
