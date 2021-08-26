@@ -514,13 +514,13 @@ export default function AllPrograms() {
                           
                           if (task.Type == 0) {
                             // Prompt response.
-                            view = <View style={styles.promptResponse}>
+                            view = <View style={styles.promptResponse} key={'taskRes_'+rIndex}>
                             </View>
                           } else if (task.Type == 1) {
                             // Survey response.
                             // Only show compiled data on first rIndex.
                             if (rIndex == 0) {
-                              view = <View style={styles.surveyData}>
+                              view = <View style={styles.surveyData} key={'taskRes_'+rIndex}>
                                 {task.Task[0].Items.map((q, index) => {
                                   var i;
                                   // Get list of input responses.
@@ -533,13 +533,18 @@ export default function AllPrograms() {
                                     return (<View style={styles.surveyDataRow} key={index + '-'}>
                                       <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
                                       {responses.map((res, ind) => {
-                                        var line = {borderTopColor:colors.headerBorder,borderTopWidth:1}
-                                        if (ind == 0) {
-                                          line = {}
-                                        }
-                                        return (<Text key={ind + '--'} style={[styles.responseClientText,line]}>
-                                          {res.Response}
-                                        </Text>)
+                                        var avatar = 'https://coachsync.me/assets/img/default.png'
+                                        var name = ''
+                                        return (<View key={ind + '--+'} style={styles.responseClientContainer}>
+                                          <Image 
+                                            source={res.Client.Avatar}
+                                            style={styles.responseClientAvatar}
+                                          />
+                                          <Text style={styles.responseClientText}>
+                                            <Text style={styles.responseClientName}>{res.Client.FirstName + ' ' + res.Client.LastName}</Text>
+                                            {res.Response}
+                                          </Text>
+                                        </View>)
                                       })}
                                     </View>)
                                   } else if (q.Type == 1) {
@@ -651,7 +656,6 @@ export default function AllPrograms() {
                                     />
                                     </View>)
                                   } else {
-                                    console.log('q:',q)
                                     var data = []
                                     var ids = q.BoxOptionsArray.split(',')
                                     for (i = 0; i < ids.length; i++) {
@@ -727,19 +731,19 @@ export default function AllPrograms() {
                                 })}
                               </View>
                             } else {
-                              view = <View>
+                              view = <View key={'taskRes_'+rIndex}>
                               </View>
                             }
                           } else if (task.Type == 2) {
                             // Payment response.
-                            view = <View style={styles.paymentResponse}>
+                            view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
                             </View>
                           } else if (task.Type == 3) {
                             // Contract response.
-                            view = <View style={styles.contractResponse}>
+                            view = <View style={styles.contractResponse} key={'taskRes_'+rIndex}>
                             </View>
                           } else {
-                            view = <View>
+                            view = <View key={'taskRes_'+rIndex}>
                             </View>
                           }
 

@@ -3069,12 +3069,28 @@ export const programsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     marginBottom:10
   },
+  responseClientName: {
+    fontFamily:'PoppinsSemiBold',
+    marginRight:8
+  },
   responseClientText: {
     fontSize:18,
     color:colorsLight.mainTextColor,
     fontFamily:'Poppins',
     marginLeft:10,
   },
+  responseClientContainer: {
+    borderRadius:25,
+    padding:10,
+    backgroundColor:colorsLight.mainBackground,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  responseClientAvatar: {
+    width:30,
+    height:30,
+    borderRadius:25,
+  }
 });
 
 export const addProgramLight = StyleSheet.create({
