@@ -5,7 +5,7 @@ import { programsLight, colorsLight, innerDrawerLight, btnColors } from '../Scri
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
-import { Icon, Button } from 'react-native-elements'
+import { Icon, Button, Chip } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
 import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs, lightenHex } from './API.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
@@ -736,8 +736,116 @@ export default function AllPrograms() {
                             }
                           } else if (task.Type == 2) {
                             // Payment response.
-                            view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
-                            </View>
+                            console.log('task:',task)
+                            console.log('response:',response)
+                            if (rIndex == 0) {
+                              view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
+                                <View style={styles.paymentsControls}>
+                                  <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                                    <Text style={styles.paymentsControlsText}>Client</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                                    <Text style={styles.paymentsControlsText}>Amount</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsNumber}>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchDescription}>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                                    <Text style={styles.paymentsControlsText}>Created</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchView}>
+                                    <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Receipt</Text>
+                                  </TouchableOpacity>
+                                </View>
+                                <View style={styles.paymentsPreviousInvoices}>
+                                  {task.Responses.map((line, paymentLineIndex) => {
+                                    // Amount/total, Chip/status, Invoice Number/number, Due/period_end, Created/created, View/hosted_invoice_url
+                                    return (<View key={line.id} style={styles.paymentRow}>
+                                        <View style={[styles.paymentRowTouchAmount]}>
+                                          <Text style={[styles.paymentRowText]}>
+                                            {line.Client.FirstName + ' ' + line.Client.LastName}
+                                          </Text>
+                                        </View>
+                                        <View style={[styles.paymentRowTouchAmount]}>
+                                          <Text style={[styles.paymentRowText]}>
+                                            ${(parseInt(line.Amount)/100).toFixed(2)}
+                                          </Text>
+                                        </View>
+                                        <View style={styles.paymentRowTouchAmountStatus}>
+                                          {line.IsPaid == 0 && (<><Chip
+                                            title='Uncollected'
+                                            type='outline'
+                                            icon={{
+                                              name:'checkmark-outline',
+                                              type:'ionicon',
+                                              size:16,
+                                              color:'#fff'
+                                            }}
+                                            disabledStyle={{backgroundColor:btnColors.caution,borderColor:btnColors.caution,color:btnColors.caution,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                            disabledTitleStyle={{color:'#fff'}}
+                                            disabled={true}
+                                          /></>) ||
+                                            (<>{line.IsPaid == 1 && (<>
+                                              <Chip
+                                                title='Paid'
+                                                type='outline'
+                                                icon={{
+                                                  name:'checkmark-outline',
+                                                  type:'ionicon',
+                                                  size:16,
+                                                  color:'#fff'
+                                                }}
+                                                disabledStyle={{backgroundColor:btnColors.success,borderColor:btnColors.success,color:btnColors.success,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                                disabledTitleStyle={{color:'#fff'}}
+                                                disabled={true}
+                                              />
+                                            </>) || (<Chip
+                                              title='Void'
+                                              type='outline'
+                                              icon={{
+                                                name:'checkmark-outline',
+                                                type:'ionicon',
+                                                size:16,
+                                                color:'#fff'
+                                              }}
+                                              disabledStyle={{backgroundColor:btnColors.danger,borderColor:btnColors.danger,color:btnColors.danger,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                              disabledTitleStyle={{color:'#fff'}}
+                                              disabled={true}
+                                            />)}
+                                          </>)}
+                                        </View>
+                                        <View style={[styles.paymentRowNumber]}>
+                                          
+                                        </View>
+                                        <View style={styles.paymentRowTouchDescription}>
+                                        </View>
+                                        <View style={styles.paymentRowTouchDate}>
+                                          <Text style={styles.paymentRowText}>{parseSimpleDateText(sqlToJsDate(line.Created))}</Text>
+                                        </View>
+                                        <View style={styles.paymentRowTouchView}>
+                                          <Chip
+                                              title='View'
+                                              type='outline'
+                                              onPress={() => {
+                                                window.open(line.Receipt, '_blank')
+                                              }}
+                                              buttonStyle={{
+                                                padding:5,
+                                                margin:5
+                                              }}
+                                            />
+                                        </View>
+                                        
+                                      </View>)
+                                  })}
+                                </View>
+                              </View>
+                            } else {
+                              view = <View key={'taskRes_'+rIndex}>
+                              </View>
+                            }
+                            
                           } else if (task.Type == 3) {
                             // Contract response.
                             view = <View style={styles.contractResponse} key={'taskRes_'+rIndex}>

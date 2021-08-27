@@ -3049,7 +3049,8 @@ export const programsLight = StyleSheet.create({
     flex:1,
     backgroundColor:colorsLight.secondaryBackground,
     borderRadius:10,
-    overflow:'hidden'
+    overflow:'hidden',
+    marginTop:10
   },
   sliderInner: {
     height:'100%',
@@ -3090,7 +3091,157 @@ export const programsLight = StyleSheet.create({
     width:30,
     height:30,
     borderRadius:25,
-  }
+  },
+  paymentsControls: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentsControlsText: {
+    padding:10,
+    fontFamily:'PoppinsSemiBold',
+    fontSize:16,
+    color:colorsLight.secondaryTextColor,
+    width:'100%'
+  },
+  paymentControlsTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmount: {
+    flex:12,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsNumber: {
+    flex:16,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchAmountStatus: {
+    flex:12,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDescription: {
+    flex:55,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchView: {
+    flex:14,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentControlsTouchDate: {
+    flex:19,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRow: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  paymentRowText: {
+    padding:10,
+    fontFamily:'Poppins',
+    fontSize:14,
+    color:colorsLight.mainTextColor,
+    width:'100%'
+  },
+  paymentRowTouchIcon: {
+    height:40,
+    width:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmount: {
+    flex:12,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowNumber: {
+    flex:16,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountCurrency: {
+    flex:6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchAmountStatus: {
+    flex:12,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDescription: {
+    flex:55,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchView: {
+    flex:14,
+    height:40,
+    alignItems:'flex-end',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
+  paymentRowTouchDate: {
+    flex:19,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomColor:colorsLight.headerBorder,
+    borderBottomWidth:1
+  },
 });
 
 export const addProgramLight = StyleSheet.create({
