@@ -22,7 +22,7 @@ export default function AllPrograms() {
   
   const [refreshing, setRefreshing] = useState(true)
   const [coach, setCoach] = useState(user)
-  
+
   // Styling.
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
@@ -70,7 +70,7 @@ export default function AllPrograms() {
   // All programs functions.
   const getData = async () => {
     var data = await getPrograms(coach.Id, coach.Token)
-    console.log('data:',data)
+    console.log('data:', data)
     // Get grads and selectedClients statistics.
     var grads = []
     var selecteds = []
@@ -736,8 +736,6 @@ export default function AllPrograms() {
                             }
                           } else if (task.Type == 2) {
                             // Payment response.
-                            console.log('task:',task)
-                            console.log('response:',response)
                             if (rIndex == 0) {
                               view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
                                 <View style={styles.paymentsControls}>
@@ -748,11 +746,12 @@ export default function AllPrograms() {
                                     <Text style={styles.paymentsControlsText}>Amount</Text>
                                   </TouchableOpacity>
                                   <TouchableOpacity style={styles.paymentControlsNumber}>
+                                    <Text style={styles.paymentsControlsText}>Status</Text>
                                   </TouchableOpacity>
                                   <TouchableOpacity style={styles.paymentControlsTouchDescription}>
                                   </TouchableOpacity>
                                   <TouchableOpacity style={styles.paymentControlsTouchDate}>
-                                    <Text style={styles.paymentsControlsText}>Created</Text>
+                                    <Text style={[styles.paymentsControlsText,]}>Created</Text>
                                   </TouchableOpacity>
                                   <TouchableOpacity style={styles.paymentControlsTouchView}>
                                     <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Receipt</Text>
@@ -815,9 +814,6 @@ export default function AllPrograms() {
                                             />)}
                                           </>)}
                                         </View>
-                                        <View style={[styles.paymentRowNumber]}>
-                                          
-                                        </View>
                                         <View style={styles.paymentRowTouchDescription}>
                                         </View>
                                         <View style={styles.paymentRowTouchDate}>
@@ -848,7 +844,9 @@ export default function AllPrograms() {
                             
                           } else if (task.Type == 3) {
                             // Contract response.
+                            console.log('contract res:', response)
                             view = <View style={styles.contractResponse} key={'taskRes_'+rIndex}>
+
                             </View>
                           } else {
                             view = <View key={'taskRes_'+rIndex}>
