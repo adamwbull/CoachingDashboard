@@ -22,7 +22,7 @@ export default function AllPrograms() {
   
   const [refreshing, setRefreshing] = useState(true)
   const [coach, setCoach] = useState(user)
-
+  
   // Styling.
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
