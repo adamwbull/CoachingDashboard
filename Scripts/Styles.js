@@ -3213,7 +3213,6 @@ export const programsLight = StyleSheet.create({
   paymentRowTouchAmountStatus: {
     flex:12,
     height:40,
-    alignItems:'center',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1

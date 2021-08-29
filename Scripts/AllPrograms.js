@@ -832,7 +832,6 @@ export default function AllPrograms() {
                                               }}
                                             />
                                         </View>
-                                        
                                       </View>)
                                   })}
                                 </View>
@@ -845,9 +844,52 @@ export default function AllPrograms() {
                           } else if (task.Type == 3) {
                             // Contract response.
                             console.log('contract res:', response)
-                            view = <View style={styles.contractResponse} key={'taskRes_'+rIndex}>
-
-                            </View>
+                            if (rIndex == 0) {
+                              view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
+                                <View style={styles.paymentsControls}>
+                                  <TouchableOpacity style={[styles.paymentControlsTouchAmount,{flex:95}]}>
+                                    <Text style={styles.paymentsControlsText}>Client</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                                    <Text style={[styles.paymentsControlsText,]}>Created</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity style={styles.paymentControlsTouchView}>
+                                    <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Receipt</Text>
+                                  </TouchableOpacity>
+                                </View>
+                                <View style={styles.paymentsPreviousInvoices}>
+                                  {task.Responses.map((line, paymentLineIndex) => {
+                                    console.log('line:', line)
+                                    return (<View key={line.id} style={styles.paymentRow}>
+                                        <View style={[styles.paymentRowTouchAmount,{flex:91}]}>
+                                          <Text style={[styles.paymentRowText]}>
+                                            {line.Client.FirstName + ' ' + line.Client.LastName}
+                                          </Text>
+                                        </View>
+                                        <View style={styles.paymentRowTouchDate}>
+                                          <Text style={styles.paymentRowText}>{parseSimpleDateText(sqlToJsDate(line.Created))}</Text>
+                                        </View>
+                                        <View style={styles.paymentRowTouchView}>
+                                          <Chip
+                                              title='View'
+                                              type='outline'
+                                              onPress={() => {
+                                                window.open(line.Receipt, '_blank')
+                                              }}
+                                              buttonStyle={{
+                                                padding:5,
+                                                margin:5
+                                              }}
+                                            />
+                                        </View>
+                                      </View>)
+                                  })}
+                                </View>
+                              </View>
+                            } else {
+                              view = <View key={'taskRes_'+rIndex}>
+                              </View>
+                            }
                           } else {
                             view = <View key={'taskRes_'+rIndex}>
                             </View>
