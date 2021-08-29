@@ -514,7 +514,16 @@ export default function AllPrograms() {
                           
                           if (task.Type == 0) {
                             // Prompt response.
-                            view = <View style={styles.promptResponse} key={'taskRes_'+rIndex}>
+                            console.log('prompt response:',response)
+                            view = <View key={'taskRes_'+rIndex} style={styles.responseClientContainer}>
+                              <Image 
+                                source={response.Client.Avatar}
+                                style={styles.responseClientAvatar}
+                              />
+                              <Text style={styles.responseClientText}>
+                                <Text style={styles.responseClientName}>{response.Client.FirstName + ' ' + response.Client.LastName}</Text>
+                                {response.Text}
+                              </Text>
                             </View>
                           } else if (task.Type == 1) {
                             // Survey response.
@@ -843,7 +852,6 @@ export default function AllPrograms() {
                             
                           } else if (task.Type == 3) {
                             // Contract response.
-                            console.log('contract res:', response)
                             if (rIndex == 0) {
                               view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
                                 <View style={styles.paymentsControls}>
@@ -854,12 +862,11 @@ export default function AllPrograms() {
                                     <Text style={[styles.paymentsControlsText,]}>Created</Text>
                                   </TouchableOpacity>
                                   <TouchableOpacity style={styles.paymentControlsTouchView}>
-                                    <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Receipt</Text>
+                                    <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Contract</Text>
                                   </TouchableOpacity>
                                 </View>
                                 <View style={styles.paymentsPreviousInvoices}>
                                   {task.Responses.map((line, paymentLineIndex) => {
-                                    console.log('line:', line)
                                     return (<View key={line.id} style={styles.paymentRow}>
                                         <View style={[styles.paymentRowTouchAmount,{flex:91}]}>
                                           <Text style={[styles.paymentRowText]}>
@@ -874,7 +881,7 @@ export default function AllPrograms() {
                                               title='View'
                                               type='outline'
                                               onPress={() => {
-                                                window.open(line.Receipt, '_blank')
+                                                window.open(line.File, '_blank')
                                               }}
                                               buttonStyle={{
                                                 padding:5,
