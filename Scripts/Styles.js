@@ -3599,6 +3599,10 @@ export const addProgramLight = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center'
   },
+  viewProgramStatsRow: {
+  },
+  viewProgramSectionClientListStatColumn: {
+  }
 })
 
 export const brandDesignLight = StyleSheet.create({

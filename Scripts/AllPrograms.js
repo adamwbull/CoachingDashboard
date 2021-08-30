@@ -107,6 +107,17 @@ export default function AllPrograms() {
 
   const refreshClientList = async (index) => {
     var clients = await getClientsData(coach.Id, coach.Token)
+
+    // CODING NOTE //
+    // This is an example coding note.
+
+    /*// An array of the task IDs to use later. 
+    var taskIds = []
+    for (var i = 0; i < programs[index].Tasks.length; i++) {
+      taskIds.push(programs[index].Tasks[i].Id)
+    }*/
+
+    // Loop through all clients.
     for (var i = 0; i < clients[1].length; i++) {
 
       // Check if this client is already enrolled.
@@ -119,14 +130,22 @@ export default function AllPrograms() {
         }
       }
 
-      clients[1][i].Added = 0 
-
       if (alreadyEnrolled) {
         clients[1][i].Visible = 0
       } else {
         clients[1][i].Visible = 1
       }
 
+      // Variable for manipulating whether a client is selected.
+      clients[1][i].Added = 0 
+
+      // Check for the number of tasks completed so far.
+      var completedCount = 0
+      for (var j = 0; j < programs[index].Tasks.length; j++) {
+        if (programs[index].Tasks[j].Id == clients[1][i].Something) {
+
+        }
+      }
       
     }
     setClientList(clients[1])
@@ -268,8 +287,19 @@ export default function AllPrograms() {
     }, 500)
   }
 
-  const advanceNextTasks = () => {
+  const advanceNextTasks = async () => {
+    // Collect data for API call.
+    var advancees = []
+    // Make call.
+    var posted = await advanceProgramTasks(advancees, coach.Token, coach.Id)
+    if (posted) {
+      // Show success message.
+    }
+  }
 
+  const viewIndividualClient = (i) => {
+    setSelectedClientIndex(i)
+    setShowClientData(true)
   }
 
 
@@ -404,22 +434,440 @@ export default function AllPrograms() {
                 </TouchableOpacity>)}
               </View>
               {showClientListPage && (<View style={styles.viewProgramSection}>
-                {showClientData && (<View>
-                  {programs[viewProgramIndex].Tasks.map((task, taskIndex) => {
-
-                    return (<View key={'taskRes_'+taskIndex}>
-                      {task.Responses.map((response, responseIndex) => {
-
-                        if (response.Client.Id == programs[viewProgramIndex].Assocs[selectedClientIndex].ClientId) {
-                          // The actual task response to show. Use both task and response vars.
-                          return (<View key={'taskResRes_'+responseIndex}>
-
-                          </View>)
+                {showClientData && (<View style={styles.viewProgramSection}>
+                  {programs[viewProgramIndex].Tasks.map((task, index) => {
+                    // This is the first time I have done this, but it's pretty awesome. Just wait...
+                    var responseArray = []
+                    // Check if this client completed this task.
+                    task.Responses.forEach((res, i) => {
+                      // Check if this is a survey response.
+                      if (task.Type == 1) {
+                        // Handle as a survey.
+                        if (responseArray.length == 0 && res[0].Client.Id == programs[viewProgramIndex].Assocs[selectedClientIndex].ClientId) {
+                          responseArray.push(res)
                         }
+                      } else {
+                        if (responseArray.length == 0 && res.Client.Id == programs[viewProgramIndex].Assocs[selectedClientIndex].ClientId) {
+                          responseArray.push(res)
+                        }
+                      }
+                    })    
+                    var headerStyling = {}
+                    if (responseArray.length == 0) {
+                      headerStyling = {borderRadius:10}
+                    }
+                    return (<View key={'taskIndex_'+index} style={styles.task}>
+                      <View style={[styles.taskHeader,headerStyling]}>
+                        <View style={styles.taskHeaderTitle}>
+                          <Text style={styles.taskHeaderTitleCount}>Task #{index+1}:</Text>
+                          <Text style={styles.taskHeaderTitleName}>{task.Task[0].Title}</Text>
+                        </View>
+                        <Text style={styles.taskHeaderStatus}>
+                          {responseArray.length == 0 && 'No response yet.'}
+                        </Text>
+                      </View>
+                      <View>
+                        {responseArray.length > 0 &&
+                        (<View style={styles.taskData}>
+                          {responseArray.map((response, rIndex) => {
 
-                      })}
+                            var view = null
+                            
+                            if (task.Type == 0) {
+                              // Prompt response.
+                              view = <View key={'taskRes_'+rIndex} style={styles.responseClientContainer}>
+                                <Image 
+                                  source={response.Client.Avatar}
+                                  style={styles.responseClientAvatar}
+                                />
+                                <Text style={styles.responseClientText}>
+                                  <Text style={styles.responseClientName}>{response.Client.FirstName + ' ' + response.Client.LastName}</Text>
+                                  {response.Text}
+                                </Text>
+                              </View>
+                            } else if (task.Type == 1) {
+                              // Survey response.
+                              // Only show compiled data on first rIndex.
+                              if (rIndex == 0) {
+                                view = <View style={styles.surveyData} key={'taskRes_'+rIndex}>
+                                  {task.Task[0].Items.map((q, index) => {
+                                    var i;
+                                    // Get list of input responses.
+                                    var responses = []
+                                    for (i = 0; i < task.Responses.length; i++) {
+                                      var cur = task.Responses[i][index]
+                                      responses.push(cur)
+                                    }
+                                    if (q.Type == 0) {
+                                      return (<View style={styles.surveyDataRow} key={index + '-'}>
+                                        <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                        {responses.map((res, ind) => {
+                                          var avatar = 'https://coachsync.me/assets/img/default.png'
+                                          var name = ''
+                                          return (<View key={ind + '--+'} style={styles.responseClientContainer}>
+                                            <Image 
+                                              source={res.Client.Avatar}
+                                              style={styles.responseClientAvatar}
+                                            />
+                                            <Text style={styles.responseClientText}>
+                                              <Text style={styles.responseClientName}>{res.Client.FirstName + ' ' + res.Client.LastName}</Text>
+                                              {res.Response}
+                                            </Text>
+                                          </View>)
+                                        })}
+                                      </View>)
+                                    } else if (q.Type == 1) {
+                                      // Get range.
+                                      var rangeStrs = q.SliderRange.split(',')
+                                      var minRange = parseInt(rangeStrs[0])
+                                      var maxRange = parseInt(rangeStrs[1])
+                                      // Get average.
+                                      var top = 0
+                                      var cnt = 0
+                                      for (i = 0; i < task.Responses.length; i++) {
+                                        var cur = parseFloat(task.Responses[i][index].Response)
+                                        top += cur
+                                        cnt++
+                                      }
+                                      var average = parseFloat((top/cnt).toFixed(2))
+                                      var genWidth = parseInt((average/maxRange)*100)
+                                      genWidth = genWidth + '%'
+                                      var sliderInnerWidth = {width:genWidth}
+
+                                      return (<View style={[styles.surveyDataRow,{width:'100%',height:150}]} key={index + '-'}>
+                                        <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                        <View style={styles.sliderOuter}>
+                                          <View style={[styles.sliderInner,sliderInnerWidth]}>
+                                            <Text style={styles.sliderInnerText}>Average: {average}</Text>
+                                          </View>
+                                        </View>
+                                        <View style={{flexDirection:'row',justifyContent:'space-between',margin:10}}>
+                                          <View>
+                                            <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'left',margin:0}]}>{minRange}</Text>
+                                            <Text style={[styles.responseClientText,{textAlign:'left',margin:0}]}>{q.SliderLeft}</Text>
+                                          </View>
+                                          <View>
+                                            <Text style={[styles.responseClientText,{fontFamily:'PoppinsSemiBold',textAlign:'right'}]}>{maxRange}</Text>
+                                            <Text style={[styles.responseClientText,{textAlign:'right'}]}>{q.SliderRight}</Text>
+                                          </View>
+                                        </View>
+                                      </View>)
+                                    } else if (q.Type == 2) {
+                                      var data = []
+                                      var ids = q.BoxOptionsArray.split(',')
+                                      for (i = 0; i < ids.length; i++) {
+                                        var color = colors.primaryHighlight
+                                        if (i >= 1 && i <= 5) {
+                                          var colorsArr = [colors.secondaryHighlight]
+                                          for (var k = 0; k < 4; k++) {
+                                            colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+                                          }
+                                          color = colorsArr[(i % 5)]
+                                        }
+                                        var total = 0
+                                        for (var j = 0; j < task.Responses.length; j++) {
+                                          var thisPersonsResponses = task.Responses[j][index].Response.split(',')
+                                          if (thisPersonsResponses[i] == 'true') {
+                                            total++;
+                                          }
+                                        }
+                                        var cur = {
+                                          "id":ids[i],
+                                          "label":ids[i],
+                                          "value":total,
+                                          "color":color
+                                        }
+                                        data.push(cur)
+                                      }
+                                      return (<View style={[styles.surveyDataRow]} key={index + '-'}>
+                                        <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                        <ResponsivePie
+                                          data={data}
+                                          colors={{ datum: 'data.color' }}
+                                          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                                          innerRadius={0.5}
+                                          padAngle={0.7}
+                                          cornerRadius={3}
+                                          activeOuterRadiusOffset={8}
+                                          borderWidth={1}
+                                          borderColor={colors.headerBorder}
+                                          arcLinkLabelsSkipAngle={10}
+                                          arcLinkLabelsTextColor={colors.mainTextColor}
+                                          arcLinkLabelsThickness={2}
+                                          arcLinkLabelsColor={colors.mainTextColor}
+                                          arcLabelsSkipAngle={10}
+                                          arcLabelsTextColor={colors.mainTextColor}
+                                          legends={[
+                                              {
+                                                  anchor: 'bottom',
+                                                  direction: 'row',
+                                                  justify: false,
+                                                  translateX: 40,
+                                                  translateY: 56,
+                                                  itemsSpacing: 0,
+                                                  itemWidth: 100,
+                                                  itemHeight: 18,
+                                                  itemTextColor: colors.mainTextColor,
+                                                  itemDirection: 'left-to-right',
+                                                  itemOpacity: 1,
+                                                  symbolSize: 18,
+                                                  symbolShape: 'circle',
+                                                  effects: [
+                                                      {
+                                                          on: 'hover',
+                                                          style: {
+                                                              itemTextColor: '#000'
+                                                          }
+                                                      }
+                                                  ]
+                                              }
+                                          ]}
+                                      />
+                                      </View>)
+                                    } else {
+                                      var data = []
+                                      var ids = q.BoxOptionsArray.split(',')
+                                      for (i = 0; i < ids.length; i++) {
+                                        var color = colors.primaryHighlight
+                                        if (i >= 1 && i <= 5) {
+                                          var colorsArr = [colors.secondaryHighlight]
+                                          for (var k = 0; k < 4; k++) {
+                                            colorsArr.push(lightenHex(colorsArr[colorsArr.length-1], 20))
+                                          }
+                                          color = colorsArr[(i % 5)]
+                                        }
+                                        var total = 0
+                                        for (var j = 0; j < task.Responses.length; j++) {
+                                          var thisPersonsResponse = task.Responses[j][index].Response
+                                          if (thisPersonsResponse == ids[i]) {
+                                            total++;
+                                          }
+                                        }
+                                        var cur = {
+                                          "id":ids[i],
+                                          "label":ids[i],
+                                          "value":total,
+                                          "color":color
+                                        }
+                                        data.push(cur)
+                                      }
+                                      return (<View style={[styles.surveyDataRow,{width:'100%',height:300,marginBottom:30}]} key={index + '-'}>
+                                        <Text style={styles.surveyQuestion}>Q{(index+1) + ': ' + q.Question}</Text>
+                                        <ResponsivePie
+                                          data={data}
+                                          colors={{ datum: 'data.color' }}
+                                          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                                          innerRadius={0.5}
+                                          padAngle={0.7}
+                                          cornerRadius={3}
+                                          activeOuterRadiusOffset={8}
+                                          borderWidth={1}
+                                          borderColor={colors.headerBorder}
+                                          arcLinkLabelsSkipAngle={10}
+                                          arcLinkLabelsTextColor={colors.mainTextColor}
+                                          arcLinkLabelsThickness={2}
+                                          arcLinkLabelsColor={colors.mainTextColor}
+                                          arcLabelsSkipAngle={10}
+                                          arcLabelsTextColor={colors.mainTextColor}
+                                          legends={[
+                                              {
+                                                  anchor: 'bottom',
+                                                  direction: 'row',
+                                                  justify: false,
+                                                  translateX: 40,
+                                                  translateY: 56,
+                                                  itemsSpacing: 0,
+                                                  itemWidth: 100,
+                                                  itemHeight: 18,
+                                                  itemTextColor: colors.mainTextColor,
+                                                  itemDirection: 'left-to-right',
+                                                  itemOpacity: 1,
+                                                  symbolSize: 18,
+                                                  symbolShape: 'circle',
+                                                  effects: [
+                                                      {
+                                                          on: 'hover',
+                                                          style: {
+                                                              itemTextColor: '#000'
+                                                          }
+                                                      }
+                                                  ]
+                                              }
+                                          ]}
+                                      />
+                                      </View>)
+                                    }
+                                  })}
+                                </View>
+                              } else {
+                                view = <View key={'taskRes_'+rIndex}>
+                                </View>
+                              }
+                            } else if (task.Type == 2) {
+                              // Payment response.
+                              if (rIndex == 0) {
+                                view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
+                                  <View style={styles.paymentsControls}>
+                                    <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                                      <Text style={styles.paymentsControlsText}>Client</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchAmount}>
+                                      <Text style={styles.paymentsControlsText}>Amount</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsNumber}>
+                                      <Text style={styles.paymentsControlsText}>Status</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchDescription}>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                                      <Text style={[styles.paymentsControlsText,]}>Created</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchView}>
+                                      <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Receipt</Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                  <View style={styles.paymentsPreviousInvoices}>
+                                    {task.Responses.map((line, paymentLineIndex) => {
+                                      // Amount/total, Chip/status, Invoice Number/number, Due/period_end, Created/created, View/hosted_invoice_url
+                                      return (<View key={line.id} style={styles.paymentRow}>
+                                          <View style={[styles.paymentRowTouchAmount]}>
+                                            <Text style={[styles.paymentRowText]}>
+                                              {line.Client.FirstName + ' ' + line.Client.LastName}
+                                            </Text>
+                                          </View>
+                                          <View style={[styles.paymentRowTouchAmount]}>
+                                            <Text style={[styles.paymentRowText]}>
+                                              ${(parseInt(line.Amount)/100).toFixed(2)}
+                                            </Text>
+                                          </View>
+                                          <View style={styles.paymentRowTouchAmountStatus}>
+                                            {line.IsPaid == 0 && (<><Chip
+                                              title='Uncollected'
+                                              type='outline'
+                                              icon={{
+                                                name:'checkmark-outline',
+                                                type:'ionicon',
+                                                size:16,
+                                                color:'#fff'
+                                              }}
+                                              disabledStyle={{backgroundColor:btnColors.caution,borderColor:btnColors.caution,color:btnColors.caution,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                              disabledTitleStyle={{color:'#fff'}}
+                                              disabled={true}
+                                            /></>) ||
+                                              (<>{line.IsPaid == 1 && (<>
+                                                <Chip
+                                                  title='Paid'
+                                                  type='outline'
+                                                  icon={{
+                                                    name:'checkmark-outline',
+                                                    type:'ionicon',
+                                                    size:16,
+                                                    color:'#fff'
+                                                  }}
+                                                  disabledStyle={{backgroundColor:btnColors.success,borderColor:btnColors.success,color:btnColors.success,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                                  disabledTitleStyle={{color:'#fff'}}
+                                                  disabled={true}
+                                                />
+                                              </>) || (<Chip
+                                                title='Void'
+                                                type='outline'
+                                                icon={{
+                                                  name:'checkmark-outline',
+                                                  type:'ionicon',
+                                                  size:16,
+                                                  color:'#fff'
+                                                }}
+                                                disabledStyle={{backgroundColor:btnColors.danger,borderColor:btnColors.danger,color:btnColors.danger,margin:5,paddingLeft:3,paddingTop:3,paddingBottom:3,paddingRight:8}}
+                                                disabledTitleStyle={{color:'#fff'}}
+                                                disabled={true}
+                                              />)}
+                                            </>)}
+                                          </View>
+                                          <View style={styles.paymentRowTouchDescription}>
+                                          </View>
+                                          <View style={styles.paymentRowTouchDate}>
+                                            <Text style={styles.paymentRowText}>{parseSimpleDateText(sqlToJsDate(line.Created))}</Text>
+                                          </View>
+                                          <View style={styles.paymentRowTouchView}>
+                                            <Chip
+                                                title='View'
+                                                type='outline'
+                                                onPress={() => {
+                                                  window.open(line.Receipt, '_blank')
+                                                }}
+                                                buttonStyle={{
+                                                  padding:5,
+                                                  margin:5
+                                                }}
+                                              />
+                                          </View>
+                                        </View>)
+                                    })}
+                                  </View>
+                                </View>
+                              } else {
+                                view = <View key={'taskRes_'+rIndex}>
+                                </View>
+                              }
+                              
+                            } else if (task.Type == 3) {
+                              // Contract response.
+                              if (rIndex == 0) {
+                                view = <View style={styles.paymentResponse} key={'taskRes_'+rIndex}>
+                                  <View style={styles.paymentsControls}>
+                                    <TouchableOpacity style={[styles.paymentControlsTouchAmount,{flex:95}]}>
+                                      <Text style={styles.paymentsControlsText}>Client</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchDate}>
+                                      <Text style={[styles.paymentsControlsText,]}>Created</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.paymentControlsTouchView}>
+                                      <Text style={[styles.paymentsControlsText,{textAlign:'right'}]}>View Contract</Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                  <View style={styles.paymentsPreviousInvoices}>
+                                    {task.Responses.map((line, paymentLineIndex) => {
+                                      return (<View key={line.id} style={styles.paymentRow}>
+                                          <View style={[styles.paymentRowTouchAmount,{flex:91}]}>
+                                            <Text style={[styles.paymentRowText]}>
+                                              {line.Client.FirstName + ' ' + line.Client.LastName}
+                                            </Text>
+                                          </View>
+                                          <View style={styles.paymentRowTouchDate}>
+                                            <Text style={styles.paymentRowText}>{parseSimpleDateText(sqlToJsDate(line.Created))}</Text>
+                                          </View>
+                                          <View style={styles.paymentRowTouchView}>
+                                            <Chip
+                                                title='View'
+                                                type='outline'
+                                                onPress={() => {
+                                                  window.open(line.File, '_blank')
+                                                }}
+                                                buttonStyle={{
+                                                  padding:5,
+                                                  margin:5
+                                                }}
+                                              />
+                                          </View>
+                                        </View>)
+                                    })}
+                                  </View>
+                                </View>
+                              } else {
+                                view = <View key={'taskRes_'+rIndex}>
+                                </View>
+                              }
+                            } else {
+                              view = <View key={'taskRes_'+rIndex}>
+                              </View>
+                            }
+
+                            return view 
+
+                          })}
+                        </View>)}
+                      </View>
                     </View>)
-
                   })}
                 </View>) || (<View>
                   {selectedCounts[viewProgramIndex] > 0 && (<View style={styles.viewProgramClientListOptions}>
@@ -449,12 +897,24 @@ export default function AllPrograms() {
                                 <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
                                 </View>
                               </View>
-                              <Text style={styles.viewProgramSectionClientListTasksCompleted}>
-                                <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
-                                  {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
-                                </Text>
-                                Tasks Completed
-                              </Text>
+                              <View style={styles.viewProgramStatsRow}>
+                                <View style={styles.viewProgramSectionClientListStatColumn}>
+                                  <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                    {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                                  </Text>
+                                  <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                                    Tasks Assigned
+                                  </Text>
+                                </View>
+                                <View style={styles.viewProgramSectionClientListStatColumn}>
+                                  <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                    {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                                  </Text>
+                                  <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                                    Tasks Completed
+                                  </Text>
+                                </View>
+                              </View>
                               <View style={styles.viewProgramSectionClientListButtons}>
                                 {client.CurrentTaskId != 0 && (<Button 
                                   title={client.Selected == 0 && 'Select' || 'Deselect'}
@@ -465,7 +925,7 @@ export default function AllPrograms() {
                                 />)}
                                 <Button 
                                   title='View Data'
-                                  onPress={() => {}}
+                                  onPress={() => viewIndividualClient(index)}
                                   buttonStyle={styles.clientListViewData}
                                   titleStyle={[styles.clientListViewDataTitle,{color:colors.mainTextColor}]}
                                   containerStyle={[styles.clientListViewDataContainer,{flex:2}]}
@@ -514,7 +974,6 @@ export default function AllPrograms() {
                           
                           if (task.Type == 0) {
                             // Prompt response.
-                            console.log('prompt response:',response)
                             view = <View key={'taskRes_'+rIndex} style={styles.responseClientContainer}>
                               <Image 
                                 source={response.Client.Avatar}
