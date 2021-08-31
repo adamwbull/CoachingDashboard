@@ -2760,11 +2760,6 @@ export const programsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     textAlign:'center'
   },
-  viewProgramSectionClientListTasksCompleted: {
-    fontSize:16,
-    fontFamily:'Poppins',
-    color:colorsLight.mainTextColor
-  },
   viewProgramSectionHeader: {
     flexDirection:'row',
     alignItems:'center',
@@ -3241,6 +3236,28 @@ export const programsLight = StyleSheet.create({
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
   },
+  viewProgramStatsRow: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between',
+    width:'100%'
+  },
+  viewProgramSectionClientListStatColumn: {
+    flex:1,
+    alignItems:'center',
+  },
+  viewProgramSectionClientListStatNumber: {
+    fontSize:20,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
+  viewProgramSectionClientListTasksCompleted: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    textAlign:'center'
+  },
 });
 
 export const addProgramLight = StyleSheet.create({
@@ -3599,10 +3616,6 @@ export const addProgramLight = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center'
   },
-  viewProgramStatsRow: {
-  },
-  viewProgramSectionClientListStatColumn: {
-  }
 })
 
 export const brandDesignLight = StyleSheet.create({

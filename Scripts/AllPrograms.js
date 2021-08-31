@@ -111,21 +111,32 @@ export default function AllPrograms() {
     // CODING NOTE //
     // This is an example coding note.
 
-    /*// An array of the task IDs to use later. 
+    // An array of the task IDs to use later. 
     var taskIds = []
     for (var i = 0; i < programs[index].Tasks.length; i++) {
       taskIds.push(programs[index].Tasks[i].Id)
-    }*/
+    }
 
     // Loop through all clients.
     for (var i = 0; i < clients[1].length; i++) {
 
-      // Check if this client is already enrolled.
+      // Check if this client is already enrolled, as well as how many tasks were completed.
       var alreadyEnrolled = false
+      var completedCount = 0
+
       for (var j = 0; j < programs[index].Assocs.length; j++) {
         var assoc = programs[index].Assocs[j]
         if (assoc.Client.Id == clients[1][i].Id) {
+          // Assign this client as enrolled.
           alreadyEnrolled = true
+          // Determine how many tasks have been completed.
+          for (var k = 0; k < taskIds.length; k++) {
+            if (taskIds[k] == assoc.CurrentTaskId) {
+              break
+            } else {
+              completedCount++
+            }
+          }
           break
         }
       }
@@ -136,11 +147,11 @@ export default function AllPrograms() {
         clients[1][i].Visible = 1
       }
 
+      clients[1][i].TasksAssigned = completedCount
+
       // Variable for manipulating whether a client is selected.
       clients[1][i].Added = 0 
-
-      // Check for the number of tasks completed so far.
-      var completedCount = 0
+      
       for (var j = 0; j < programs[index].Tasks.length; j++) {
         if (programs[index].Tasks[j].Id == clients[1][i].Something) {
 
@@ -899,7 +910,7 @@ export default function AllPrograms() {
                               </View>
                               <View style={styles.viewProgramStatsRow}>
                                 <View style={styles.viewProgramSectionClientListStatColumn}>
-                                  <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                  <Text style={[styles.viewProgramSectionClientListStatNumber,{color:progressBarColors[client.TasksProgressColor]}]}>
                                     {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
                                   </Text>
                                   <Text style={styles.viewProgramSectionClientListTasksCompleted}>
@@ -907,7 +918,7 @@ export default function AllPrograms() {
                                   </Text>
                                 </View>
                                 <View style={styles.viewProgramSectionClientListStatColumn}>
-                                  <Text style={{marginRight:5,color:progressBarColors[client.TasksProgressColor]}}>
+                                  <Text style={[styles.viewProgramSectionClientListStatNumber,{color:progressBarColors[client.TasksProgressColor]}]}>
                                     {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
                                   </Text>
                                   <Text style={styles.viewProgramSectionClientListTasksCompleted}>
