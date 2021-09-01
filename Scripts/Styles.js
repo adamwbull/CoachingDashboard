@@ -67,11 +67,11 @@ export const messageBox = StyleSheet.create({
     borderRadius:10,
   },
   box: {
-    paddingTop:20,
-    paddingBottom:20,
+    paddingTop:10,
+    paddingBottom:10,
     paddingLeft:10,
     paddingRight:10,
-    width:'100%',
+    flex:1,
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center',
@@ -85,7 +85,7 @@ export const messageBox = StyleSheet.create({
   },
   text: {
     flex:6,
-    fontSize:14,
+    fontSize:16,
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
   }
@@ -2739,15 +2739,26 @@ export const programsLight = StyleSheet.create({
   },
   viewProgramProgressOuter: {
     flex:1,
-    width:'80%',
+    width:'96%',
     height:20,
-    margin:5,
+    marginTop:5,
+    marginBottom:10,
     borderRadius:25,
     backgroundColor:colorsLight.secondaryBackground,
   },
   viewProgramProgressInner: {
     height:20,
     borderRadius:25
+  },
+  viewProgramSectionClientListMemberInfo: {
+    flexDirection:'row',
+    alignItems:'center',
+    width:'100%',
+    justifyContent:'flex-start',
+    marginBottom:10
+  },
+  viewProgramSectionClientListMemberDetails: {
+    marginLeft:10
   },
   viewProgramSectionClientListAvatar: {
     width:80,
@@ -2758,7 +2769,13 @@ export const programsLight = StyleSheet.create({
     fontSize:18,
     fontFamily:'PoppinsSemiBold',
     color:colorsLight.mainTextColor,
-    textAlign:'center'
+    lineHeight:18
+  },
+  viewProgramSectionClientListJoined: {
+    fontSize:14,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor,
+    lineHeight:14
   },
   viewProgramSectionHeader: {
     flexDirection:'row',
@@ -2919,11 +2936,11 @@ export const programsLight = StyleSheet.create({
     margin:10,
     flexDirection:'row',
     alignItems:'center'
-  },
+  },  
   clientListOptionsCount: {
     fontFamily:'Poppins',
     fontSize:20,
-    marginRight:10,
+    marginLeft:5,
     color:colorsLight.mainTextColor,
   },
   advanceNextTaskButton: {
@@ -3240,7 +3257,8 @@ export const programsLight = StyleSheet.create({
     flexDirection:'row',
     alignItems:'center',
     justifyContent:'space-between',
-    width:'100%'
+    width:'100%',
+    paddingTop:10
   },
   viewProgramSectionClientListStatColumn: {
     flex:1,
@@ -3258,6 +3276,53 @@ export const programsLight = StyleSheet.create({
     color:colorsLight.mainTextColor,
     textAlign:'center'
   },
+  advanceTasksConfirmContainer: {
+    flex:1,
+    justifyContent: 'center',
+    alignItems:'center',
+    padding:15,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground
+  },
+  advanceTasksConfirmTitle: {
+    width:'100%',
+    textAlign:'center',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'PoppinsSemiBold',
+  },
+  advanceTasksConfirmDesc: {
+    width:'100%',
+    textAlign:'center',
+    fontSize:16,
+    lineHeight:18,
+    color:colorsLight.mainTextColor,
+    fontFamily:'Poppins',
+  },
+  advanceTasksConfirmRow: {
+    flexDirection:'row',
+    width:'100%',
+    marginTop:15,
+    alignItems:'center',
+    justifyContent: 'space-between',
+  },
+  advanceTasksCancel: {
+    marginRight:7,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:btnColors.danger
+  },
+  advanceTasksConfirm: {
+    marginLeft:7,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:btnColors.success
+  },
+  advanceTasksButtonTitle: {
+    fontSize:16,
+    color:'#fff',
+    fontFamily:'Poppins'
+  }
 });
 
 export const addProgramLight = StyleSheet.create({

@@ -1,17 +1,20 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState, useContext } from 'react'
-import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import { programsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
+import React, { useEffect, useState, useContext, useRef } from 'react'
+import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Animated } from 'react-native'
+import { messageBox, programsLight, colorsLight, innerDrawerLight, btnColors } from '../Scripts/Styles.js'
 import { homeDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo, Link, useFocusEffect } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { set, get, getTTL, ttl } from './Storage.js'
-import { getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs, lightenHex } from './API.js'
+import { advanceProgramTasks, getClientsData, getPrograms, parseSimpleDateText, sqlToJsDate, createProgramAssocs, lightenHex } from './API.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Progress } from 'semantic-ui-react'
 import { TextInput } from 'react-native-web'
 import { ResponsivePie } from '@nivo/pie'
+import { confirmAlert } from 'react-confirm-alert' 
 
 import userContext from './Context.js'
 
@@ -27,7 +30,7 @@ export default function AllPrograms() {
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
   const progressBarColors = [ // 0, 1, 2 index match from API on TasksProgressColor
-    btnColors.caution,
+    colors.mainTextColor,
     btnColors.info,
     btnColors.success
   ]
@@ -39,6 +42,9 @@ export default function AllPrograms() {
   const [showAddClient, setShowAddClient] = useState(false)
   const [showViewProgram, setShowViewProgram] = useState(false)
   const [viewProgramIndex, setViewProgramIndex] = useState(-1)
+  //const [advanceProgramOpacity, setAdvanceProgramOpacity] = useState(new Animated.Value(0))
+  const advanceProgramOpacity = useRef(new Animated.Value(0)).current;
+  const [advanceProgramOpacityBool, setAdvanceProgramOpacityBool] = useState(false)
 
   // Data.
   const [programs, setPrograms] = useState([])
@@ -63,32 +69,64 @@ export default function AllPrograms() {
     if (coach == null) {
       linkTo('/welcome')
     } else {
-      getData()
+      getData(0)
     }
   },[])
 
   // All programs functions.
-  const getData = async () => {
+
+  // Get main program data. Type specified whether or not this should handle data/UI or data only.
+  const getData = async (type) => {
+
     var data = await getPrograms(coach.Id, coach.Token)
     console.log('data:', data)
-    // Get grads and selectedClients statistics.
+
+    // Get completedCount, grads, selectedClients statistics.
     var grads = []
     var selecteds = []
     for (var i = 0; i < data.length; i++) {
-      selecteds.push(0)
+
+      // An array of the task IDs to use later. 
+      var taskIds = []
+      for (var j = 0; j < data[i].Tasks.length; j++) {
+        taskIds.push(data[i].Tasks[j].Id)
+      }
+
+
+      // Get statistics.
       var num = 0
       for (var j = 0; j < data[i].Assocs.length; j++) {
+
+        // Determine how many tasks have been completed.
+        var completedCount = 0
+        for (var k = 0; k < taskIds.length; k++) {
+          completedCount++
+          if (taskIds[k] == data[i].Assocs[j].CurrentTaskId) {
+            break
+          }
+        }
+        data[i].Assocs[j].TasksAssigned = completedCount
+
+        // Check if client is graduate.
         if (data[i].Assocs[j].CurrentTaskId == 0) {
           num++
         }
+
       }
+
       grads.push(num)
+      selecteds.push(0)
+
     }
+
     setSelectedCounts(selecteds)
     setProgramGrads(grads)
     setPrograms(data)
-    setShowActivityIndicator(false)
-    setShowAll(true)
+    if (type == 0) {
+      setShowActivityIndicator(false)
+      setShowAll(true)
+    }
+
   }
 
   const addProgram = () => {
@@ -111,32 +149,17 @@ export default function AllPrograms() {
     // CODING NOTE //
     // This is an example coding note.
 
-    // An array of the task IDs to use later. 
-    var taskIds = []
-    for (var i = 0; i < programs[index].Tasks.length; i++) {
-      taskIds.push(programs[index].Tasks[i].Id)
-    }
-
     // Loop through all clients.
     for (var i = 0; i < clients[1].length; i++) {
 
       // Check if this client is already enrolled, as well as how many tasks were completed.
       var alreadyEnrolled = false
-      var completedCount = 0
 
       for (var j = 0; j < programs[index].Assocs.length; j++) {
         var assoc = programs[index].Assocs[j]
         if (assoc.Client.Id == clients[1][i].Id) {
           // Assign this client as enrolled.
           alreadyEnrolled = true
-          // Determine how many tasks have been completed.
-          for (var k = 0; k < taskIds.length; k++) {
-            if (taskIds[k] == assoc.CurrentTaskId) {
-              break
-            } else {
-              completedCount++
-            }
-          }
           break
         }
       }
@@ -146,8 +169,6 @@ export default function AllPrograms() {
       } else {
         clients[1][i].Visible = 1
       }
-
-      clients[1][i].TasksAssigned = completedCount
 
       // Variable for manipulating whether a client is selected.
       clients[1][i].Added = 0 
@@ -290,6 +311,7 @@ export default function AllPrograms() {
   }
 
   const exitClientAddSuccessForm = () => {
+    getData(1)
     setShowClientAddSuccessForm(false)
     setShowActivityIndicator(true)
     setTimeout(() => {
@@ -298,14 +320,80 @@ export default function AllPrograms() {
     }, 500)
   }
 
-  const advanceNextTasks = async () => {
+  const sendAdvancementRequests = async () => {
     // Collect data for API call.
     var advancees = []
+    for (var i = 0; i < programs[viewProgramIndex].Assocs.length; i++) {
+      if (programs[viewProgramIndex].Assocs[i].Selected == 1) {
+        advancees.push({
+          CurrentTaskId:programs[viewProgramIndex].Assocs[i].CurrentTaskId,
+          ClientId:programs[viewProgramIndex].Assocs[i].ClientId,
+          Id:programs[viewProgramIndex].Assocs[i].Id
+        })
+      }
+    }
     // Make call.
-    var posted = await advanceProgramTasks(advancees, coach.Token, coach.Id)
+    var posted = await advanceProgramTasks(advancees, coach.Token, programs[viewProgramIndex].Id, coach.Id)
     if (posted) {
       // Show success message.
+      getData(1)
+      setTimeout(() => {
+        setAdvanceProgramOpacityBool(true)
+        Animated.timing(advanceProgramOpacity, {
+          toValue: 1,
+          duration: 0,
+        }).start();
+        Animated.timing(advanceProgramOpacity, {
+          toValue: 0,
+          duration: 3000,
+        }).start();
+        setTimeout(() => {
+          setAdvanceProgramOpacityBool(false)
+        }, 2500)
+      }, 500)
     }
+  }
+
+  const advanceNextTasksConfirm = () => {
+
+    confirmAlert({
+      overlayClassName:'confirmUIBasic',
+      customUI: ({ onClose }) => {
+        return (<View style={styles.advanceTasksConfirmContainer}>
+          <Text style={styles.advanceTasksConfirmTitle}>
+            Assign New Tasks?
+          </Text> 
+          <Text style={styles.advanceTasksConfirmDesc}>
+            All selected clients will be assigned their next task.
+          </Text>
+          <Text style={styles.advanceTasksConfirmDesc}>
+            Previous tasks will still be available to complete.
+          </Text>
+          <View style={styles.advanceTasksConfirmRow}>
+            <Button 
+              title='Cancel'
+              buttonStyle={styles.advanceTasksCancel}
+              titleStyle={styles.advanceTasksButtonTitle}
+              containerStyle={{flex:1}}
+              onPress={onClose}
+            />
+            <Button 
+              title='Confirm'
+              buttonStyle={styles.advanceTasksConfirm}
+              titleStyle={styles.advanceTasksButtonTitle}
+              containerStyle={{flex:1}}
+              onPress={() => {
+                sendAdvancementRequests()
+                onClose()
+              }}
+            />
+          </View>
+        </View>)
+      },
+      closeOnEscape: true,
+      closeOnClickOutside: true
+    })
+    
   }
 
   const viewIndividualClient = (i) => {
@@ -882,28 +970,38 @@ export default function AllPrograms() {
                   })}
                 </View>) || (<View>
                   {selectedCounts[viewProgramIndex] > 0 && (<View style={styles.viewProgramClientListOptions}>
-                    <Text style={styles.clientListOptionsCount}>
-                      {selectedCounts[viewProgramIndex]} selected
-                    </Text>
                     <Button 
                       title='Release Next Task'
                       buttonStyle={styles.advanceNextTaskButton}
-                      onPress={() => advanceNextTasks()}
+                      onPress={() => advanceNextTasksConfirm()}
                     />
+                    <Text style={styles.clientListOptionsCount}>
+                      for {selectedCounts[viewProgramIndex]} selected
+                    </Text>
                   </View>)}
+                  {advanceProgramOpacityBool && (<Animated.View style={[messageBox.box,{backgroundColor:btnColors.success,margin:10,opacity:advanceProgramOpacity}]}>
+                    <Text style={[messageBox.text,{color:'#fff'}]}>Client tasks assigned successfully!</Text>
+                  </Animated.View>)}
                   <View style={styles.viewProgramSectionClientList}>
                     {programs[viewProgramIndex].Assocs.length > 0 && (<>
                       {programs[viewProgramIndex].Assocs.map((client, index) => {
                         if (showFullClientList || index < 8) {
                           return (<View key={'programClient_'+index} style={styles.viewProgramSectionClientListItemContainer}>
                             <View style={client.Selected == 0 && styles.viewProgramSectionClientListItem || styles.viewProgramSectionClientListItemSelected}>
-                              <Image 
-                                source={{uri:client.Client.Avatar}}
-                                style={styles.viewProgramSectionClientListAvatar}
-                              />
-                              <Text style={styles.viewProgramSectionClientListName}>
-                                {client.Client.FirstName + ' ' + client.Client.LastName}
-                              </Text>
+                              <View style={styles.viewProgramSectionClientListMemberInfo}>
+                                <Image 
+                                  source={{uri:client.Client.Avatar}}
+                                  style={styles.viewProgramSectionClientListAvatar}
+                                />
+                                <View style={styles.viewProgramSectionClientListMemberDetails}>
+                                  <Text style={styles.viewProgramSectionClientListName}>
+                                    {client.Client.FirstName + ' ' + client.Client.LastName}
+                                  </Text>
+                                  <Text style={styles.viewProgramSectionClientListJoined}>
+                                    Member since {parseSimpleDateText(sqlToJsDate(client.Created))}
+                                  </Text>
+                                </View>
+                              </View>
                               <View style={styles.viewProgramProgressOuter}>
                                 <View style={[styles.viewProgramProgressInner,{width:client.TasksProgressPercent+'%',backgroundColor:progressBarColors[client.TasksProgressColor]}]}>
                                 </View>
@@ -911,7 +1009,7 @@ export default function AllPrograms() {
                               <View style={styles.viewProgramStatsRow}>
                                 <View style={styles.viewProgramSectionClientListStatColumn}>
                                   <Text style={[styles.viewProgramSectionClientListStatNumber,{color:progressBarColors[client.TasksProgressColor]}]}>
-                                    {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                                    {client.TasksAssigned} / {programs[viewProgramIndex].Tasks.length}
                                   </Text>
                                   <Text style={styles.viewProgramSectionClientListTasksCompleted}>
                                     Tasks Assigned
@@ -939,7 +1037,7 @@ export default function AllPrograms() {
                                   onPress={() => viewIndividualClient(index)}
                                   buttonStyle={styles.clientListViewData}
                                   titleStyle={[styles.clientListViewDataTitle,{color:colors.mainTextColor}]}
-                                  containerStyle={[styles.clientListViewDataContainer,{flex:2}]}
+                                  containerStyle={[styles.clientListViewDataContainer]}
                                 />
                               </View>
                             </View>
@@ -1472,7 +1570,7 @@ export default function AllPrograms() {
             </View>
           </View>)}
 
-          {showClientAddSuccessForm && (<View style={[styles.promptListContainer,{width:'50%',height:'60%'}]}>
+          {showClientAddSuccessForm && (<View style={[styles.promptListContainer]}>
             <Text style={styles.clientAddSuccessTitle}>Success!</Text>
             <Text style={styles.clientAddSuccessDesc}>Added {clientAddedCount} client{clientAddedCount > 1 && 's'} to <Text style={{fontFamily:'PoppinsSemiBold'}}>{programs[viewProgramIndex].Title}</Text>.</Text>
             <Button 

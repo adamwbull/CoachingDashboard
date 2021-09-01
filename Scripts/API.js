@@ -212,6 +212,34 @@ export async function check() {
 
 */
 
+export async function advanceProgramTasks(assocs, token, programId, coachId) {
+
+  var ret = false
+  var arr = {Assocs:assocs, Token:token, CoachId:coachId, ProgramId:programId}
+
+  console.log('arr:',arr)
+  console.log('Advancing program members...')
+  const res = await fetch(url + '/program-assoc/advance-task-set', {
+    method:'POST',
+    body: JSON.stringify(arr),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+
+  const payload = await res.json()
+
+  if (payload.success == true) {
+    console.log('Success!')
+    ret = true
+  } else {
+    console.log('Advancement failed.')
+  }
+
+  return ret
+
+}
 
 export async function createProgramAssocs(token, id, assocs) {
 
