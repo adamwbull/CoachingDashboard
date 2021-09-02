@@ -2698,7 +2698,7 @@ export const programsLight = StyleSheet.create({
     flex:1
   },
   mainProgramButton: {
-    fontSize:14,
+    fontSize:16,
     color:'#fff',
     fontFamily:'Poppins'
   },

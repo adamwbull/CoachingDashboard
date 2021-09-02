@@ -30,7 +30,7 @@ export default function AllPrograms() {
   const [styles, setStyles] = useState(programsLight)
   const [colors, setColors] = useState(colorsLight)
   const progressBarColors = [ // 0, 1, 2 index match from API on TasksProgressColor
-    colors.mainTextColor,
+    btnColors.caution,
     btnColors.info,
     btnColors.success
   ]
@@ -134,6 +134,8 @@ export default function AllPrograms() {
   }
 
   const viewProgram = (index) => {
+    console.log('setting view:',index)
+    console.log('program:',programs[index])
     setViewProgramIndex(index)
     setShowAll(false)
     setShowActivityIndicator(true)
@@ -535,6 +537,7 @@ export default function AllPrograms() {
               {showClientListPage && (<View style={styles.viewProgramSection}>
                 {showClientData && (<View style={styles.viewProgramSection}>
                   {programs[viewProgramIndex].Tasks.map((task, index) => {
+                    console.log('found task:',task)
                     // This is the first time I have done this, but it's pretty awesome. Just wait...
                     var responseArray = []
                     // Check if this client completed this task.
@@ -1009,18 +1012,18 @@ export default function AllPrograms() {
                               <View style={styles.viewProgramStatsRow}>
                                 <View style={styles.viewProgramSectionClientListStatColumn}>
                                   <Text style={[styles.viewProgramSectionClientListStatNumber,{color:progressBarColors[client.TasksProgressColor]}]}>
-                                    {client.TasksAssigned} / {programs[viewProgramIndex].Tasks.length}
-                                  </Text>
-                                  <Text style={styles.viewProgramSectionClientListTasksCompleted}>
-                                    Tasks Assigned
-                                  </Text>
-                                </View>
-                                <View style={styles.viewProgramSectionClientListStatColumn}>
-                                  <Text style={[styles.viewProgramSectionClientListStatNumber,{color:progressBarColors[client.TasksProgressColor]}]}>
                                     {client.TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
                                   </Text>
                                   <Text style={styles.viewProgramSectionClientListTasksCompleted}>
                                     Tasks Completed
+                                  </Text>
+                                </View>
+                                <View style={styles.viewProgramSectionClientListStatColumn}>
+                                  <Text style={[styles.viewProgramSectionClientListStatNumber]}>
+                                    {client.TasksAssigned} / {programs[viewProgramIndex].Tasks.length}
+                                  </Text>
+                                  <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                                    Tasks Assigned
                                   </Text>
                                 </View>
                               </View>
@@ -1337,7 +1340,7 @@ export default function AllPrograms() {
                                 <View style={styles.paymentsPreviousInvoices}>
                                   {task.Responses.map((line, paymentLineIndex) => {
                                     // Amount/total, Chip/status, Invoice Number/number, Due/period_end, Created/created, View/hosted_invoice_url
-                                    return (<View key={line.id} style={styles.paymentRow}>
+                                    return (<View key={line.id+'--_'} style={styles.paymentRow}>
                                         <View style={[styles.paymentRowTouchAmount]}>
                                           <Text style={[styles.paymentRowText]}>
                                             {line.Client.FirstName + ' ' + line.Client.LastName}
@@ -1435,7 +1438,7 @@ export default function AllPrograms() {
                                 </View>
                                 <View style={styles.paymentsPreviousInvoices}>
                                   {task.Responses.map((line, paymentLineIndex) => {
-                                    return (<View key={line.id} style={styles.paymentRow}>
+                                    return (<View key={line.id+'+=='} style={styles.paymentRow}>
                                         <View style={[styles.paymentRowTouchAmount,{flex:91}]}>
                                           <Text style={[styles.paymentRowText]}>
                                             {line.Client.FirstName + ' ' + line.Client.LastName}
