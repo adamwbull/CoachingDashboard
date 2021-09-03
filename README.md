@@ -1,22 +1,18 @@
-# CoachingDashboard Docs
-CoachingDashboard with many features:
+# CoachingDashboard (84% Complete)
+CoachingDashboard with many features for coaches to leverage:
 
-## Sidebar
-* Home Analytics
-  * Customizable Modules
-    * Search for Client > View Assocs
-    * ...
-* Clients Management
-  * All Clients - For each client:
-    * View Assocs
-    * View Prompt
-    * View Contract
-    * View Concept
-  *
-* Programs
-  * Manage Programs
-  * Create New Program
+## Home
+### Client Management
+![Client Management](readme-images/clients.png)
 
-## Other Pages:
-* Settings
-* Edit Prompt (in program )
+### Invite Clients
+
+
+### Feature Board
+
+
+## Messaging
+
+## Mobile App
+
+## Programs

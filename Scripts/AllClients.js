@@ -741,32 +741,34 @@ export default function AllClients() {
                   {chips.length == 0 && (<Text style={styles.clientRowText}>No programs or tags yet.</Text>) ||
                   (<>
                     {chips.map((chip, index) => {
-                      if (chip.Type == 0) {
-                        return (<View key={'chip_' + index}>
-                          <Chip 
-                            title={chip.Title}
-                            icon={{
-                              name: 'documents-outline',
-                              type: 'ionicon',
-                              size:16,
-                              color: 'white'
-                            }}
-                            iconStyle={{marginTop:3}}
-                            buttonStyle={[styles.tag,{backgroundColor:btnColors.success}]}
-                            containerStyle={styles.tagContainer}
-                            titleStyle={styles.tagTitle}
-                          />
-                      </View>)
-                      } else {
-                        return (<View key={'chip_' + index}>
-                          <Chip 
-                            title={chip.Title}
-                            iconStyle={{marginTop:3}}
-                            buttonStyle={[styles.tag,{backgroundColor:colorsLight.mainTextColor}]}
-                            containerStyle={styles.tagContainer}
-                            titleStyle={styles.tagTitle}
-                          />
+                      if (index == 0) {
+                        if (chip.Type == 0) {
+                          return (<View key={'chip_' + index}>
+                            <Chip 
+                              title={chip.Title}
+                              icon={{
+                                name: 'documents-outline',
+                                type: 'ionicon',
+                                size:16,
+                                color: 'white'
+                              }}
+                              iconStyle={{marginTop:3}}
+                              buttonStyle={[styles.tag,{backgroundColor:btnColors.success}]}
+                              containerStyle={styles.tagContainer}
+                              titleStyle={styles.tagTitle}
+                            />
                         </View>)
+                        } else {
+                          return (<View key={'chip_' + index}>
+                            <Chip 
+                              title={chip.Title}
+                              iconStyle={{marginTop:3}}
+                              buttonStyle={[styles.tag,{backgroundColor:colorsLight.mainTextColor}]}
+                              containerStyle={styles.tagContainer}
+                              titleStyle={styles.tagTitle}
+                            />
+                          </View>)
+                        }
                       }
                     })}
                   </>)}
