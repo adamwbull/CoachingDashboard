@@ -28,8 +28,9 @@ export default function Payments() {
 
   // Main stage variables.
   const [coach, setCoach] = useState(user)
-  const [monthlyStarting, setMonthlyStarting] = useState({})
+  const [monthlyStarting, setMonthlyStarting] = useState('')
   const date = new Date()
+
   // Payment related.
   const [payments, setPayments] = useState(false)
   const [monthlyTotal, setMonthlyTotal] = useState(0)
@@ -39,28 +40,36 @@ export default function Payments() {
   const refreshPayments = async (id, token) => {
     var refresh = await getPaymentCharges(id, token)
     // Get total and monthly earnings.
+    console.log('payments:',refresh)
     var t = 0
     var m = 0
-    var beginningOfMonth = new Date(date.getMonth() + ' 1, ' + date.getFullYear())
+    var d = new Date()
+    var firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
     refresh.forEach((item, index) => {
       var d = sqlToJsDate(item.Created)
-      t += item.Amount
-      if (d > beginningOfMonth) {
-        t += item.Amount
+      t += parseInt(item.Amount)
+      if (d > firstDay) {
+        m += parseInt(item.Amount)
       }
     })
+    setPayments(refresh)
+    setMonthlyTotal(m)
+    setTotal(t)
   }
 
   useEffect(() => {
+
     console.log('Welcome to payments.')
     if (coach != null) {
+      // Refresh payment info.
       refreshPayments(coach.Id, coach.Token)
+
+      // Set starting date for month.
       var d = new Date()
-      if (d.getDay() > 1) {
-        setMonthlyStarting(monthNames[d.getMonth()] + ' ' + d.getDay() + ', ' + d.getFullYear())
-      } else {
-        setMonthlyStarting(monthNames[d.getMonth()] + ' 1, ' + d.getFullYear())
-      }
+      // String for nicely representing on UI.
+      setMonthlyStarting(monthNames[d.getMonth()] + ' 1, ' + d.getFullYear())
+
+      // Display main.
       setTimeout(() => {
         setActivityIndicator(false)
         if (coach.Plan == 0) {
@@ -68,10 +77,14 @@ export default function Payments() {
         }
         setMain(true)
       }, 500)
+
     } else {
+
       linkTo('/welcome')
+
     }
-  },[])
+
+  }, [])
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
@@ -96,12 +109,12 @@ export default function Payments() {
             <View style={styles.bodyRow}>
               <View style={[styles.bodyContainer,{flex:1,marginRight:10}]}>
                 <Text style={styles.bodySubtitle}>Monthly Earnings</Text>
-                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${monthlyTotal}</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${(parseInt(monthlyTotal)/100).toFixed(2)}</Text>
                 <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since {monthlyStarting}</Text>
               </View>
               <View style={[styles.bodyContainer,{flex:1,marginLeft:10}]}>
                 <Text style={styles.bodySubtitle}>Total Earnings</Text>
-                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${total}</Text>
+                <Text style={[styles.bodyTitle,{fontSize:40,fontFamily:'Poppins',color:btnColors.success}]}>${(parseInt(total)/100).toFixed(2)}</Text>
                 <Text style={[styles.bodySubtitle,{fontFamily:'Poppins',fontSize:20}]}>since joining on {parseSimpleDateText(sqlToJsDate(coach.Created))}</Text>
               </View>
             </View>
@@ -120,11 +133,8 @@ export default function Payments() {
                   <TouchableOpacity style={styles.paymentControlsTouchAmount}>
                     <Text style={[styles.paymentsControlsText,{paddingRight:0}]}>Amount</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentControlsTouchAmountCurrency}>
-                    <Text style={styles.paymentsControlsText}></Text>
-                  </TouchableOpacity>
                   <TouchableOpacity style={styles.paymentControlsTouchAmountStatus}>
-                    <Text style={styles.paymentsControlsText}></Text>
+                    <Text style={styles.paymentsControlsText}>Status</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.paymentControlsTouchDescription}>
                     <Text style={styles.paymentsControlsText}>Description</Text>
@@ -135,7 +145,7 @@ export default function Payments() {
                   <TouchableOpacity style={styles.paymentControlsTouchDate}>
                     <Text style={styles.paymentsControlsText}>Date</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentControlsTouchIcon}>
+                  <TouchableOpacity style={[styles.paymentControlsTouchIcon,{flex:20}]}>
                     <Icon
                       name='ellipsis-horizontal-outline'
                       type='ionicon'
@@ -156,10 +166,9 @@ export default function Payments() {
                         />
                       </TouchableOpacity>
                       <View style={[styles.paymentRowTouchAmount]}>
-                        <Text style={[styles.paymentRowText,{paddingRight:0,textAlign:'right',fontFamily:'PoppinsSemiBold'}]}>${(payment.Amount/100).toFixed(2)}</Text>
-                      </View>
-                      <View style={styles.paymentRowTouchAmountCurrency}>
-                        <Text style={styles.paymentRowText}>{payment.Currency}</Text>
+                        <Text style={[styles.paymentRowText,{paddingRight:0,fontFamily:'PoppinsSemiBold'}]}>
+                          ${(payment.Amount/100).toFixed(2)} {payment.Currency.toUpperCase()}
+                        </Text>
                       </View>
                       <View style={styles.paymentRowTouchAmountStatus}>
                         {payment.IsPaid == 0 && (<><Chip
@@ -207,20 +216,26 @@ export default function Payments() {
                         </>)}
                       </View>
                       <View style={styles.paymentRowTouchDescription}>
-                        <Text style={styles.paymentRowText}>Description</Text>
+                        <Text style={styles.paymentRowText}>{[payment.Memo]}</Text>
                       </View>
                       <View style={styles.paymentRowTouchClient}>
-                        <Text style={styles.paymentRowText}>Client</Text>
+                        <Text style={styles.paymentRowText}>{payment.Client.FirstName + ' ' + payment.Client.LastName}</Text>
                       </View>
                       <View style={styles.paymentRowTouchDate}>
-                        <Text style={styles.paymentRowText}>Date</Text>
+                        <Text style={styles.paymentRowText}>{parseSimpleDateText(sqlToJsDate(payment.Created))}</Text>
                       </View>
-                      <TouchableOpacity style={styles.paymentRowTouchIcon}>
-                        <Icon
-                          name='ellipsis-horizontal-outline'
-                          type='ionicon'
-                          size={22}
-                          color={colors.mainTextColor}
+                      <TouchableOpacity style={[styles.paymentRowTouchIcon,{flex:20,justifyContent:'flex-end',alignItems:'flex-end'}]}>
+                        <Chip
+                          title='View Receipt'
+                          type='outline'
+                          onPress={() => {
+                            window.open(payment.Receipt, '_blank')
+                          }}
+                          buttonStyle={{
+                            padding:5,
+                            marginBottom:5,
+                            marginTop:10
+                          }}
                         />
                       </TouchableOpacity>
                     </View>)

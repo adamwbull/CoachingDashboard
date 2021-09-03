@@ -4670,7 +4670,7 @@ export const paymentsLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentControlsTouchAmount: {
-    flex:8,
+    flex:12,
     height:40,
     alignItems:'flex-end',
     justifyContent:'center',
@@ -4737,7 +4737,7 @@ export const paymentsLight = StyleSheet.create({
     borderBottomWidth:1
   },
   paymentRowTouchAmount: {
-    flex:8,
+    flex:12,
     height:40,
     alignItems:'flex-end',
     justifyContent:'center',
@@ -4755,7 +4755,7 @@ export const paymentsLight = StyleSheet.create({
   paymentRowTouchAmountStatus: {
     flex:12,
     height:40,
-    alignItems:'center',
+    alignItems:'flex-start',
     justifyContent:'center',
     borderBottomColor:colorsLight.headerBorder,
     borderBottomWidth:1
