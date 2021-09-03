@@ -71,7 +71,7 @@ export default function AllPrograms() {
     } else {
       getData(0)
     }
-  },[])
+  }, [])
 
   // All programs functions.
 
@@ -95,6 +95,7 @@ export default function AllPrograms() {
 
       // Get statistics.
       var num = 0
+      var taskCount = data[i].Tasks.length
       for (var j = 0; j < data[i].Assocs.length; j++) {
 
         // Determine how many tasks have been completed.
@@ -108,7 +109,7 @@ export default function AllPrograms() {
         data[i].Assocs[j].TasksAssigned = completedCount
 
         // Check if client is graduate.
-        if (data[i].Assocs[j].CurrentTaskId == 0) {
+        if (data[i].Assocs[j].TasksCompleted == taskCount) {
           num++
         }
 
@@ -403,7 +404,10 @@ export default function AllPrograms() {
     setShowClientData(true)
   }
 
-
+  const backFromIndividualClient = () => {
+    setShowClientData(false)
+    setSelectedClientIndex(-1)
+  }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
@@ -440,15 +444,15 @@ export default function AllPrograms() {
                   <View style={styles.programStats}>
                     <View style={[styles.programStatTop,{paddingRight:10}]}>
                       <Text style={styles.programStatTopNumber}>{program.Tasks.length}</Text>
-                      <Text style={styles.programStatTopText}>Tasks</Text>
+                      <Text style={styles.programStatTopText}>Task{program.Tasks.length == 1 ? '' : 's'}</Text>
                     </View>
                     <View style={styles.programStatTop}>
                       <Text style={styles.programStatTopNumber}>{program.Assocs.length}</Text>
-                      <Text style={styles.programStatTopText}>Members</Text>
+                      <Text style={styles.programStatTopText}>Member{program.Assocs.length == 1 ? '' : 's'}</Text>
                     </View>
-                    <View style={[styles.programStatTop,{borderRightWidth:2}]}>
-                      <Text style={styles.programStatTopNumber}>{programGrads[index]}</Text>
-                      <Text style={styles.programStatTopText}>Graduates</Text>
+                    <View style={[styles.programStatTop]}>
+                      <Text style={styles.programStatTopNumber}>{programGrads[index].toString()}</Text>
+                      <Text style={styles.programStatTopText}>Graduate{programGrads[index] == 1 ? '' : 's'}</Text>
                     </View>
                     <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
                       <Button 
@@ -492,15 +496,15 @@ export default function AllPrograms() {
               <View style={styles.programStats}>
                 <View style={[styles.programStatTop]}>
                   <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Tasks.length}</Text>
-                  <Text style={styles.programStatTopText}>Tasks</Text>
+                  <Text style={styles.programStatTopText}>Task{programs[viewProgramIndex].Tasks.length == 1 ? '' : 's'}</Text>
                 </View>
                 <View style={styles.programStatTop}>
                   <Text style={styles.programStatTopNumber}>{programs[viewProgramIndex].Assocs.length}</Text>
-                  <Text style={styles.programStatTopText}>Members</Text>
+                  <Text style={styles.programStatTopText}>Member{programs[viewProgramIndex].Assocs.length == 1 ? '' : 's'}</Text>
                 </View>
-                <View style={[styles.programStatTop,{borderRightWidth:2}]}>
+                <View style={[styles.programStatTop,]}>
                   <Text style={styles.programStatTopNumber}>{programGrads[viewProgramIndex]}</Text>
-                  <Text style={styles.programStatTopText}>Graduates</Text>
+                  <Text style={styles.programStatTopText}>Graduate{programGrads[viewProgramIndex] == 1 ? '' : 's'}</Text>
                 </View>
                 <View style={[styles.programStatTop,{justifyContent:'flex-end',borderRightWidth:0}]}>
                   <Button 
@@ -514,7 +518,8 @@ export default function AllPrograms() {
               </View>
             </View>
             <View style={styles.promptListContainer}>
-              <View style={[styles.tabListContainer]}>
+              {!showClientData && 
+              (<View style={[styles.tabListContainer]}>
                 {showClientListPage && (<View style={styles.viewProgramTabHighlighted}>
                   <Text style={styles.viewProgramTabHighlightedText}>
                     Program Members
@@ -533,11 +538,49 @@ export default function AllPrograms() {
                     Task Data
                   </Text>
                 </TouchableOpacity>)}
-              </View>
+              </View>) || (<View style={[styles.tabListContainer,{justifyContent:'flex-start'}]}>
+                <Icon
+                  name='chevron-back'
+                  type='ionicon'
+                  size={32}
+                  color={colors.mainTextColor}
+                  style={{marginRight:10}}
+                  onPress={() => backFromIndividualClient(1)}
+                />
+                <Image 
+                  source={{uri:programs[viewProgramIndex].Assocs[selectedClientIndex].Client.Avatar}}
+                  style={styles.viewProgramSectionClientListAvatar}
+                />
+                <View style={styles.viewProgramSectionClientListMemberDetails}>
+                  <Text style={styles.viewProgramSectionClientListName}>
+                    {programs[viewProgramIndex].Assocs[selectedClientIndex].Client.FirstName + ' ' + programs[viewProgramIndex].Assocs[selectedClientIndex].Client.LastName}
+                  </Text>
+                  <Text style={styles.viewProgramSectionClientListJoined}>
+                    Member since {parseSimpleDateText(sqlToJsDate(programs[viewProgramIndex].Assocs[selectedClientIndex].Created))}
+                  </Text>
+                </View>
+                <View style={[{justifyContent: 'center',flex:1,alignItems:'flex-end',marginRight:10}]}>
+                  <View style={[styles.viewProgramSectionClientListStatColumn,{flexDirection:'row'}]}>
+                    <Text style={[styles.viewProgramSectionClientListStatNumber,{marginLeft:10,marginRight:10,color:progressBarColors[programs[viewProgramIndex].Assocs[selectedClientIndex].TasksProgressColor]}]}>
+                      {programs[viewProgramIndex].Assocs[selectedClientIndex].TasksCompleted} / {programs[viewProgramIndex].Tasks.length}
+                    </Text>
+                    <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                      Tasks Completed
+                    </Text>
+                  </View>
+                  <View style={[styles.viewProgramSectionClientListStatColumn,{flexDirection:'row'}]}>
+                    <Text style={[styles.viewProgramSectionClientListStatNumber,{marginLeft:10,marginRight:10,}]}>
+                      {programs[viewProgramIndex].Assocs[selectedClientIndex].TasksAssigned} / {programs[viewProgramIndex].Tasks.length}
+                    </Text>
+                    <Text style={styles.viewProgramSectionClientListTasksCompleted}>
+                      Tasks Assigned
+                    </Text>
+                  </View>
+                </View>
+              </View>)}
               {showClientListPage && (<View style={styles.viewProgramSection}>
                 {showClientData && (<View style={styles.viewProgramSection}>
                   {programs[viewProgramIndex].Tasks.map((task, index) => {
-                    console.log('found task:',task)
                     // This is the first time I have done this, but it's pretty awesome. Just wait...
                     var responseArray = []
                     // Check if this client completed this task.
@@ -960,7 +1003,16 @@ export default function AllPrograms() {
                                 </View>
                               }
                             } else {
-                              view = <View key={'taskRes_'+rIndex}>
+                              // Concept.
+                              view = <View key={'taskRes_'+rIndex} style={styles.responseClientContainer}>
+                                <Image 
+                                  source={response.Client.Avatar}
+                                  style={styles.responseClientAvatar}
+                                />
+                                <Text style={styles.responseClientText}>
+                                  <Text style={[styles.responseClientName,{marginRight:4}]}>{response.Client.FirstName + ' ' + response.Client.LastName}</Text>
+                                  read concept on {parseSimpleDateText(sqlToJsDate(response.VisitedDate))}
+                                </Text>
                               </View>
                             }
 
@@ -1028,7 +1080,7 @@ export default function AllPrograms() {
                                 </View>
                               </View>
                               <View style={styles.viewProgramSectionClientListButtons}>
-                                {client.CurrentTaskId != 0 && (<Button 
+                                {client.TasksCompleted != programs[viewProgramIndex].Tasks.length && (<Button 
                                   title={client.Selected == 0 && 'Select' || 'Deselect'}
                                   onPress={() => toggleSelectedClient(index)}
                                   buttonStyle={client.Selected == 0 && styles.clientListSelect || styles.clientListDeselect}
@@ -1074,7 +1126,7 @@ export default function AllPrograms() {
                         <Text style={styles.taskHeaderTitleCount}>Task #{index+1}:</Text>
                         <Text style={styles.taskHeaderTitleName}>{task.Task[0].Title}</Text>
                       </View>
-                      <Text style={styles.taskHeaderStatus}>{task.Responses.length} Responses</Text>
+                      <Text style={styles.taskHeaderStatus}>{task.Responses.length} Response{task.Responses.length == 1 ? '' : 's'}</Text>
                     </View>
                     <View style={styles.taskData}>
                       {task.Responses.length == 0 &&
@@ -1469,7 +1521,16 @@ export default function AllPrograms() {
                               </View>
                             }
                           } else {
-                            view = <View key={'taskRes_'+rIndex}>
+                            // Concept.
+                            view = <View key={'taskRes_'+rIndex} style={styles.responseClientContainer}>
+                              <Image 
+                                source={response.Client.Avatar}
+                                style={styles.responseClientAvatar}
+                              />
+                              <Text style={styles.responseClientText}>
+                                <Text style={[styles.responseClientName,{marginRight:4}]}>{response.Client.FirstName + ' ' + response.Client.LastName}</Text>
+                                read concept on {parseSimpleDateText(sqlToJsDate(response.VisitedDate))}
+                              </Text>
                             </View>
                           }
 
