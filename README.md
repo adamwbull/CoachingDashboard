@@ -1,7 +1,12 @@
 # CoachingDashboard (80% Complete)
-CoachingDashboard with many features for coaches to leverage:
+Built in React Native for Web, with a Node.js REST API backend. The API is currently in another private repo.
 
-Not Done: Social Feed, Integrations, Account, Clients.
+Not Done for Beta release: Social Feed, Integrations, Account, Clients.
+
+Future features:
+* Mobile version of this dashboard.
+* Improved sorting and search features for clients, payments, and program data.
+* And more [provided by the community](https://github.com/cappycap/CoachingDashboard#feature-board)!
 
 ### Client Management
 ![Client Management](readme-images/clients.png)
