@@ -5569,6 +5569,40 @@ export const socialFeedLight = StyleSheet.create({
     lineHeight:14,
     fontFamily:'Poppins'
   },
+  socialFeedTabination: {
+    borderRadius:10,
+    padding:20,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:10,
+    width:'100%'
+  },
+  socialFeedTabHighlighted: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+    backgroundColor:btnColors.primary,
+  },
+  socialFeedTabHighlightedText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:'#fff'
+  },
+  socialFeedTab: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+  },
+  socialFeedTabText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
 })
 
 export const featureBoardLight = StyleSheet.create({

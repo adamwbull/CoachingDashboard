@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { socialFeedLight, colorsLight, innerDrawerLight, btnColors} from '../Scripts/Styles.js'
 import { socialFeedDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
@@ -54,6 +54,24 @@ export default function SocialFeed() {
             </View>
             <View style={styles.socialFeedPages}>
               <View style={styles.socialFeedTabination}>
+                {showSocialFeedPosts && (<View style={styles.viewProgramTabHighlighted}>
+                  <Text style={styles.viewProgramTabHighlightedText}>
+                    Feed Posts
+                  </Text>
+                </View>) || (<TouchableOpacity style={styles.viewProgramTab} onPress={() => tabNavigate(0)}>
+                  <Text style={styles.viewProgramTabText}>
+                    Feed Posts
+                  </Text>
+                </TouchableOpacity>)}
+                {showBio && (<View style={styles.viewProgramTabHighlighted}>
+                  <Text style={styles.viewProgramTabHighlightedText}>
+                    Coach Bio
+                  </Text>
+                </View>) || (<TouchableOpacity style={styles.viewProgramTab} onPress={() => tabNavigate(0)}>
+                  <Text style={styles.viewProgramTabText}>
+                    Feed Posts
+                  </Text>
+                </TouchableOpacity>)}
               </View>
               {showSocialFeedPosts && (<View style={styles.socialFeedContainer}>
                 <View style={styles.socialFeedMain}>
@@ -62,7 +80,7 @@ export default function SocialFeed() {
                 </View>  
               </View>)}
               {showBio && (<View style={styles.socialFeedBio}>
-              
+
               </View>)}
             </View>
           </View>)}
