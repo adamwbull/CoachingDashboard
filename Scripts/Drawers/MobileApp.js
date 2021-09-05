@@ -49,6 +49,12 @@ function DrawerContent(props) {
         Body:'Customize the onboarding experience for your clients. Click to learn more!',
         Wiki:'https://wiki.coachsync.me/en/mobile-app/onboarding'
       } 
+    } else if (loc == 'CoachBio') {
+      i = {
+        Header:'Coach Bio',
+        Body:'Customize your public profile visible to all clients. Click to learn more!',
+        Wiki:'https://wiki.coachsync.me/en/mobile-app/coach-bio'
+      } 
     }
     setInfo(i)
   }, [props.loc])
@@ -90,6 +96,7 @@ import BrandDesign from '../BrandDesign.js'
 import SocialFeed from '../SocialFeed.js'
 import Onboarding from '../Onboarding.js'
 import Notifications from '../Notifications.js'
+import CoachBio from '../CoachBio.js'
 
 export default function MobileApp() {
   const linkTo = useLinkTo();
@@ -171,6 +178,29 @@ export default function MobileApp() {
           drawerLabel:({focused}) => {
             const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
             return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Brand</Text>)
+          }
+        }}
+      />
+      <Drawer.Screen name="CoachBio" component={CoachBio}
+        listeners={{
+          focus: () => {
+            setLoc('CoachBio')
+          }
+        }}
+        options={{
+          title:'Coach Bio - CoachSync',
+          drawerIcon: ({focused, size}) => (
+            <Icon
+              name='person-circle'
+              type='ionicon'
+              size={20}
+              style={{backgroundColor:''}}
+              color={focused ? coach.SecondaryHighlight : colors.mainTextColor}
+            />
+          ),
+          drawerLabel:({focused}) => {
+            const color = focused ? coach.SecondaryHighlight : colors.mainTextColor
+            return (<Text style={{marginLeft:-25,fontSize:14,fontFamily:'Poppins',color:color}}>Coach Bio</Text>)
           }
         }}
       />

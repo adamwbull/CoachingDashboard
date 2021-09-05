@@ -5569,12 +5569,18 @@ export const socialFeedLight = StyleSheet.create({
     lineHeight:14,
     fontFamily:'Poppins'
   },
-  socialFeedTabination: {
+  socialFeedPages: {
     borderRadius:10,
     padding:20,
     backgroundColor:colorsLight.mainBackground,
-    marginBottom:10,
-    width:'100%'
+  },
+  socialFeedTabination: {
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.header,
+    marginBottom:20,
+    width:'100%',
+    flexDirection:'row',
   },
   socialFeedTabHighlighted: {
     flex:1,
@@ -5603,6 +5609,115 @@ export const socialFeedLight = StyleSheet.create({
     fontFamily:'Poppins',
     color:colorsLight.mainTextColor
   },
+  socialFeedContainer: {
+    flexDirection:'row',
+  }, 
+  socialFeedMain: {
+    flex:3,
+  },
+  socialFeedColumn:{ 
+    flex:1,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.header,
+  }
+})
+
+export const coachBioLight = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  main: {
+    flex:1,
+    flexDirection:'row',
+  },
+  scrollView: {
+    paddingTop:20,
+    paddingLeft:20,
+    paddingRight:20
+  },
+  body: {
+    flex:1,
+    borderWidth:0,
+  },
+  bodyHeader: {
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+    marginBottom:20,
+  },
+  bodyTitleGroup: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  bodyTitle: {
+    color:colorsLight.darkGray,
+    fontSize:26,
+    marginRight:10,
+    fontFamily:'PoppinsSemiBold'
+  },
+  bodyDesc: {
+    color:colorsLight.darkGray,
+    fontSize:14,
+    lineHeight:14,
+    fontFamily:'Poppins'
+  },
+  socialFeedPages: {
+    borderRadius:10,
+    padding:20,
+    backgroundColor:colorsLight.mainBackground,
+  },
+  socialFeedTabination: {
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.header,
+    marginBottom:20,
+    width:'100%',
+    flexDirection:'row',
+  },
+  socialFeedTabHighlighted: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+    backgroundColor:btnColors.primary,
+  },
+  socialFeedTabHighlightedText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:'#fff'
+  },
+  socialFeedTab: {
+    flex:1,
+    padding:5,
+    marginLeft:5,
+    marginLeft:5,
+    borderRadius:10,
+  },
+  socialFeedTabText: {
+    textAlign:'center',
+    fontSize:18,
+    fontFamily:'Poppins',
+    color:colorsLight.mainTextColor
+  },
+  socialFeedContainer: {
+    flexDirection:'row',
+  }, 
+  socialFeedMain: {
+    flex:3,
+  },
+  socialFeedColumn:{ 
+    flex:1,
+    borderRadius:10,
+    padding:10,
+    backgroundColor:colorsLight.header,
+  }
 })
 
 export const featureBoardLight = StyleSheet.create({
