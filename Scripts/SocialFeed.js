@@ -7,7 +7,7 @@ import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
 import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Icon, Button, Chip } from 'react-native-elements'
-
+import { getFeedPosts } from './API.js'
 import userContext from './Context.js'
 
 export default function SocialFeed() {
@@ -30,8 +30,13 @@ export default function SocialFeed() {
 
   // Main variables.
   const [coach, setCoach] = useState(user)
+  const [posts, setPosts] = useState([])
+
 
   const getData = async () => {
+
+    const data = await getFeedPosts(coach.Id, coach.Token)
+    setPosts(data)
 
     setShowActivityIndicator(false)
     setShowSocialFeed(true)
@@ -48,6 +53,15 @@ export default function SocialFeed() {
     }
   },[])
 
+  const navNewPost = () => {
+    setShowSocialFeed(false)
+    setShowActivityIndicator(true)
+    setTimeout(() => {
+      setShowActivityIndicator(false)
+      setShowAddPost(true)
+    }, 500)
+  }
+
   return (<ScrollView contentContainerStyle={styles.scrollView}>
     <View style={styles.container}>
       <View style={styles.main}>
@@ -57,11 +71,26 @@ export default function SocialFeed() {
 
           {showSocialFeed && (<View style={styles.socialFeedContainer}>
             <View style={styles.socialFeedMain}>
+              {posts.length == 0 && (<View style={styles.socialFeedNoPosts}>
+                <Text style={styles.socialFeedNoPostsText}>
+                  No social feed posts yet.
+                </Text>
+              </View>) || (<View style={styles.socialFeedPosts}>
+                {posts.map((post, index) => {
+                  return (<View key={'index_'+index}>
+                    
+                  </View>)
+                })}
+              </View>)}
             </View>
             <View style={styles.socialFeedColumn}>
-              <Button 
-                title='Create New Post'
-              />
+              <View style={styles.newPostButtonContainer}>
+                <Button 
+                  title='Create New Post'
+                  buttonStyle={styles.newPostButton}
+                  onPress={() => navNewPost()}
+                />
+              </View>
             </View>  
           </View>)}
 

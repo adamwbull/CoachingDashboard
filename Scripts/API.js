@@ -212,6 +212,28 @@ export async function check() {
 
 */
 
+export async function getFeedPosts(id, token) {
+
+  var ret = []
+
+  console.log('Getting feed posts...')
+  const res = await fetch(url + '/feed/all/'+id+'/'+token, {
+    method:'GET'
+  })
+
+  const payload = await res.json()
+
+  if (payload.length > 0) {
+    console.log('Feed posts found!')
+    ret = payload
+  } else {
+    console.log('No posts yet.')
+  }
+
+  return ret
+
+}
+
 export async function advanceProgramTasks(assocs, token, programId, coachId) {
 
   var ret = false

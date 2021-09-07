@@ -5615,11 +5615,27 @@ export const socialFeedLight = StyleSheet.create({
   socialFeedMain: {
     flex:3,
   },
+  socialFeedNoPosts: {
+    justifyContent:'center',
+    marginRight:20,
+    padding:20,
+    borderRadius:10,
+    backgroundColor:colorsLight.mainBackground,
+  },
+  socialFeedNoPostsText: {
+    lineHeight:20,
+    fontFamily:'Poppins',
+    fontSize:20,
+    marginLeft:5,
+    color:colorsLight.mainTextColor,
+  },
   socialFeedColumn:{ 
     flex:1,
+  },
+  newPostButtonContainer: {
     borderRadius:10,
     padding:10,
-    backgroundColor:colorsLight.header,
+    backgroundColor:colorsLight.mainBackground,
   }
 })
 
@@ -5716,8 +5732,8 @@ export const coachBioLight = StyleSheet.create({
     flex:1,
     borderRadius:10,
     padding:10,
-    backgroundColor:colorsLight.header,
-  }
+    backgroundColor:colorsLight.mainBackground,
+  },
 })
 
 export const featureBoardLight = StyleSheet.create({
