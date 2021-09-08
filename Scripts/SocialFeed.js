@@ -98,7 +98,7 @@ export default function SocialFeed() {
               }}
               value={newPostText}
               style={[styles.newPostTextInput,{height:newPostScrollHeight}]}
-              placeholder={'What do you have to share?'}
+              placeholder={'What do you want to share?'}
             />
             <Text style={styles.newPostAttachmentOptionsText}>Attachment (optional)</Text>
             <View style={styles.newPostAttachmentOptions}>
@@ -110,6 +110,18 @@ export default function SocialFeed() {
               <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(4)}>
                 <Text style={styles.newPostAttachmentOptionText}>
                   Video
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.newPostAttachmentOptions}>
+              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(2)}>
+                <Text style={styles.newPostAttachmentOptionText}>
+                  YouTube URL
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
+                <Text style={styles.newPostAttachmentOptionText}>
+                  Upload
                 </Text>
               </TouchableOpacity>
             </View>
