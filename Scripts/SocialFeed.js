@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -9,6 +11,9 @@ import ActivityIndicatorView from '../Scripts/ActivityIndicatorView.js'
 import { Icon, Button, Chip } from 'react-native-elements'
 import { getFeedPosts } from './API.js'
 import userContext from './Context.js'
+import { TextInput } from 'react-native-web'
+import { confirmAlert } from 'react-confirm-alert'
+import './CSS/confirmAlert.css' // Import css
 
 export default function SocialFeed() {
 
@@ -32,7 +37,11 @@ export default function SocialFeed() {
   const [coach, setCoach] = useState(user)
   const [posts, setPosts] = useState([])
 
+  const [newPostText, setNewPostText] = useState('')
+  const [newPostMedia, setNewPostMedia] = useState('')
+  const [newPostType, setNewPostType] = useState(0)
 
+  const [newPostScrollHeight, setNewPostScrollHeight] = useState(null)
   const getData = async () => {
 
     const data = await getFeedPosts(coach.Id, coach.Token)
@@ -53,12 +62,71 @@ export default function SocialFeed() {
     }
   },[])
 
+  const selectAttachmentType = (type) => {
+
+  }
+
   const navNewPost = () => {
-    setShowSocialFeed(false)
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<View style={styles.newPostContainer}>
+            <View style={styles.newPostHeader}>
+              <Text style={styles.newPostTitle}>Create New Post</Text>
+              <Icon
+                name='chevron-back'
+                type='ionicon'
+                size={28}
+                color={colors.mainTextColor}
+                style={{marginRight:0}}
+                onPress={onClose}
+              />
+            </View>
+            <TextInput
+              multiline={true}
+              onChange={(e) => {
+                if (e.currentTarget.value.length < 4) {
+                  setNewPostScrollHeight(null)
+                } else if (e.target.scrollHeight - newPostScrollHeight > 10) {
+                  setNewPostScrollHeight(e.target.scrollHeight)
+                }
+              }}
+              onChangeText={(t) => {
+                if (t.length < 500) {
+                  setNewPostText(t)
+                }
+              }}
+              value={newPostText}
+              style={[styles.newPostTextInput,{height:newPostScrollHeight}]}
+              placeholder={'What do you have to share?'}
+            />
+            <Text style={styles.newPostAttachmentOptionsText}>Attachment (optional)</Text>
+            <View style={styles.newPostAttachmentOptions}>
+              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
+                <Text style={styles.newPostAttachmentOptionText}>
+                  Photo
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(4)}>
+                <Text style={styles.newPostAttachmentOptionText}>
+                  Video
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>)
+      },
+      closeOnEscape: false,
+      closeOnClickOutside: false
+    })
+
+  }
+
+  const navSocialFeed = () => {
+    setShowAddPost(false)
     setShowActivityIndicator(true)
     setTimeout(() => {
       setShowActivityIndicator(false)
-      setShowAddPost(true)
+      setShowSocialFeed(true)
     }, 500)
   }
 
@@ -92,10 +160,6 @@ export default function SocialFeed() {
                 />
               </View>
             </View>  
-          </View>)}
-
-          {showAddPost && (<View style={styles.newPostContainer}>
-
           </View>)}
 
         </View>

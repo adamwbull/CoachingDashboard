@@ -5636,6 +5636,33 @@ export const socialFeedLight = StyleSheet.create({
     borderRadius:10,
     padding:10,
     backgroundColor:colorsLight.mainBackground,
+  },
+  newPostContainer: {
+    backgroundColor:colorsLight.mainBackground,
+    padding:15,
+    borderRadius:10,
+    width:500
+  },
+  newPostHeader: {
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent: 'space-between',
+    width:'100%',
+    borderBottomWidth:1,
+    borderBottomColor:colorsLight.headerBorder,
+    marginBottom:20
+  },
+  newPostTitle: {
+    fontSize:25,
+    fontFamily:'PoppinsSemiBold',
+    color:colorsLight.mainTextColor,
+  },
+  newPostTextInput: {
+    padding:10,
+    backgroundColor:colorsLight.secondaryBackground,
+    borderRadius:10,
+    outlineWidth:0,
+    marginBottom:20
   }
 })
 
