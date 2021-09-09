@@ -42,6 +42,7 @@ export default function SocialFeed() {
   const [newPostType, setNewPostType] = useState(0)
 
   const [newPostScrollHeight, setNewPostScrollHeight] = useState(null)
+  
   const getData = async () => {
 
     const data = await getFeedPosts(coach.Id, coach.Token)
@@ -64,6 +65,8 @@ export default function SocialFeed() {
 
   const selectAttachmentType = (type) => {
 
+    setNewPostType(type)
+    
   }
 
   const navNewPost = () => {
@@ -101,30 +104,40 @@ export default function SocialFeed() {
               placeholder={'What do you want to share?'}
             />
             <Text style={styles.newPostAttachmentOptionsText}>Attachment (optional)</Text>
-            <View style={styles.newPostAttachmentOptions}>
-              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
-                <Text style={styles.newPostAttachmentOptionText}>
-                  Photo
-                </Text>
+            {newPostType == 0 && (<View>
+              <View style={styles.newPostAttachmentOptions}>
+                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
+                  <Text style={styles.newPostAttachmentOptionText}>
+                    Photo
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(4)}>
+                  <Text style={styles.newPostAttachmentOptionText}>
+                    Video
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>)}
+            {newPostType == 4 && (<View>
+              <View style={styles.newPostAttachmentOptions}>
+                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(2)}>
+                  <Text style={styles.newPostAttachmentOptionText}>
+                    YouTube URL
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
+                  <Text style={styles.newPostAttachmentOptionText}>
+                    Upload
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity onPress={() => selectAttachmentType(0)}>
+                <Text>Go back</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(4)}>
-                <Text style={styles.newPostAttachmentOptionText}>
-                  Video
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.newPostAttachmentOptions}>
-              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(2)}>
-                <Text style={styles.newPostAttachmentOptionText}>
-                  YouTube URL
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
-                <Text style={styles.newPostAttachmentOptionText}>
-                  Upload
-                </Text>
-              </TouchableOpacity>
-            </View>
+            </View>)}
+            {newPostType == 1 && (<View></View>)}
+            {newPostType == 2 && (<View></View>)}
+            {newPostType == 3 && (<View></View>)}
           </View>)
       },
       closeOnEscape: false,
