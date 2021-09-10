@@ -135,9 +135,9 @@ export default function SocialFeed() {
                 <Text>Go back</Text>
               </TouchableOpacity>
             </View>)}
-            {newPostType == 1 && (<View></View>)}
-            {newPostType == 2 && (<View></View>)}
-            {newPostType == 3 && (<View></View>)}
+            {newPostType == 1 && (<View style={styles.newPostPhotoContainer}></View>)}
+            {newPostType == 2 && (<View style={styles.newPostYouTubeContainer}></View>)}
+            {newPostType == 3 && (<View style={styles.newPostVideoContainer}></View>)}
           </View>)
       },
       closeOnEscape: false,
