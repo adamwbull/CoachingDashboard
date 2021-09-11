@@ -127,7 +127,7 @@ export default function SocialFeed() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
                   <Text style={styles.newPostAttachmentOptionText}>
-                    Upload
+                    Upload Video
                   </Text>
                 </TouchableOpacity>
               </View>
