@@ -219,7 +219,7 @@ export default function Concepts() {
       setVideoUrl(genUrl)
     }
   }
-
+  
   const hiddenFileInput = React.useRef(null)
 
   const handleFocusBack = () => {

@@ -5641,7 +5641,8 @@ export const socialFeedLight = StyleSheet.create({
     backgroundColor:colorsLight.mainBackground,
     padding:15,
     borderRadius:10,
-    width:500
+    width:'50%',
+    marginLeft:'25%'
   },
   newPostHeader: {
     flexDirection:'row',
@@ -5662,7 +5663,58 @@ export const socialFeedLight = StyleSheet.create({
     backgroundColor:colorsLight.secondaryBackground,
     borderRadius:10,
     outlineWidth:0,
-    marginBottom:20
+    marginBottom:20,
+    fontSize:18
+  },
+  newPostAttachmentOptionsText: {
+    fontFamily:'Poppins',
+    fontSize:18,
+    color:colorsLight.secondaryTextColor,
+    marginBottom:10,
+  },
+  newPostAttachmentOptions: {
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  newPostAttachmentOption: {
+    borderColor:colorsLight.secondaryTextColor,
+    borderWidth:1,
+    borderStyle:'dashed',
+    borderRadius:10,
+    flex:1,
+    marginLeft:10,
+    marginRight:10,
+    padding:10,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  newPostAttachmentOptionText: {
+    fontFamily:'Poppins',
+    fontSize:16,
+    color:colorsLight.secondaryTextColor,
+  },
+  newPostAttachGoBack: {
+    width:'100%',
+    alignItems:'center'
+  },
+  newPostAttachGoBackText: {
+    textAlign:'center',
+    fontSize:18,
+    color:colorsLight.mainTextColor,
+    textDecorationLine: 'underline',
+    marginTop:10
+  },
+  newPostAttachmentIndicator: {
+
+  },
+  newPostPhotoContainer: {
+
+  },
+  newPostYouTubeContainer: {
+
+  },
+  newPostVideoContainer: {
+
   }
 })
 
