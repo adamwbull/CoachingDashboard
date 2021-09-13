@@ -3,7 +3,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, useContext } from 'react'
 import { TouchableOpacity, ScrollView, StyleSheet, Text, View, Image } from 'react-native'
-import { socialFeedLight, colorsLight, innerDrawerLight, btnColors} from '../Scripts/Styles.js'
+import { socialFeedLight, colorsLight, innerDrawerLight, btnColors, messageBox } from '../Scripts/Styles.js'
 import { socialFeedDark, colorsDark, innerDrawerDark } from '../Scripts/Styles.js'
 import { useLinkTo } from '@react-navigation/native'
 import LoadingScreen from '../Scripts/LoadingScreen.js'
@@ -14,6 +14,7 @@ import userContext from './Context.js'
 import { TextInput } from 'react-native-web'
 import { confirmAlert } from 'react-confirm-alert'
 import './CSS/confirmAlert.css' // Import css
+import { useWindowDimensions } from 'react-native';
 
 export default function SocialFeed() {
 
@@ -39,13 +40,24 @@ export default function SocialFeed() {
   const [attachmentError, setAttachmentError] = useState('')
 
   const [newPostText, setNewPostText] = useState('')
-  const [newPostImage, setNewPostImage] = useState('')
+  const [newPostImageUrl, setNewPostImageUrl] = useState('')
+  const [newPostImage, setNewPostImage] = useState(null)
   const [newPostImageSize, setNewPostImageSize] = useState(0)
-  const [newPostVideo, setNewPostVideo] = useState('')
+  const [newPostVideoUrl, setNewPostVideoUrl] = useState('')
+  const [newPostVideo, setNewPostVideo] = useState(null)
   const [newPostType, setNewPostType] = useState(0)
 
   const [newPostScrollHeight, setNewPostScrollHeight] = useState(null)
-  
+
+  const [windowHeight, setWindowHeight] = useState(-1)
+  const [windowWidth, setWindowWidth] = useState(-1)
+
+  const getWindowWidth = () => {
+    const { height, width } = useWindowDimensions()
+    setWindowWidth(width)
+    setWindowHeight(height)
+  }
+
   const getData = async () => {
 
     const data = await getFeedPosts(coach.Id, coach.Token)
@@ -79,6 +91,60 @@ export default function SocialFeed() {
     setAttachmentError('')
   }
 
+  const handleVideoClick = event => {
+    hiddenVideoInput.current.click()
+    window.addEventListener('focus', handleFocusBack)
+    setAttachmentError('')
+  }
+
+  const handleVideo = async () => {
+
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['mov','mp4','m4a']
+      var fileType = fileArr[1].toLowerCase()
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 200000000) {
+          var url = URL.createObjectURL(file)
+          setNewPostVideoUrl(url)
+          setNewPostVideo(file)
+        } else {
+          setAttachmentError('File size should be less than 200 MB.')
+          setNewPostType(4)
+        }
+      } else {
+        setAttachmentError('File type should be mp4, m4a, or mov.')
+        setNewPostType(4)
+      }
+    }
+
+  }
+
+  const handleImage = async () => {
+
+    var file = event.target.files[0]
+    if (file !== undefined) {
+      var fileArr = file.name.split('.')
+      var fileOptions = ['png','jpg','jpeg']
+      var fileType = fileArr[1].toLowerCase()
+      if (fileOptions.includes(fileType)) {
+        if (file.size <= 5000000) {
+          var url = URL.createObjectURL(file)
+          setNewPostImageUrl(url)
+          setNewPostImage(file)
+        } else {
+          setAttachmentError('File size should be less than 5 MB.')
+          setNewPostType(0)
+        }
+      } else {
+        setAttachmentError('File type should be png, jpg, or jpeg.')
+        setNewPostType(0)
+      }
+    }
+
+  }
+
   const checkYouTubeID = (url) => {
     var r, x = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/
     return url.match(x)
@@ -89,15 +155,20 @@ export default function SocialFeed() {
     setNewPostType(type)
 
     if (type == 1) {
+
       // Request photo upload.
+      handleImageClick()
 
     } else if (type == 3) {
+
       // Request video upload.
+      handleVideoClick()
 
     } else {
 
         setNewPostImage('')
         setNewPostVideo('')
+        setAttachmentError('')
 
     }
     
@@ -121,6 +192,24 @@ export default function SocialFeed() {
       setShowActivityIndicator(false)
       setShowSocialFeed(true)
     }, 500)
+  }
+  
+  const previewImage = () => {
+
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (<TouchableOpacity style={{flex:1,width:windowWidth,height:windowWidth}} onPress={onClose}>
+          <Image
+            source={{uri:newPostImageUrl}}
+            resizeMode={'cover'}
+            style={{ width: windowWidth, height: windowHeight }}
+          />
+        </TouchableOpacity>)
+      },
+      closeOnEscape: true,
+      closeOnClickOutside: true
+    })
+
   }
 
   return (<ScrollView contentContainerStyle={styles.scrollView}>
@@ -188,6 +277,9 @@ export default function SocialFeed() {
             <Text style={styles.newPostAttachmentOptionsText}>Attachment <Text style={{fontSize:14}}>(optional)</Text></Text>
             <input type="file" ref={hiddenImageInput} onChange={handleImage} style={{display:'none'}} />
             <input type="file" ref={hiddenVideoInput} onChange={handleVideo} style={{display:'none'}} />
+            {attachmentError.length > 0 && (<View style={[messageBox.errorBox,{marginLeft:10,marginRight:10}]}>
+              <Text style={[messageBox.text,{color:colorsLight.mainBackground}]}>{attachmentError}</Text>
+            </View>)}
             {newPostType == 0 && (<View>
               <View style={styles.newPostAttachmentOptions}>
                 <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
@@ -216,19 +308,22 @@ export default function SocialFeed() {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
-                <Text style={styles.newPostAttachGoBackText}>Go back</Text>
+                <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
               </TouchableOpacity>
             </View>)}
             {newPostType == 1 && (<View style={styles.newPostPhotoContainer}>
-              {newPostImage == '' && (<View style={styles.newPostAttachmentIndicator}>
+              {newPostImage == null && (<View style={styles.newPostAttachmentIndicator}>
                 <ActivityIndicatorView />
               </View>) || (<View style={styles.newPostImageContainer}>
-                <Image
-                  source={{uri:newPostImage}}
-                  style={styles.newPostImage}
-                />
+                <TouchableOpacity onPress={() => previewImage()}>
+                  <Image
+                    source={{uri:newPostImageUrl}}
+                    resizeMode={'cover'}
+                    style={{ width: '100%', height: 250 }}
+                  />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
-                  <Text style={styles.newPostAttachGoBackText}>Go back</Text>
+                  <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
                 </TouchableOpacity>
               </View>)}
             </View>)}

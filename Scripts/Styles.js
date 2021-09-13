@@ -59,7 +59,6 @@ export const messageBox = StyleSheet.create({
     paddingLeft:10,
     paddingRight:10,
     backgroundColor:boxColors.danger,
-    width:'100%',
     flexDirection:'row',
     justifyContent:'center',
     alignItems:'center',
@@ -5700,7 +5699,7 @@ export const socialFeedLight = StyleSheet.create({
   newPostAttachGoBackText: {
     textAlign:'center',
     fontSize:18,
-    color:colorsLight.mainTextColor,
+    color:btnColors.danger,
     textDecorationLine: 'underline',
     marginTop:10
   },
@@ -5715,7 +5714,7 @@ export const socialFeedLight = StyleSheet.create({
   },
   newPostVideoContainer: {
 
-  }
+  },
 })
 
 export const coachBioLight = StyleSheet.create({
