@@ -5703,17 +5703,16 @@ export const socialFeedLight = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop:10
   },
-  newPostAttachmentIndicator: {
-
-  },
-  newPostPhotoContainer: {
-
-  },
   newPostYouTubeContainer: {
 
   },
   newPostVideoContainer: {
 
+  },
+  reactPlayerContainer: {
+    width:500,
+    height:280,
+    aspectRatio:16/9,
   },
 })
 

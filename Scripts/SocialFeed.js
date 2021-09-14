@@ -15,10 +15,12 @@ import { TextInput } from 'react-native-web'
 import { confirmAlert } from 'react-confirm-alert'
 import './CSS/confirmAlert.css' // Import css
 import { useWindowDimensions } from 'react-native';
+import ReactPlayer from 'react-player'
 
 export default function SocialFeed() {
 
   const user = useContext(userContext)
+  const { height, width } = useWindowDimensions()
 
   const linkTo = useLinkTo()
   const [refreshing, setRefreshing] = useState(true)
@@ -47,17 +49,6 @@ export default function SocialFeed() {
   const [newPostVideo, setNewPostVideo] = useState(null)
   const [newPostType, setNewPostType] = useState(0)
 
-  const [newPostScrollHeight, setNewPostScrollHeight] = useState(null)
-
-  const [windowHeight, setWindowHeight] = useState(-1)
-  const [windowWidth, setWindowWidth] = useState(-1)
-
-  const getWindowWidth = () => {
-    const { height, width } = useWindowDimensions()
-    setWindowWidth(width)
-    setWindowHeight(height)
-  }
-
   const getData = async () => {
 
     const data = await getFeedPosts(coach.Id, coach.Token)
@@ -81,7 +72,7 @@ export default function SocialFeed() {
   const hiddenImageInput = React.useRef(null)
   const hiddenVideoInput = React.useRef(null)
 
-  const handleFocusBack = () => {
+  const handleFocusBack = event => {
     window.removeEventListener('focus', handleFocusBack)
   }
 
@@ -117,6 +108,8 @@ export default function SocialFeed() {
         setAttachmentError('File type should be mp4, m4a, or mov.')
         setNewPostType(4)
       }
+    } else {
+      setNewPostType(0)
     }
 
   }
@@ -141,6 +134,8 @@ export default function SocialFeed() {
         setAttachmentError('File type should be png, jpg, or jpeg.')
         setNewPostType(0)
       }
+    } else {
+      setNewPostType(0)
     }
 
   }
@@ -166,8 +161,10 @@ export default function SocialFeed() {
 
     } else {
 
-        setNewPostImage('')
-        setNewPostVideo('')
+        setNewPostImage(null)
+        setNewPostImageUrl('')
+        setNewPostVideo(null)
+        setNewPostVideoUrl('')
         setAttachmentError('')
 
     }
@@ -198,11 +195,11 @@ export default function SocialFeed() {
 
     confirmAlert({
       customUI: ({ onClose }) => {
-        return (<TouchableOpacity style={{flex:1,width:windowWidth,height:windowWidth}} onPress={onClose}>
+        return (<TouchableOpacity style={{width:width,height:height}} onPress={onClose}>
           <Image
             source={{uri:newPostImageUrl}}
-            resizeMode={'cover'}
-            style={{ width: windowWidth, height: windowHeight }}
+            resizeMode={'contain'}
+            style={{ width: width-20, height: height-20, margin:10 }}
           />
         </TouchableOpacity>)
       },
@@ -259,11 +256,8 @@ export default function SocialFeed() {
             <TextInput
               multiline={true}
               onChange={(e) => {
-                if (e.currentTarget.value.length < 4) {
-                  setNewPostScrollHeight(null)
-                } else if (e.target.scrollHeight - newPostScrollHeight > 10) {
-                  setNewPostScrollHeight(e.target.scrollHeight)
-                }
+                e.target.style.height = 0
+                e.target.style.height = `${e.target.scrollHeight}px`
               }}
               onChangeText={(t) => {
                 if (t.length < 500) {
@@ -271,7 +265,7 @@ export default function SocialFeed() {
                 }
               }}
               value={newPostText}
-              style={[styles.newPostTextInput,{height:newPostScrollHeight}]}
+              style={[styles.newPostTextInput]}
               placeholder={'What do you want to share?'}
             />
             <Text style={styles.newPostAttachmentOptionsText}>Attachment <Text style={{fontSize:14}}>(optional)</Text></Text>
@@ -280,7 +274,7 @@ export default function SocialFeed() {
             {attachmentError.length > 0 && (<View style={[messageBox.errorBox,{marginLeft:10,marginRight:10}]}>
               <Text style={[messageBox.text,{color:colorsLight.mainBackground}]}>{attachmentError}</Text>
             </View>)}
-            {newPostType == 0 && (<View>
+            {(newPostType != 4 && newPostType != 2 && newPostImage == null && newPostVideo == null) && (<View>
               <View style={styles.newPostAttachmentOptions}>
                 <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
                   <Text style={styles.newPostAttachmentOptionText}>
@@ -308,27 +302,30 @@ export default function SocialFeed() {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
+                <Text style={[styles.newPostAttachGoBackText,{color:colorsLight.mainTextColor}]}>Go back</Text>
+              </TouchableOpacity>
+            </View>)}
+            {newPostType == 2 && (<View style={styles.newPostYouTubeContainer}></View>)}
+            {newPostImage != null && (<View style={styles.newPostImageContainer}>
+              <TouchableOpacity onPress={() => previewImage()}>
+                <Image
+                  source={{uri:newPostImageUrl}}
+                  resizeMode={'cover'}
+                  style={{ width: '100%', height: 250 }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
                 <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
               </TouchableOpacity>
             </View>)}
-            {newPostType == 1 && (<View style={styles.newPostPhotoContainer}>
-              {newPostImage == null && (<View style={styles.newPostAttachmentIndicator}>
-                <ActivityIndicatorView />
-              </View>) || (<View style={styles.newPostImageContainer}>
-                <TouchableOpacity onPress={() => previewImage()}>
-                  <Image
-                    source={{uri:newPostImageUrl}}
-                    resizeMode={'cover'}
-                    style={{ width: '100%', height: 250 }}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
-                  <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
-                </TouchableOpacity>
-              </View>)}
+            {newPostType == 3 && (<View style={styles.newPostVideoContainer}>
+              <View style={[styles.reactPlayerContainer]}>
+                <ReactPlayer controls={true} url={newPostVideoUrl} width={'100%'} height={'100%'} />
+              </View>
+              <TouchableOpacity onPress={() => selectAttachmentType(4)} style={styles.newPostAttachGoBack}>
+                <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
+              </TouchableOpacity>
             </View>)}
-            {newPostType == 2 && (<View style={styles.newPostYouTubeContainer}></View>)}
-            {newPostType == 3 && (<View style={styles.newPostVideoContainer}></View>)}
           </View>)}
 
         </View>
