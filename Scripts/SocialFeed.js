@@ -98,6 +98,7 @@ export default function SocialFeed() {
       if (fileOptions.includes(fileType)) {
         if (file.size <= 200000000) {
           var url = URL.createObjectURL(file)
+          console.log('setting url:',url)
           setNewPostVideoUrl(url)
           setNewPostVideo(file)
         } else {
@@ -274,8 +275,8 @@ export default function SocialFeed() {
             {attachmentError.length > 0 && (<View style={[messageBox.errorBox,{marginLeft:10,marginRight:10}]}>
               <Text style={[messageBox.text,{color:colorsLight.mainBackground}]}>{attachmentError}</Text>
             </View>)}
-            {(newPostType != 4 && newPostType != 2 && newPostImage == null && newPostVideo == null) && (<View>
-              <View style={styles.newPostAttachmentOptions}>
+            {(newPostType != 2 && newPostImage == null && newPostVideo == null) && (<View>
+              {newPostType != 4 && (<View style={styles.newPostAttachmentOptions}>
                 <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(1)}>
                   <Text style={styles.newPostAttachmentOptionText}>
                     Photo
@@ -286,24 +287,23 @@ export default function SocialFeed() {
                     Video
                   </Text>
                 </TouchableOpacity>
-              </View>
-            </View>)}
-            {newPostType == 4 && (<View>
-              <View style={styles.newPostAttachmentOptions}>
-                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(2)}>
-                  <Text style={styles.newPostAttachmentOptionText}>
-                    YouTube URL
-                  </Text>
+              </View>) || (<View>
+                <View style={styles.newPostAttachmentOptions}>
+                  <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(2)}>
+                    <Text style={styles.newPostAttachmentOptionText}>
+                      YouTube URL
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
+                    <Text style={styles.newPostAttachmentOptionText}>
+                      Upload Video
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
+                  <Text style={[styles.newPostAttachGoBackText,{color:colorsLight.mainTextColor}]}>Go back</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.newPostAttachmentOption} onPress={() => selectAttachmentType(3)}>
-                  <Text style={styles.newPostAttachmentOptionText}>
-                    Upload Video
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity onPress={() => selectAttachmentType(0)} style={styles.newPostAttachGoBack}>
-                <Text style={[styles.newPostAttachGoBackText,{color:colorsLight.mainTextColor}]}>Go back</Text>
-              </TouchableOpacity>
+              </View>)}
             </View>)}
             {newPostType == 2 && (<View style={styles.newPostYouTubeContainer}></View>)}
             {newPostImage != null && (<View style={styles.newPostImageContainer}>
@@ -318,7 +318,7 @@ export default function SocialFeed() {
                 <Text style={styles.newPostAttachGoBackText}>Remove attachment</Text>
               </TouchableOpacity>
             </View>)}
-            {newPostType == 3 && (<View style={styles.newPostVideoContainer}>
+            {newPostVideo != null && (<View style={styles.newPostVideoContainer}>
               <View style={[styles.reactPlayerContainer]}>
                 <ReactPlayer controls={true} url={newPostVideoUrl} width={'100%'} height={'100%'} />
               </View>
