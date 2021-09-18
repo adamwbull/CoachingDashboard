@@ -892,7 +892,7 @@ export default function AllClients() {
                     iconRight
                   />
                 </View>
-                {notes.length == 0 && (<Text style={styles.noClients}>No notes yet.</Text>)
+                {notes.length == 0 && (<Text style={styles.noClients}>No notes yet!</Text>)
                 || (<>
                 {notes.map((note, index) => {
                   //
