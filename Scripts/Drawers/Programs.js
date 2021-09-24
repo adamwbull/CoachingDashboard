@@ -25,6 +25,7 @@ function DrawerContent(props) {
   
   useEffect(() => {
     var loc = props.loc
+    
     var i = {
       Header:'',
       Body:'',
