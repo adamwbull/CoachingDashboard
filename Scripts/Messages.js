@@ -637,9 +637,11 @@ export default function Messages() {
   }
 
   const refreshChatList = async () => {
+
     var get = await getMessageInfo(coach.Id, coach.Token)
     console.log('data:', get)
-    setUserList(get[0])
+
+    // Generate templates and indices.
     var indices = []
     var tems = []
     for (var i = 0; i < get[1].length; i++) {
@@ -648,13 +650,17 @@ export default function Messages() {
       t.Visible = true
       tems.push(t)
     }
+
+    setUserList(get[0])
     setTemplates(tems)
     setTemplateIndices(indices)
     setUserListLoading(false)
     setChatLoading(false)
+
     // Build message array and client array.
     var ms = []
     var clients = []
+
     // For each convo...
     for (var i = 0; i < get[0].length; i++) {
 
@@ -669,10 +675,10 @@ export default function Messages() {
           user.Visible = true
         }
         // Ensure we haven't added this person yet.
-        var found = false;
+        var found = false
         for (var k = 0; k < clients.length; k++) {
           if (user.Id == clients[k].Id) {
-            found = true;
+            found = true
             break
           }
         }
