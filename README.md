@@ -1,4 +1,4 @@
-# CoachingDashboard (80% Complete)
+# CoachingDashboard (85% Complete)
 Built in React Native for Web, with a Node.js REST API backend. The API is currently in another private repo.
 
 Not Done for Beta release: Social Feed, Integrations, Account, Clients.
