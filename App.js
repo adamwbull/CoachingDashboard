@@ -13,7 +13,6 @@ import { Provider } from './Scripts/Context.js'
 
 import userContext from './Scripts/Context.js'
 
-
 const linking = {
   prefixes: ['https://dashboard.coachsync.me', 'coachsync://'],
   config: {
