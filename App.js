@@ -93,7 +93,8 @@ export default function App() {
       background:colors.secondaryBackground,
       primary:colors.mainTextColor,
       card:colors.mainBackground,
-      border:colors.mainBackground
+      border:colors.mainBackground,
+      default:'#000'
     }
   };
 
